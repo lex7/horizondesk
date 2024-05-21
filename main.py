@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 from models import MessageRequest, Issue
-from firebase_utils import store_token
+from firebase_utils import store_token, save_issue
 import json
-import os
 
 app = FastAPI()
 
@@ -12,22 +11,7 @@ def assign_fcm_endpoint(request: MessageRequest):
 
 @app.post("/send-issue")
 async def send_issue(issue_data: Issue):
-    if os.path.exists("test_data.json"):
-        with open("test_data.json", "r") as file:
-            existing_data = json.load(file)
-            
-            if not isinstance(existing_data, list):
-                existing_data = []
-    else:
-        existing_data = []
-
-    existing_data.append(issue_data.dict())
-
-    with open("test_data.json", "w") as file:
-        json.dump(existing_data, file, indent=4)
-
-    return 200
-
+    return save_issue(issue_data)
 
 @app.get("/get-issues")
 async def get_issues():
