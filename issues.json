@@ -4,20 +4,27 @@
         "subject" : "electric",
         "message": "my problem",
         "region": "Участок #1",
-        "status": "new"
+        "status": "new",
+        "created": "20-05-2024",
+        "completed": "22-05-2024"
+
     },
     {
         "id": "315017803",
         "subject" : "electric",
         "message": "my problem",
         "region": "Участок #1",
-        "status": "new"
+        "status": "new",
+        "created": "20-05-2024",
+        "completed": "22-05-2024"
     },
     {
         "id": "31561",
         "subject" : "electric",
         "message": "my problem",
         "region": "Участок #1",
-        "status": "new"
+        "status": "new",
+        "created": "20-05-2024",
+        "completed": "22-05-2024"
     }
 ]

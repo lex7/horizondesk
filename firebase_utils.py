@@ -8,6 +8,8 @@ from fastapi import HTTPException
 import os
 from datetime import datetime
 from models import Issue
+import random
+import string
 
 cred = credentials.Certificate("accKey.json")
 firebase_admin.initialize_app(cred)
@@ -70,6 +72,11 @@ def store_token(id: str, fcmToken: str):
 
     return {'message': 'Token stored in DB'}
 
+
+def generate_random_id(length=10):
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
+
+
 def save_issue(issue_data: Issue):
     if os.path.exists("issues.json"):
         with open("issues.json", "r") as file:
@@ -79,6 +86,11 @@ def save_issue(issue_data: Issue):
     else:
         existing_data = []
 
+    if not issue_data.id:
+        issue_data.id = generate_random_id()
+    if not issue_data.status:
+        issue_data.status = "new"
+
     print(issue_data)
     existing_data.append(issue_data.dict())
 
@@ -86,8 +98,10 @@ def save_issue(issue_data: Issue):
         json.dump(existing_data, file, ensure_ascii=False, indent=4)
 
     issue_id = issue_data.id
-    send_push_by_id("2", "New issue reported", f"Issue ID: {issue_id}")
-
+    try:
+        send_push_by_id("2", "New issue reported", f"Issue ID: {issue_id}")
+    except Exception as e:
+        print(e)
 
     return {'message': 'Issue stored in DB'}
 

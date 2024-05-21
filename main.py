@@ -11,10 +11,8 @@ def assign_fcm_endpoint(request: UserData):
 
 @app.post("/send-issue")
 async def send_issue(issue_data: Issue):
-    try:
-        return save_issue(issue_data)
-    except Exception as e:
-        print(e)
+    return save_issue(issue_data)
+
 
 @app.get("/get-issues")
 async def get_issues():
