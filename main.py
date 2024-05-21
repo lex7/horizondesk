@@ -1,7 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from models import UserData, Issue, IssueUpdate, IssueAccept, IssueComplete
 from firebase_utils import store_token, save_issue, update_issue
 import json
+import subprocess
+
 
 app = FastAPI()
 
@@ -38,3 +40,17 @@ async def send_review(request: IssueUpdate):
 @app.post("/done")
 async def done(request: IssueComplete):
     return update_issue(request.id, "done", request.completed)
+
+@app.post("/gen-data")
+async def run_gen_data():
+    try:
+        result = subprocess.run(["python3", "gen_data.py"], check=True, capture_output=False, text=False)
+        return {"message": "Generated data"}
+    except subprocess.CalledProcessError as e:
+        raise HTTPException(status_code=500, detail=f"Script execution failed: {e.stderr}")
+    
+@app.get("/get-data")
+async def get_data():
+    with open("data.json", "r") as file:
+        data = json.load(file)
+    return data

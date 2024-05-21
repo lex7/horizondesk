@@ -9,6 +9,7 @@ class EnhancedJSONEncoder(json.JSONEncoder): # Класс необходимый
         if is_dataclass(o):
             return asdict(o)
         return super().default(o)
+    
 @dataclass
 class MonthPerformance:
     name_of_month: str
@@ -69,5 +70,5 @@ for spec in fields(Specialization):
     
 pprint.pprint(data)
 
-with open("data_json_2.json", "w") as write_file:
+with open("data.json", "w") as write_file:
       json.dump(data, write_file, cls=EnhancedJSONEncoder)
