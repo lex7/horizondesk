@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from models import MessageRequest, Issue
 from firebase_utils import send_message
 import json
+import os
 
 app = FastAPI()
 
