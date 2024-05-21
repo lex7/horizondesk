@@ -45,3 +45,21 @@ def send_message(fcmToken: str):
         return {'message': 'Message sent to Firebase for delivery', 'response': resp.text}
     else:
         raise HTTPException(status_code=resp.status_code, detail=resp.text)
+    
+
+def store_token(fcmToken: str, id: int):
+    try:
+        with open("tokens.json", "r") as file:
+            tokens = json.load(file)
+    except FileNotFoundError:
+        tokens = []
+
+    for token in tokens:
+        if token["id"] == id:
+            token["fcmToken"] = fcmToken
+            break
+    else:
+        tokens.append({"id": id, "fcmToken": fcmToken})
+
+    with open("tokens.json", "w") as file:
+        json.dump(tokens, file, indent=4)
