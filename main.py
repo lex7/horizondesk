@@ -6,4 +6,7 @@ app = FastAPI()
 
 @app.post("/send-message")
 def send_message_endpoint(request: MessageRequest):
-    return send_message(request.fcmToken, request.deviceType)
+    return send_message(
+        request.fcmToken,
+        request.deviceType
+        )
