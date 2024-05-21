@@ -78,6 +78,7 @@ def save_issue(issue_data):
     else:
         existing_data = []
 
+    print(issue_data)
     existing_data.append(issue_data.dict())
 
     with open("test_data.json", "w") as file:
