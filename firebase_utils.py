@@ -71,8 +71,8 @@ def store_token(id: str, fcmToken: str):
     return {'message': 'Token stored in DB'}
 
 def save_issue(issue_data: Issue):
-    if os.path.exists("test_data.json"):
-        with open("test_data.json", "r") as file:
+    if os.path.exists("issues.json"):
+        with open("issues.json", "r") as file:
             existing_data = json.load(file)
             if not isinstance(existing_data, list):
                 existing_data = []
@@ -82,7 +82,7 @@ def save_issue(issue_data: Issue):
     print(issue_data)
     existing_data.append(issue_data.dict())
 
-    with open("test_data.json", "w") as file:
+    with open("issues.json", "w") as file:
         json.dump(existing_data, file, indent=4)
 
     issue_id = issue_data.id
