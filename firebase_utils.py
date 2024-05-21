@@ -7,7 +7,7 @@ import json
 from fastapi import HTTPException
 import os
 from datetime import datetime
-frm models import Issue
+from models import Issue
 
 cred = credentials.Certificate("accKey.json")
 firebase_admin.initialize_app(cred)
