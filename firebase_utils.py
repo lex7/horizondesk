@@ -6,6 +6,7 @@ import requests
 import json
 from fastapi import HTTPException
 import os
+from datetime import datetime
 
 cred = credentials.Certificate("accKey.json")
 firebase_admin.initialize_app(cred)
@@ -45,6 +46,8 @@ def send_message(fcmToken: str, title="title", body="body"):
         raise HTTPException(status_code=resp.status_code, detail=resp.text)
 
 def store_token(id: str, fcmToken: str):
+    current_time = datetime.now().isoformat()
+    
     try:
         with open("tokens.json", "r") as file:
             tokens = json.load(file)
@@ -54,14 +57,15 @@ def store_token(id: str, fcmToken: str):
     for token in tokens:
         if token["id"] == id:
             token["fcmToken"] = fcmToken
+            token["datetime"] = current_time
             break
     else:
-        tokens.append({"id": id, "fcmToken": fcmToken})
+        tokens.append({"id": id, "fcmToken": fcmToken, "datetime": current_time})
 
     with open("tokens.json", "w") as file:
         json.dump(tokens, file, indent=4)
 
-    send_message(fcmToken,"New login",f"user {id} logged in")
+    send_message(fcmToken, "New login", f"user {id} logged in")
 
     return {'message': 'Token stored in DB'}
 
