@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from models import UserData, Issue
-from firebase_utils import store_token, save_issue
+from models import UserData, Issue, IssueUpdate
+from firebase_utils import store_token, save_issue, update_status
 import json
 
 app = FastAPI()
@@ -19,3 +19,23 @@ async def get_issues():
     with open("issues.json", "r") as file:
         data = json.load(file)
     return data
+
+@app.post("/approve-issue")
+async def approve_issue(request: IssueUpdate):
+    return update_status(request.id, "approved")
+
+@app.post("/decline-issue")
+async def decline_issue(request: IssueUpdate):
+    return update_status(request.id, "declined")
+
+@app.post("/inprogress")
+async def inprogress(request: IssueUpdate):
+    return update_status(request.id, "inprogress")
+
+@app.post("/send-review")
+async def send_review(request: IssueUpdate):
+    return update_status(request.id, "review")
+
+@app.post("/done")
+async def done(request: IssueUpdate):
+    return update_status(request.id, "done")

@@ -1,30 +1,13 @@
 [
     {
-        "id": "175939",    
-        "subject" : "electric",
-        "message": "my problem",
+        "id": "999",    
+        "subject" : "Электрика",
+        "message": "Сломалась лампочка",
         "region": "Участок #1",
-        "status": "new",
+        "status": "acceptExecuter",
         "created": "20-05-2024",
+        "deadline": "23-05-2024",
         "completed": "22-05-2024"
 
-    },
-    {
-        "id": "315017803",
-        "subject" : "electric",
-        "message": "my problem",
-        "region": "Участок #1",
-        "status": "new",
-        "created": "20-05-2024",
-        "completed": "22-05-2024"
-    },
-    {
-        "id": "31561",
-        "subject" : "electric",
-        "message": "my problem",
-        "region": "Участок #1",
-        "status": "new",
-        "created": "20-05-2024",
-        "completed": "22-05-2024"
     }
 ]
