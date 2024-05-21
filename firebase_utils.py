@@ -137,6 +137,7 @@ def update_issue(issue_id: str, new_status: str, date: str):
         if issue["id"] == issue_id:
             issue["status"] = new_status
             issue_found = True
+            message = issue["message"]
             break
 
     if new_status == "approved":
@@ -155,5 +156,15 @@ def update_issue(issue_id: str, new_status: str, date: str):
 
     with open("issues.json", "w", encoding='utf-8') as file:
         json.dump(issues, file, ensure_ascii=False, indent=4)
+
+    try:
+        if new_status == "approved":
+            send_push_by_id("3", "New issue approved", message)
+        elif new_status == "review":
+            send_push_by_id("1", "Issue needs review", message)
+        if new_status == "done":
+            send_push_by_id("3", "Issue resolved", message)
+    except Exception as e:
+        print(e)
 
     return {'message': f'Issue status updated to {new_status}'}
