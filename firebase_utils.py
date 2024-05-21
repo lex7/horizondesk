@@ -125,7 +125,7 @@ def send_push_by_id(id: str, title="title", body="body"):
         raise HTTPException(status_code=404, detail=f"FCM token not found for ID {id}")
     
 
-def update_issue(issue_id: str, new_status: str, date: str):
+def update_issue(issue_id: str, new_status: str, date: str = None):
     if os.path.exists("issues.json"):
         with open("issues.json", "r") as file:
             issues = json.load(file)
