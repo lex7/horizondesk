@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from models import UserData, Issue, IssueUpdate
+from models import UserData, Issue, IssueUpdate, IssueAccept
 from firebase_utils import store_token, save_issue, update_status
 import json
 
@@ -21,7 +21,7 @@ async def get_issues():
     return data
 
 @app.post("/approve-issue")
-async def approve_issue(request: IssueUpdate):
+async def approve_issue(request: IssueAccept):
     return update_status(request.id, "approved", request.date)
 
 @app.post("/decline-issue")

@@ -16,4 +16,7 @@ class Issue(BaseModel):
 
 class IssueUpdate(BaseModel):
     id: str = Field(..., description="Issue id")
+
+class IssueAccept(BaseModel):
+    id: str = Field(..., description="Issue id")
     date: str = Field(..., description="Date like dd-mm-yyyy")
