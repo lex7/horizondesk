@@ -6,7 +6,7 @@ import requests
 import json
 from fastapi import HTTPException
 import os
-from datetime import datetime
+from datetime import datetime, date
 from models import Issue
 import random
 import string
@@ -138,6 +138,12 @@ def update_status(issue_id: str, new_status: str):
             issue["status"] = new_status
             issue_found = True
             break
+
+    if new_status == "done":
+        for issue in issues:
+            if issue["id"] == issue_id:
+                issue["completed"] = date.now().strftime("%d-%m-%Y")
+                break
 
     if not issue_found:
         raise HTTPException(status_code=404, detail=f"Issue with ID {issue_id} not found")
