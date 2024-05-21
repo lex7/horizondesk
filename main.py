@@ -24,8 +24,8 @@ async def send_issue(issue_data: Issue):
     
     with open("test_data.json", "w") as file:
         json.dump(existing_data, file, indent=4)
-    
-    return {"message": "Issue sent successfully", "issue_id": new_id}
+
+    return 200
 
 
 @app.get("/get-issues")
