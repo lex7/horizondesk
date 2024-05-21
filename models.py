@@ -17,6 +17,10 @@ class Issue(BaseModel):
 class IssueUpdate(BaseModel):
     id: str = Field(..., description="Issue id")
 
+class IssueComplete(BaseModel):
+    id: str = Field(..., description="Issue id")
+    completed: str = Field(..., description="Completed or declined date")
+
 class IssueAccept(BaseModel):
     id: str = Field(..., description="Issue id")
-    date: str = Field(..., description="Date like dd-mm-yyyy")
+    deadline: str = Field(..., description="Deadline date")

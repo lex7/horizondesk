@@ -125,7 +125,7 @@ def send_push_by_id(id: str, title="title", body="body"):
         raise HTTPException(status_code=404, detail=f"FCM token not found for ID {id}")
     
 
-def update_status(issue_id: str, new_status: str, date: str):
+def update_issue(issue_id: str, new_status: str, date: str):
     if os.path.exists("issues.json"):
         with open("issues.json", "r") as file:
             issues = json.load(file)
@@ -139,15 +139,15 @@ def update_status(issue_id: str, new_status: str, date: str):
             issue_found = True
             break
 
-    if date:
+    if new_status == "approved":
         for issue in issues:
             if issue["id"] == issue_id:
                 issue["deadline"] = date
                 break
-    elif new_status == "done":
+    elif new_status in ["declined","done"]:
         for issue in issues:
             if issue["id"] == issue_id:
-                issue["completed"] = datetime.now().strftime("%d-%m-%Y")
+                issue["completed"] = date
                 break
 
     if not issue_found:

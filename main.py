@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from models import UserData, Issue, IssueUpdate, IssueAccept
-from firebase_utils import store_token, save_issue, update_status
+from models import UserData, Issue, IssueUpdate, IssueAccept, IssueComplete
+from firebase_utils import store_token, save_issue, update_issue
 import json
 
 app = FastAPI()
@@ -13,7 +13,6 @@ def assign_fcm_endpoint(request: UserData):
 async def send_issue(issue_data: Issue):
     return save_issue(issue_data)
 
-
 @app.get("/get-issues")
 async def get_issues():
     with open("issues.json", "r") as file:
@@ -22,20 +21,20 @@ async def get_issues():
 
 @app.post("/approve-issue")
 async def approve_issue(request: IssueAccept):
-    return update_status(request.id, "approved", request.date)
+    return update_issue(request.id, "approved", request.deadline)
 
 @app.post("/decline-issue")
-async def decline_issue(request: IssueUpdate):
-    return update_status(request.id, "declined")
+async def decline_issue(request: IssueComplete):
+    return update_issue(request.id, "declined", request.completed)
 
 @app.post("/inprogress")
 async def inprogress(request: IssueUpdate):
-    return update_status(request.id, "inprogress")
+    return update_issue(request.id, "inprogress")
 
 @app.post("/send-review")
 async def send_review(request: IssueUpdate):
-    return update_status(request.id, "review")
+    return update_issue(request.id, "review")
 
 @app.post("/done")
-async def done(request: IssueUpdate):
-    return update_status(request.id, "done")
+async def done(request: IssueComplete):
+    return update_issue(request.id, "done", request.completed)
