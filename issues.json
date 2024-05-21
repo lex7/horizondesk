@@ -3,18 +3,21 @@
         "id": "175939",    
         "subject" : "electric",
         "message": "my problem",
-        "region": "Участок #1"
+        "region": "Участок #1",
+        "status": "new"
     },
     {
         "id": "315017803",
         "subject" : "electric",
         "message": "my problem",
-        "region": "Участок #1"
+        "region": "Участок #1",
+        "status": "new"
     },
     {
         "id": "31561",
         "subject" : "electric",
         "message": "my problem",
-        "region": "Участок #1"
+        "region": "Участок #1",
+        "status": "new"
     }
 ]

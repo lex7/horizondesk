@@ -7,6 +7,7 @@ import json
 from fastapi import HTTPException
 import os
 from datetime import datetime
+from models import Issue
 
 cred = credentials.Certificate("accKey.json")
 firebase_admin.initialize_app(cred)
@@ -69,7 +70,7 @@ def store_token(id: str, fcmToken: str):
 
     return {'message': 'Token stored in DB'}
 
-def save_issue(issue_data):
+def save_issue(issue_data: Issue):
     if os.path.exists("issues.json"):
         with open("issues.json", "r") as file:
             existing_data = json.load(file)
@@ -89,7 +90,7 @@ def save_issue(issue_data):
     existing_data.append(issue_data_dict)
 
     with open("issues.json", "w") as file:
-        json.dump(existing_data, file, indent=4)
+        json.dump(existing_data, file, ensure_ascii=False, indent=4)
 
     try:
         with open("tokens.json", "r") as file:
