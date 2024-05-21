@@ -83,10 +83,26 @@ def save_issue(issue_data):
     with open("test_data.json", "w") as file:
         json.dump(existing_data, file, indent=4)
 
-
-    with open("tokens.json", "r") as file:
-        tokens = json.load(file)
-    fcmToken = tokens.get(2)
-    send_message(fcmToken)
+    issue_id = issue_data.id
+    send_message_by_id("2", "New issue reported", f"Issue ID: {issue_id}")
 
     return {'message': 'Issue stored in DB'}
+
+
+def send_message_by_id(id: str, title="title", body="body"):
+    try:
+        with open("tokens.json", "r") as file:
+            tokens = json.load(file)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Tokens file not found")
+
+    fcmToken = None
+    for token in tokens:
+        if token.get("id") == id:
+            fcmToken = token.get("fcmToken")
+            break
+
+    if fcmToken:
+        send_message(fcmToken, title, body)
+    else:
+        raise HTTPException(status_code=404, detail=f"FCM token not found for ID {id}")
