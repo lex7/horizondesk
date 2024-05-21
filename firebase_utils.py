@@ -68,7 +68,7 @@ def store_token(id: str, fcmToken: str):
     with open("tokens.json", "w") as file:
         json.dump(tokens, file, indent=4)
 
-    send_push(fcmToken, "New login", f"user {id} logged in")
+    send_push(fcmToken, "Новый логин", f"Новый пользователь вошел")
 
     return {'message': 'Token stored in DB'}
 
@@ -99,7 +99,7 @@ def save_issue(issue_data: Issue):
 
     issue_id = issue_data.id
     try:
-        send_push_by_id("2", "New issue reported", f"Issue ID: {issue_id}")
+        send_push_by_id("2", "Новая заявка", f"{issue_data.region} тема: {issue_data.subject}")
     except Exception as e:
         print(e)
 
@@ -137,7 +137,8 @@ def update_issue(issue_id: str, new_status: str, date: str):
         if issue["id"] == issue_id:
             issue["status"] = new_status
             issue_found = True
-            message = issue["message"]
+            region = issue["region"]
+            subject = issue["subject"]
             break
 
     if new_status == "approved":
@@ -159,11 +160,13 @@ def update_issue(issue_id: str, new_status: str, date: str):
 
     try:
         if new_status == "approved":
-            send_push_by_id("3", "New issue approved", message)
+            send_push_by_id("3", "Поступила новая заявка", f"{region} тема: {subject}")
         elif new_status == "review":
-            send_push_by_id("1", "Issue needs review", message)
-        if new_status == "done":
-            send_push_by_id("3", "Issue resolved", message)
+            send_push_by_id("1", "Изменился статус заявки", "Заявка исполнена и требует проверки")
+        elif new_status == "done":
+            send_push_by_id("3", "Задание подтверждено", "Вам начислятся бонусы")
+        elif new_status == "declined":
+            send_push_by_id("1", "Заявка отклонена", "Ответственный отклонил заявку")
     except Exception as e:
         print(e)
 
