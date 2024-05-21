@@ -35,9 +35,6 @@ def send_message(fcmToken: str, deviceType: int):
             "notification": {
                 "title": "Breaking News",
                 "body": "New news story available."
-            },
-            "data": {
-                "story_id": "story_12345"
             }
         }
     }
