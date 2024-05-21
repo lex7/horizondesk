@@ -18,7 +18,7 @@ FCM_ENDPOINT = 'v1/projects/' + PROJECT_ID + '/messages:send'
 FCM_URL = BASE_URL + '/' + FCM_ENDPOINT
 SCOPES = ['https://www.googleapis.com/auth/firebase.messaging']
 
-def send_message(fcmToken: str, title="title", body="body"):
+def send_push(fcmToken: str, title="title", body="body"):
     credentials = service_account.Credentials.from_service_account_file(
         'accKey.json', scopes=SCOPES)
     request = google.auth.transport.requests.Request()
@@ -66,7 +66,7 @@ def store_token(id: str, fcmToken: str):
     with open("tokens.json", "w") as file:
         json.dump(tokens, file, indent=4)
 
-    send_message(fcmToken, "New login", f"user {id} logged in")
+    send_push(fcmToken, "New login", f"user {id} logged in")
 
     return {'message': 'Token stored in DB'}
 
@@ -85,13 +85,14 @@ def save_issue(issue_data: Issue):
     with open("issues.json", "w") as file:
         json.dump(existing_data, file, ensure_ascii=False, indent=4)
 
-    # issue_id = issue_data.id
-    # send_message_by_id("2", "New issue reported", f"Issue ID: {issue_id}")
+    issue_id = issue_data.id
+    send_push_by_id("2", "New issue reported", f"Issue ID: {issue_id}")
+
 
     return {'message': 'Issue stored in DB'}
 
 
-def send_message_by_id(id: str, title="title", body="body"):
+def send_push_by_id(id: str, title="title", body="body"):
     try:
         with open("tokens.json", "r") as file:
             tokens = json.load(file)
@@ -105,6 +106,6 @@ def send_message_by_id(id: str, title="title", body="body"):
             break
 
     if fcmToken:
-        send_message(fcmToken, title, body)
+        send_push(fcmToken, title, body)
     else:
         raise HTTPException(status_code=404, detail=f"FCM token not found for ID {id}")
