@@ -83,7 +83,7 @@ def save_issue(issue_data: Issue):
     existing_data.append(issue_data.dict())
 
     with open("issues.json", "w") as file:
-        json.dump(existing_data, file, indent=4)
+        json.dump(existing_data, file, ensure_ascii=False, indent=4)
 
     issue_id = issue_data.id
     send_message_by_id("2", "New issue reported", f"Issue ID: {issue_id}")
