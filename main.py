@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from models import MessageRequest
+from models import MessageRequest, Issue
 from firebase_utils import send_message
 import json
 
@@ -10,18 +10,17 @@ def assign_fcm_endpoint(request: MessageRequest):
     return send_message(request.fcmToken, request.deviceType)
 
 @app.post("/send-issue")
-async def send_issue(issue_data: dict):
-    # Load existing data from test_data.json
-    with open("test_data.json", "r") as file:
-        existing_data = json.load(file)
-    
-    # Generate a new ID for the issue
+async def send_issue(issue_data: Issue):
+    if os.path.exists("test_data.json"):
+        with open("test_data.json", "r") as file:
+            existing_data = json.load(file)
+    else:
+        existing_data = {}
+
     new_id = str(len(existing_data) + 1)
     
-    # Add the new issue data to the existing data
-    existing_data[new_id] = issue_data
+    existing_data[new_id] = issue_data.dict()
     
-    # Write the updated data back to test_data.json
     with open("test_data.json", "w") as file:
         json.dump(existing_data, file, indent=4)
     
