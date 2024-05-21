@@ -15,7 +15,7 @@ FCM_ENDPOINT = 'v1/projects/' + PROJECT_ID + '/messages:send'
 FCM_URL = BASE_URL + '/' + FCM_ENDPOINT
 SCOPES = ['https://www.googleapis.com/auth/firebase.messaging']
 
-def send_message(fcmToken: str, deviceType: int):
+def send_message(fcmToken: str):
     """Retrieve a valid access token that can be used to authorize requests.
     :return: Access token.
     """
