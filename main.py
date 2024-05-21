@@ -15,13 +15,14 @@ async def send_issue(issue_data: Issue):
     if os.path.exists("test_data.json"):
         with open("test_data.json", "r") as file:
             existing_data = json.load(file)
+            
+            if not isinstance(existing_data, list):
+                existing_data = []
     else:
-        existing_data = {}
+        existing_data = []
 
-    new_id = str(len(existing_data) + 1)
-    
-    existing_data[new_id] = issue_data.dict()
-    
+    existing_data.append(issue_data.dict())
+
     with open("test_data.json", "w") as file:
         json.dump(existing_data, file, indent=4)
 
@@ -30,7 +31,6 @@ async def send_issue(issue_data: Issue):
 
 @app.get("/get-issues")
 async def get_issues():
-    # Read and return all data from test_data.json
     with open("test_data.json", "r") as file:
         data = json.load(file)
     return data

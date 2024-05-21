@@ -3,7 +3,7 @@ from typing import List
 import random
 import json
 import pprint
-import os
+
 class EnhancedJSONEncoder(json.JSONEncoder): # Класс необходимый для сериализации dataclass (не трогать)
     def default(self, o):
         if is_dataclass(o):
@@ -68,8 +68,6 @@ for spec in fields(Specialization):
     data[spec.name]=Fabric(regions(),spec.name)
     
 pprint.pprint(data)
-
-#print(os.getcwd())
 
 with open("data_json_2.json", "w") as write_file:
       json.dump(data, write_file, cls=EnhancedJSONEncoder)
