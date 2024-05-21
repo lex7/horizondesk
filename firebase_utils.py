@@ -47,7 +47,7 @@ def send_message(fcmToken: str):
         raise HTTPException(status_code=resp.status_code, detail=resp.text)
     
 
-def store_token(fcmToken: str, id: int):
+def store_token(id: int, fcmToken: str):
     try:
         with open("tokens.json", "r") as file:
             tokens = json.load(file)

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from models import MessageRequest, Issue
-from firebase_utils import send_message
+from firebase_utils import store_token
 import json
 import os
 
@@ -8,7 +8,7 @@ app = FastAPI()
 
 @app.post("/assign-fcm")
 def assign_fcm_endpoint(request: MessageRequest):
-    return send_message(request.fcmToken, request.deviceType)
+    return store_token(request.id, request.fcmToken)
 
 @app.post("/send-issue")
 async def send_issue(issue_data: Issue):
