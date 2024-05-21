@@ -1,12 +1,12 @@
 from fastapi import FastAPI
-from models import MessageRequest, Issue
+from models import UserData, Issue
 from firebase_utils import store_token, save_issue
 import json
 
 app = FastAPI()
 
 @app.post("/assign-fcm")
-def assign_fcm_endpoint(request: MessageRequest):
+def assign_fcm_endpoint(request: UserData):
     return store_token(request.id, request.fcmToken)
 
 @app.post("/send-issue")

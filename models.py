@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-class MessageRequest(BaseModel):
+class UserData(BaseModel):
     id: str
     fcmToken: str
 
