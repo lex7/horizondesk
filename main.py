@@ -22,7 +22,7 @@ async def get_issues():
 
 @app.post("/approve-issue")
 async def approve_issue(request: IssueUpdate):
-    return update_status(request.id, "approved")
+    return update_status(request.id, "approved", request.date)
 
 @app.post("/decline-issue")
 async def decline_issue(request: IssueUpdate):
