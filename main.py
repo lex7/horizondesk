@@ -17,7 +17,7 @@ async def send_issue(issue_data: Issue):
 
 @app.get("/get-issues")
 async def get_issues():
-    with open("issues.json", "r") as file:
+    with open("data/issues.json", "r") as file:
         data = json.load(file)
     return data
 
@@ -51,6 +51,6 @@ async def run_gen_data():
     
 @app.get("/get-data")
 async def get_data():
-    with open("data.json", "r") as file:
+    with open("data/data.json", "r") as file:
         data = json.load(file)
     return data

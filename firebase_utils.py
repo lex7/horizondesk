@@ -52,7 +52,7 @@ def store_token(id: str, fcmToken: str):
     current_time = datetime.now().isoformat()
     
     try:
-        with open("tokens.json", "r") as file:
+        with open("data/tokens.json", "r") as file:
             tokens = json.load(file)
     except FileNotFoundError:
         tokens = []
@@ -65,7 +65,7 @@ def store_token(id: str, fcmToken: str):
     else:
         tokens.append({"id": id, "fcmToken": fcmToken, "datetime": current_time})
 
-    with open("tokens.json", "w") as file:
+    with open("data/tokens.json", "w") as file:
         json.dump(tokens, file, indent=4)
 
     send_push(fcmToken, "Новый логин", f"Новый пользователь вошел")
@@ -78,8 +78,8 @@ def generate_random_id(length=10):
 
 
 def save_issue(issue_data: Issue):
-    if os.path.exists("issues.json"):
-        with open("issues.json", "r") as file:
+    if os.path.exists("data/issues.json"):
+        with open("data/issues.json", "r") as file:
             existing_data = json.load(file)
             if not isinstance(existing_data, list):
                 existing_data = []
@@ -94,7 +94,7 @@ def save_issue(issue_data: Issue):
     print(issue_data)
     existing_data.append(issue_data.dict())
 
-    with open("issues.json", "w") as file:
+    with open("data/issues.json", "w") as file:
         json.dump(existing_data, file, ensure_ascii=False, indent=4)
 
     issue_id = issue_data.id
@@ -108,7 +108,7 @@ def save_issue(issue_data: Issue):
 
 def send_push_by_id(id: str, title="title", body="body"):
     try:
-        with open("tokens.json", "r") as file:
+        with open("data/tokens.json", "r") as file:
             tokens = json.load(file)
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Tokens file not found")
@@ -126,8 +126,8 @@ def send_push_by_id(id: str, title="title", body="body"):
     
 
 def update_issue(issue_id: str, new_status: str, date: str = None):
-    if os.path.exists("issues.json"):
-        with open("issues.json", "r") as file:
+    if os.path.exists("data/issues.json"):
+        with open("data/issues.json", "r") as file:
             issues = json.load(file)
     else:
         raise HTTPException(status_code=404, detail="Issues file not found")
@@ -155,7 +155,7 @@ def update_issue(issue_id: str, new_status: str, date: str = None):
     if not issue_found:
         raise HTTPException(status_code=404, detail=f"Issue with ID {issue_id} not found")
 
-    with open("issues.json", "w", encoding='utf-8') as file:
+    with open("data/issues.json", "w", encoding='utf-8') as file:
         json.dump(issues, file, ensure_ascii=False, indent=4)
 
     try:

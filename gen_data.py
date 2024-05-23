@@ -70,5 +70,5 @@ for spec in fields(Specialization):
     
 pprint.pprint(data)
 
-with open("data.json", "w") as write_file:
+with open("data/data.json", "w") as write_file:
       json.dump(data, write_file, cls=EnhancedJSONEncoder)
