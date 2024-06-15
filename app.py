@@ -25,6 +25,10 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 app = FastAPI()
 
+@app.get("/")
+def read_root():
+    return {"message": "Yo"}
+
 class User(Base):
     __tablename__ = 'users'
     user_id = Column(Integer, primary_key=True, index=True)
