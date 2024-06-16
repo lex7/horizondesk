@@ -1,5 +1,3 @@
-set schema 'mobile_desk';
-
 INSERT INTO positions (position_name)
 VALUES ('Рабочий'),
        ('Мастер'),
