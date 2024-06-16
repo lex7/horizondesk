@@ -7,8 +7,8 @@ CREATE TABLE positions (
 -- Table: worker_shifts
 CREATE TABLE worker_shifts (
     shift_id SERIAL PRIMARY KEY,
-    start_time TIMESTAMP NOT NULL,
-    end_time TIMESTAMP NOT NULL
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL
 );
 
 -- Table: users
