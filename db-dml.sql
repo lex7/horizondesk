@@ -22,10 +22,11 @@ VALUES ('Участок #1'),
        ('Участок #4');
 
 INSERT INTO statuses (status_name)
-VALUES ('Участок #1'),
-       ('Участок #2'),
-       ('Участок #3'),
-       ('Участок #4');
+VALUES ('На рассмотрении'),
+       ('В работе'),
+       ('Отклонена'),
+       ('На проверке'),
+       ('Завершена'),;
 
 INSERT INTO users (username, password_hash, surname, name, specialization, fcm_token, position_id, shift_id)
 VALUES 

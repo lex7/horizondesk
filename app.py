@@ -66,21 +66,32 @@ class Status(Base):
 class Request(Base):
     __tablename__ = 'requests'
     request_id = Column(Integer, primary_key=True, index=True)
-    request_type = Column(Integer, ForeignKey('request_types.type_id'))
-    created_by = Column(Integer, ForeignKey('users.user_id'))
+    request_type = Column(Integer, ForeignKey('request_types.type_id'), nullable=False)
+    created_by = Column(Integer, ForeignKey('users.user_id'), nullable=False)
     assigned_to = Column(Integer, ForeignKey('users.user_id'))
-    area_id = Column(Integer, ForeignKey('areas.area_id'))
+    area_id = Column(Integer, ForeignKey('areas.area_id'), nullable=False)
     description = Column(String, nullable=False)
-    status_id = Column(Integer, ForeignKey('statuses.status_id'), default=1)
+    status_id = Column(Integer, ForeignKey('statuses.status_id'), default=1, nullable=False)
     created_at = Column(TIMESTAMP, nullable=False, default=datetime.utcnow)
-    updated_at = Column(TIMESTAMP, nullable=False, default=datetime.utcnow)
-    deadline = Column(TIMESTAMP, nullable=False)
+    updated_at = Column(TIMESTAMP)
+    deadline = Column(TIMESTAMP)
 
     creator = relationship("User", foreign_keys=[created_by])
     assignee = relationship("User", foreign_keys=[assigned_to])
     request_type_rel = relationship("RequestType")
     area_rel = relationship("Area")
     status_rel = relationship("Status")
+
+class RequestStatusLog(Base):
+    __tablename__ = 'request_status_log'
+    log_id = Column(Integer, primary_key=True, index=True)
+    request_id = Column(Integer, ForeignKey('requests.request_id'))
+    old_status_id = Column(Integer, ForeignKey('statuses.status_id'))
+    new_status_id = Column(Integer, ForeignKey('statuses.status_id'))
+    changed_at = Column(TIMESTAMP, nullable=False, default=datetime.utcnow)
+    changed_by = Column(Integer, ForeignKey('users.user_id'))
+
+    request_rel = relationship("Request")
 
 Base.metadata.create_all(bind=engine)
 
@@ -102,6 +113,12 @@ class RequestCreate(BaseModel):
     user_id: int
     area_id: int
     description: str
+
+class ApproveRequest(BaseModel):
+    user_id: int
+    request_id: int
+    assign_to: int
+    deadline: datetime = None
 
 def get_db():
     db = SessionLocal()
@@ -133,19 +150,49 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     
     return LoginResponse(user_id=user.user_id, position_id=user.position_id)
 
-@app.post("/create_request", response_model=dict)
+@app.post("/create-request", response_model=dict)
 def create_request(request: RequestCreate, db: Session = Depends(get_db)):
     new_request = Request(
         request_type=request.request_type,
         created_by=request.user_id,
         area_id=request.area_id,
-        description=request.description,
-        deadline=datetime.now()  # Set the current time for the deadline
+        description=request.description
     )
     db.add(new_request)
     db.commit()
     db.refresh(new_request)
     return {"message": "Request created successfully", "request_id": new_request.request_id}
+
+@app.post("/approve-request", response_model=dict)
+def approve_request(request: ApproveRequest, db: Session = Depends(get_db)):
+    # Retrieve the request to be approved
+    existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
+    if existing_request is None:
+        raise HTTPException(status_code=404, detail="Request not found")
+
+    # Update request details
+    existing_request.assigned_to = request.assign_to
+    existing_request.updated_at = datetime.utcnow()
+    if request.deadline:
+        existing_request.deadline = request.deadline
+
+    # Update request status to 'approved' (status_id = 2)
+    existing_request.status_id = 2
+
+    # Log status change in request_status_log
+    log_entry = RequestStatusLog(
+        request_id=existing_request.request_id,
+        old_status_id=existing_request.status_id,
+        new_status_id=2,  # Status ID for 'approved'
+        changed_by=request.user_id  # Assuming the current user is making the change
+    )
+    db.add(log_entry)
+
+    db.commit()
+    db.refresh(existing_request)
+    db.refresh(log_entry)
+
+    return {"message": "Request approved successfully", "request_id": existing_request.request_id}
 
 if __name__ == "__main__":
     import uvicorn

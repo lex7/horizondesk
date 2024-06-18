@@ -20,7 +20,7 @@ CREATE TABLE users (
     name VARCHAR(50),
     specialization VARCHAR(100),
     fcm_token VARCHAR(255),
-    position_id INTEGER REFERENCES positions(position_id),
+    position_id INTEGER NOT NULL REFERENCES positions(position_id),
     shift_id INTEGER REFERENCES worker_shifts(shift_id)
 );
 
@@ -45,15 +45,15 @@ CREATE TABLE statuses (
 -- Table: requests
 CREATE TABLE requests (
     request_id SERIAL PRIMARY KEY,
-    request_type INTEGER REFERENCES request_types(type_id),
-    created_by INTEGER REFERENCES users(user_id),
+    request_type INTEGER NOT NULL REFERENCES request_types(type_id),
+    created_by INTEGER NOT NULL REFERENCES users(user_id),
     assigned_to INTEGER REFERENCES users(user_id),
-    area_id INTEGER REFERENCES areas(area_id),
+    area_id INTEGER NOT NULL REFERENCES areas(area_id),
     description TEXT NOT NULL,
-    status_id INTEGER REFERENCES statuses(status_id),
+    status_id INTEGER NOT NULL REFERENCES statuses(status_id),
     created_at TIMESTAMP NOT NULL DEFAULT now(),
-    updated_at TIMESTAMP NOT NULL DEFAULT now(),
-    deadline TIMESTAMP NOT NULL
+    updated_at TIMESTAMP,
+    deadline TIMESTAMP
 );
 
 -- Table: request_status_log
