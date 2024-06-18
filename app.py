@@ -172,12 +172,9 @@ def approve_request(request: ApproveRequest, db: Session = Depends(get_db)):
 
     # Update request details
     existing_request.assigned_to = request.assign_to
-    existing_request.updated_at = datetime.utcnow()
+    existing_request.updated_at = datetime.now()
     if request.deadline:
         existing_request.deadline = request.deadline
-
-    # Update request status to 'approved' (status_id = 2)
-    existing_request.status_id = 2
 
     # Log status change in request_status_log
     log_entry = RequestStatusLog(
@@ -188,11 +185,28 @@ def approve_request(request: ApproveRequest, db: Session = Depends(get_db)):
     )
     db.add(log_entry)
 
+    # Update request status to 'approved' (status_id = 1)
+    existing_request.status_id = 2
+
     db.commit()
     db.refresh(existing_request)
     db.refresh(log_entry)
 
     return {"message": "Request approved successfully", "request_id": existing_request.request_id}
+
+@app.get("/requests", response_model=list[dict])
+def get_requests(db: Session = Depends(get_db)):
+    requests = db.query(Request).all()
+    return [{"request_id": request.request_id,
+             "request_type": request.request_type,
+             "created_by": request.created_by,
+             "assigned_to": request.assigned_to,
+             "area_id": request.area_id,
+             "description": request.description,
+             "status_id": request.status_id,
+             "created_at": request.created_at,
+             "updated_at": request.updated_at,
+             "deadline": request.deadline} for request in requests]
 
 if __name__ == "__main__":
     import uvicorn
