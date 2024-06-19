@@ -120,6 +120,10 @@ class ApproveRequest(BaseModel):
     assign_to: int
     deadline: datetime = None
 
+class RejectRequest(BaseModel):
+    user_id: int
+    request_id: int
+
 def get_db():
     db = SessionLocal()
     try:
@@ -185,7 +189,7 @@ def approve_request(request: ApproveRequest, db: Session = Depends(get_db)):
     )
     db.add(log_entry)
 
-    # Update request status to 'approved' (status_id = 1)
+    # Update request status to 'approved' (status_id = 2)
     existing_request.status_id = 2
 
     db.commit()
@@ -194,7 +198,32 @@ def approve_request(request: ApproveRequest, db: Session = Depends(get_db)):
 
     return {"message": "Request approved successfully", "request_id": existing_request.request_id}
 
-@app.get("/requests", response_model=list[dict])
+@app.post("/reject-request", response_model=dict)
+def reject_request(request: RejectRequest, db: Session = Depends(get_db)):
+    # Retrieve the request to be rejected
+    existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
+    if existing_request is None:
+        raise HTTPException(status_code=404, detail="Request not found")
+
+    # Log status change in request_status_log
+    log_entry = RequestStatusLog(
+        request_id=existing_request.request_id,
+        old_status_id=existing_request.status_id,
+        new_status_id=3,  # Status ID for 'rejected'
+        changed_by=request.user_id  # Assuming the current user is making the change
+    )
+    db.add(log_entry)
+
+    # Update request status to 'rejected' (status_id = 3)
+    existing_request.status_id = 3
+
+    db.commit()
+    db.refresh(existing_request)
+    db.refresh(log_entry)
+
+    return {"message": "Request rejected successfully", "request_id": existing_request.request_id}
+
+@app.get("/get-requests", response_model=list[dict])
 def get_requests(db: Session = Depends(get_db)):
     requests = db.query(Request).all()
     return [{"request_id": request.request_id,
