@@ -127,6 +127,10 @@ class CompleteRequest(BaseModel):
     user_id: int
     request_id: int
 
+class ConfirmRequest(BaseModel):
+    user_id: int
+    request_id: int
+
 def get_db():
     db = SessionLocal()
     try:
@@ -244,7 +248,32 @@ def complete_request(request: CompleteRequest, db: Session = Depends(get_db)):
 
     return {"message": "Request completed successfully", "request_id": existing_request.request_id}
 
-@app.get("/get-requests", response_model=list[dict])
+@app.post("/confirm-request", response_model=dict)
+def confirm_request(request: ConfirmRequest, db: Session = Depends(get_db)):
+    existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
+    if existing_request is None:
+        raise HTTPException(status_code=404, detail="Request not found")
+    if existing_request.created_by != request.user_id:
+        raise HTTPException(status_code=403, detail="Permission denied")
+
+    log_entry = RequestStatusLog(
+        request_id=existing_request.request_id,
+        old_status_id=existing_request.status_id,
+        new_status_id=5,
+        changed_by=request.user_id
+    )
+    db.add(log_entry)
+
+    existing_request.status_id = 5
+    existing_request.updated_at = datetime.now()
+
+    db.commit()
+    db.refresh(existing_request)
+    db.refresh(log_entry)
+
+    return {"message": "Request confirmed successfully", "request_id": existing_request.request_id}
+
+@app.get("/requests")
 def get_requests(db: Session = Depends(get_db)):
     requests = db.query(Request).all()
     return [{"request_id": request.request_id,
