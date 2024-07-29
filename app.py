@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, HTTPException, Depends
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, TIMESTAMP
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, TIMESTAMP, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from passlib.context import CryptContext
@@ -11,6 +11,7 @@ from datetime import datetime
 
 load_dotenv()
 
+# Load environment variables from system
 DATABASE_USER = os.getenv("DATABASE_USER")
 DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
 DATABASE_HOST = os.getenv("DATABASE_HOST")
@@ -74,6 +75,7 @@ class Request(Base):
     created_at = Column(TIMESTAMP, nullable=False, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP)
     deadline = Column(TIMESTAMP)
+    rejection_reason = Column(Text)
 
     creator = relationship("User", foreign_keys=[created_by])
     assignee = relationship("User", foreign_keys=[assigned_to])
@@ -122,6 +124,7 @@ class ApproveRequest(BaseModel):
 class RejectRequest(BaseModel):
     user_id: int
     request_id: int
+    reason: str
 
 class CompleteRequest(BaseModel):
     user_id: int
@@ -176,23 +179,27 @@ def create_request(request: RequestCreate, db: Session = Depends(get_db)):
 
 @app.post("/approve-request", response_model=dict)
 def approve_request(request: ApproveRequest, db: Session = Depends(get_db)):
+    # Retrieve the request to be approved
     existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
     if existing_request is None:
         raise HTTPException(status_code=404, detail="Request not found")
 
+    # Update request details
     existing_request.assigned_to = request.assign_to
     existing_request.updated_at = datetime.now()
     if request.deadline:
         existing_request.deadline = request.deadline
 
+    # Log status change in request_status_log
     log_entry = RequestStatusLog(
         request_id=existing_request.request_id,
         old_status_id=existing_request.status_id,
-        new_status_id=2,
-        changed_by=request.user_id
+        new_status_id=2,  # Status ID for 'approved'
+        changed_by=request.user_id  # Assuming the current user is making the change
     )
     db.add(log_entry)
 
+    # Update request status to 'approved' (status_id = 2)
     existing_request.status_id = 2
 
     db.commit()
@@ -203,19 +210,23 @@ def approve_request(request: ApproveRequest, db: Session = Depends(get_db)):
 
 @app.post("/reject-request", response_model=dict)
 def reject_request(request: RejectRequest, db: Session = Depends(get_db)):
+    # Retrieve the request to be rejected
     existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
     if existing_request is None:
         raise HTTPException(status_code=404, detail="Request not found")
 
+    # Log status change in request_status_log
     log_entry = RequestStatusLog(
         request_id=existing_request.request_id,
         old_status_id=existing_request.status_id,
-        new_status_id=3,
-        changed_by=request.user_id
+        new_status_id=3,  # Status ID for 'rejected'
+        changed_by=request.user_id  # Assuming the current user is making the change
     )
     db.add(log_entry)
 
+    # Update request status to 'rejected' (status_id = 3)
     existing_request.status_id = 3
+    existing_request.rejection_reason = request.reason
 
     db.commit()
     db.refresh(existing_request)
@@ -225,22 +236,26 @@ def reject_request(request: RejectRequest, db: Session = Depends(get_db)):
 
 @app.post("/complete-request", response_model=dict)
 def complete_request(request: CompleteRequest, db: Session = Depends(get_db)):
+    # Retrieve the request to be completed
     existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
     if existing_request is None:
         raise HTTPException(status_code=404, detail="Request not found")
-    if existing_request.assigned_to != request.user_id:
-        raise HTTPException(status_code=403, detail="Permission denied")
 
+    # Check if the user is assigned to the request
+    if existing_request.assigned_to != request.user_id:
+        raise HTTPException(status_code=403, detail="User not assigned to this request")
+
+    # Log status change in request_status_log
     log_entry = RequestStatusLog(
         request_id=existing_request.request_id,
         old_status_id=existing_request.status_id,
-        new_status_id=4,
-        changed_by=request.user_id
+        new_status_id=4,  # Status ID for 'completed'
+        changed_by=request.user_id  # Assuming the current user is making the change
     )
     db.add(log_entry)
 
+    # Update request status to 'completed' (status_id = 4)
     existing_request.status_id = 4
-    existing_request.updated_at = datetime.now()
 
     db.commit()
     db.refresh(existing_request)
@@ -250,22 +265,26 @@ def complete_request(request: CompleteRequest, db: Session = Depends(get_db)):
 
 @app.post("/confirm-request", response_model=dict)
 def confirm_request(request: ConfirmRequest, db: Session = Depends(get_db)):
+    # Retrieve the request to be confirmed
     existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
     if existing_request is None:
         raise HTTPException(status_code=404, detail="Request not found")
-    if existing_request.created_by != request.user_id:
-        raise HTTPException(status_code=403, detail="Permission denied")
 
+    # Check if the user is the creator of the request
+    if existing_request.created_by != request.user_id:
+        raise HTTPException(status_code=403, detail="User not authorized to confirm this request")
+
+    # Log status change in request_status_log
     log_entry = RequestStatusLog(
         request_id=existing_request.request_id,
         old_status_id=existing_request.status_id,
-        new_status_id=5,
-        changed_by=request.user_id
+        new_status_id=5,  # Status ID for 'confirmed'
+        changed_by=request.user_id  # Assuming the current user is making the change
     )
     db.add(log_entry)
 
+    # Update request status to 'confirmed' (status_id = 5)
     existing_request.status_id = 5
-    existing_request.updated_at = datetime.now()
 
     db.commit()
     db.refresh(existing_request)
@@ -285,7 +304,18 @@ def get_requests(db: Session = Depends(get_db)):
              "status_id": request.status_id,
              "created_at": request.created_at,
              "updated_at": request.updated_at,
-             "deadline": request.deadline} for request in requests]
+             "deadline": request.deadline,
+             "rejection_reason": request.rejection_reason} for request in requests]
+
+@app.get("/request-types", response_model=list)
+def get_request_types(db: Session = Depends(get_db)):
+    request_types = db.query(RequestType).all()
+    return request_types
+
+@app.get("/positions", response_model=list)
+def get_positions(db: Session = Depends(get_db)):
+    positions = db.query(Position).all()
+    return positions
 
 if __name__ == "__main__":
     import uvicorn
