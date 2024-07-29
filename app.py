@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, HTTPException, Depends
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, TIMESTAMP, Text
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, TIMESTAMP
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from passlib.context import CryptContext
@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from dotenv import load_dotenv
 from datetime import datetime
+from typing import List
 
 load_dotenv()
 
@@ -75,7 +76,7 @@ class Request(Base):
     created_at = Column(TIMESTAMP, nullable=False, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP)
     deadline = Column(TIMESTAMP)
-    rejection_reason = Column(Text)
+    rejection_reason = Column(String)
 
     creator = relationship("User", foreign_keys=[created_by])
     assignee = relationship("User", foreign_keys=[assigned_to])
@@ -133,6 +134,20 @@ class CompleteRequest(BaseModel):
 class ConfirmRequest(BaseModel):
     user_id: int
     request_id: int
+
+class RequestTypeModel(BaseModel):
+    type_id: int
+    type_name: str
+
+    class Config:
+        orm_mode = True
+
+class PositionModel(BaseModel):
+    position_id: int
+    position_name: str
+
+    class Config:
+        orm_mode = True
 
 def get_db():
     db = SessionLocal()
@@ -226,7 +241,8 @@ def reject_request(request: RejectRequest, db: Session = Depends(get_db)):
 
     # Update request status to 'rejected' (status_id = 3)
     existing_request.status_id = 3
-    existing_request.rejection_reason = request.reason
+    existing_request.rejection_reason = request.reason  # Store the rejection reason
+    existing_request.updated_at = datetime.now()
 
     db.commit()
     db.refresh(existing_request)
@@ -236,14 +252,10 @@ def reject_request(request: RejectRequest, db: Session = Depends(get_db)):
 
 @app.post("/complete-request", response_model=dict)
 def complete_request(request: CompleteRequest, db: Session = Depends(get_db)):
-    # Retrieve the request to be completed
+    # Retrieve the request to be marked as completed
     existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
     if existing_request is None:
         raise HTTPException(status_code=404, detail="Request not found")
-
-    # Check if the user is assigned to the request
-    if existing_request.assigned_to != request.user_id:
-        raise HTTPException(status_code=403, detail="User not assigned to this request")
 
     # Log status change in request_status_log
     log_entry = RequestStatusLog(
@@ -256,12 +268,13 @@ def complete_request(request: CompleteRequest, db: Session = Depends(get_db)):
 
     # Update request status to 'completed' (status_id = 4)
     existing_request.status_id = 4
+    existing_request.updated_at = datetime.now()
 
     db.commit()
     db.refresh(existing_request)
     db.refresh(log_entry)
 
-    return {"message": "Request completed successfully", "request_id": existing_request.request_id}
+    return {"message": "Request marked as completed successfully", "request_id": existing_request.request_id}
 
 @app.post("/confirm-request", response_model=dict)
 def confirm_request(request: ConfirmRequest, db: Session = Depends(get_db)):
@@ -269,10 +282,6 @@ def confirm_request(request: ConfirmRequest, db: Session = Depends(get_db)):
     existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
     if existing_request is None:
         raise HTTPException(status_code=404, detail="Request not found")
-
-    # Check if the user is the creator of the request
-    if existing_request.created_by != request.user_id:
-        raise HTTPException(status_code=403, detail="User not authorized to confirm this request")
 
     # Log status change in request_status_log
     log_entry = RequestStatusLog(
@@ -285,6 +294,7 @@ def confirm_request(request: ConfirmRequest, db: Session = Depends(get_db)):
 
     # Update request status to 'confirmed' (status_id = 5)
     existing_request.status_id = 5
+    existing_request.updated_at = datetime.now()
 
     db.commit()
     db.refresh(existing_request)
@@ -307,16 +317,12 @@ def get_requests(db: Session = Depends(get_db)):
              "deadline": request.deadline,
              "rejection_reason": request.rejection_reason} for request in requests]
 
-@app.get("/request-types", response_model=list)
+@app.get("/request-types", response_model=List[RequestTypeModel])
 def get_request_types(db: Session = Depends(get_db)):
     request_types = db.query(RequestType).all()
     return request_types
 
-@app.get("/positions", response_model=list)
+@app.get("/positions", response_model=List[PositionModel])
 def get_positions(db: Session = Depends(get_db)):
     positions = db.query(Position).all()
     return positions
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=443, reload=True)
