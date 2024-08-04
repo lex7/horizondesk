@@ -154,7 +154,6 @@ class RequestCreate(BaseModel):
 class ApproveRequest(BaseModel):
     user_id: int
     request_id: int
-    assign_to: int
     deadline: datetime = None
 
 class RejectRequest(BaseModel):
@@ -240,7 +239,6 @@ def approve_request(request: ApproveRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Request not found")
 
     # Update request details
-    existing_request.assigned_to = request.assign_to
     existing_request.updated_at = datetime.now()
     if request.deadline:
         existing_request.deadline = request.deadline
@@ -294,16 +292,17 @@ def complete_request(request: CompleteRequest, db: Session = Depends(get_db)):
     existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
     if existing_request is None:
         raise HTTPException(status_code=404, detail="Request not found")
-
+    
     # Log status change in request_status_log
     log_entry = RequestStatusLog(
         request_id=existing_request.request_id,
         old_status_id=existing_request.status_id,
         new_status_id=4,  
-        changed_by=request.user_id  # Assuming the current user is making the change
+        changed_by=request.user_id
     )
     db.add(log_entry)
 
+    existing_request.assigned_to = request.user_id
     existing_request.status_id = 4
     existing_request.updated_at = datetime.now()
 
