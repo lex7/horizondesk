@@ -1,7 +1,8 @@
 INSERT INTO positions (position_name)
 VALUES ('Рабочий'),
        ('Мастер'),
-       ('Начальник');
+       ('Начальник'),
+       ('Босс');
 
 INSERT INTO worker_shifts (start_time, end_time)
 VALUES ('08:30:00', '16:30:00'),

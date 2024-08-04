@@ -101,11 +101,11 @@ Base.metadata.create_all(bind=engine)
 class LoginRequest(BaseModel):
     username: str
     password: str
+    fcm_token: Optional[str] = None
 
 class LoginResponse(BaseModel):
     user_id: int
     position_id: int
-    fcm_token: Optional[str] = None
 
 class RegisterRequest(BaseModel):
     username: str
@@ -179,7 +179,12 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     if user is None or not verify_password(request.password, user.password_hash):
         raise HTTPException(status_code=400, detail="Invalid username or password")
     
-    return LoginResponse(user_id=user.user_id, position_id=user.position_id, fcm_token=user.fcm_token)
+    # Update the fcm_token if provided
+    if request.fcm_token:
+        user.fcm_token = request.fcm_token
+        db.commit()
+    
+    return LoginResponse(user_id=user.user_id, position_id=user.position_id)
 
 @app.post("/create-request", response_model=dict)
 def create_request(request: RequestCreate, db: Session = Depends(get_db)):
