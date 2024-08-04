@@ -394,7 +394,7 @@ def get_under_master_approval_requests(db: Session = Depends(get_db)):
 
 @app.get("/in-progress", response_model=List[dict])
 def get_in_progress_requests(user_id: int, db: Session = Depends(get_db)):
-    requests = db.query(Request).filter(Request.status_id == 2, Request.assigned_to == user_id).all()
+    requests = db.query(Request).filter(Request.status_id == 2, Request.created_by == user_id).all()
     return [{"request_id": request.request_id,
              "request_type": request.request_type,
              "created_by": request.created_by,
@@ -409,7 +409,7 @@ def get_in_progress_requests(user_id: int, db: Session = Depends(get_db)):
 
 @app.get("/denied", response_model=List[dict])
 def get_denied_requests(user_id: int, db: Session = Depends(get_db)):
-    requests = db.query(Request).filter(Request.status_id == 3, Request.assigned_to == user_id).all()
+    requests = db.query(Request).filter(Request.status_id == 3, Request.created_by == user_id).all()
     return [{"request_id": request.request_id,
              "request_type": request.request_type,
              "created_by": request.created_by,
@@ -424,7 +424,7 @@ def get_denied_requests(user_id: int, db: Session = Depends(get_db)):
 
 @app.get("/under-user-approval", response_model=List[dict])
 def get_under_user_approval_requests(user_id: int, db: Session = Depends(get_db)):
-    requests = db.query(Request).filter(Request.status_id == 4, Request.assigned_to == user_id).all()
+    requests = db.query(Request).filter(Request.status_id == 4, Request.created_by == user_id).all()
     return [{"request_id": request.request_id,
              "request_type": request.request_type,
              "created_by": request.created_by,
@@ -439,7 +439,7 @@ def get_under_user_approval_requests(user_id: int, db: Session = Depends(get_db)
 
 @app.get("/completed", response_model=List[dict])
 def get_completed_requests(user_id: int, db: Session = Depends(get_db)):
-    requests = db.query(Request).filter(Request.status_id == 5, Request.assigned_to == user_id).all()
+    requests = db.query(Request).filter(Request.status_id == 5, Request.created_by == user_id).all()
     return [{"request_id": request.request_id,
              "request_type": request.request_type,
              "created_by": request.created_by,
