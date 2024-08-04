@@ -91,6 +91,13 @@ class Status(Base):
     status_id = Column(Integer, primary_key=True, index=True)
     status_name = Column(String, unique=True, index=True, nullable=False)
 
+class StatusModel(BaseModel):
+    status_id: int
+    status_name: str
+
+    class Config:
+        orm_mode = True
+
 class Request(Base):
     __tablename__ = 'requests'
     request_id = Column(Integer, primary_key=True, index=True)
@@ -364,3 +371,83 @@ def get_roles(db: Session = Depends(get_db)):
 def get_users(db: Session = Depends(get_db)):
     users = db.query(User).all()
     return users
+
+@app.get("/statuses", response_model=List[StatusModel])
+def get_statuses(db: Session = Depends(get_db)):
+    statuses = db.query(Status).all()
+    return statuses
+
+@app.get("/under-master-approval", response_model=List[dict])
+def get_under_master_approval_requests(db: Session = Depends(get_db)):
+    requests = db.query(Request).filter(Request.status_id == 1).all()
+    return [{"request_id": request.request_id,
+             "request_type": request.request_type,
+             "created_by": request.created_by,
+             "assigned_to": request.assigned_to,
+             "area_id": request.area_id,
+             "description": request.description,
+             "status_id": request.status_id,
+             "created_at": request.created_at,
+             "updated_at": request.updated_at,
+             "deadline": request.deadline,
+             "rejection_reason": request.rejection_reason} for request in requests]
+
+@app.get("/in-progress", response_model=List[dict])
+def get_in_progress_requests(user_id: int, db: Session = Depends(get_db)):
+    requests = db.query(Request).filter(Request.status_id == 2, Request.assigned_to == user_id).all()
+    return [{"request_id": request.request_id,
+             "request_type": request.request_type,
+             "created_by": request.created_by,
+             "assigned_to": request.assigned_to,
+             "area_id": request.area_id,
+             "description": request.description,
+             "status_id": request.status_id,
+             "created_at": request.created_at,
+             "updated_at": request.updated_at,
+             "deadline": request.deadline,
+             "rejection_reason": request.rejection_reason} for request in requests]
+
+@app.get("/denied", response_model=List[dict])
+def get_denied_requests(user_id: int, db: Session = Depends(get_db)):
+    requests = db.query(Request).filter(Request.status_id == 3, Request.assigned_to == user_id).all()
+    return [{"request_id": request.request_id,
+             "request_type": request.request_type,
+             "created_by": request.created_by,
+             "assigned_to": request.assigned_to,
+             "area_id": request.area_id,
+             "description": request.description,
+             "status_id": request.status_id,
+             "created_at": request.created_at,
+             "updated_at": request.updated_at,
+             "deadline": request.deadline,
+             "rejection_reason": request.rejection_reason} for request in requests]
+
+@app.get("/under-user-approval", response_model=List[dict])
+def get_under_user_approval_requests(user_id: int, db: Session = Depends(get_db)):
+    requests = db.query(Request).filter(Request.status_id == 4, Request.assigned_to == user_id).all()
+    return [{"request_id": request.request_id,
+             "request_type": request.request_type,
+             "created_by": request.created_by,
+             "assigned_to": request.assigned_to,
+             "area_id": request.area_id,
+             "description": request.description,
+             "status_id": request.status_id,
+             "created_at": request.created_at,
+             "updated_at": request.updated_at,
+             "deadline": request.deadline,
+             "rejection_reason": request.rejection_reason} for request in requests]
+
+@app.get("/completed", response_model=List[dict])
+def get_completed_requests(user_id: int, db: Session = Depends(get_db)):
+    requests = db.query(Request).filter(Request.status_id == 5, Request.assigned_to == user_id).all()
+    return [{"request_id": request.request_id,
+             "request_type": request.request_type,
+             "created_by": request.created_by,
+             "assigned_to": request.assigned_to,
+             "area_id": request.area_id,
+             "description": request.description,
+             "status_id": request.status_id,
+             "created_at": request.created_at,
+             "updated_at": request.updated_at,
+             "deadline": request.deadline,
+             "rejection_reason": request.rejection_reason} for request in requests]
