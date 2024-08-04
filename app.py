@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from dotenv import load_dotenv
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 load_dotenv()
 
@@ -31,7 +31,7 @@ app = FastAPI()
 
 @app.get("/")
 def read_root():
-    return {"message": "Yo"}
+    return {"message": "home page"}
 
 class User(Base):
     __tablename__ = 'users'
@@ -39,6 +39,7 @@ class User(Base):
     username = Column(String, unique=True, index=True, nullable=False)
     password_hash = Column(String, nullable=False)
     position_id = Column(Integer, ForeignKey('positions.position_id'))
+    fcm_token = Column(String, nullable=True)  # Make sure this field is included
 
     position = relationship("Position", back_populates="users")
 
@@ -104,6 +105,7 @@ class LoginRequest(BaseModel):
 class LoginResponse(BaseModel):
     user_id: int
     position_id: int
+    fcm_token: Optional[str] = None
 
 class RegisterRequest(BaseModel):
     username: str
@@ -177,7 +179,7 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     if user is None or not verify_password(request.password, user.password_hash):
         raise HTTPException(status_code=400, detail="Invalid username or password")
     
-    return LoginResponse(user_id=user.user_id, position_id=user.position_id)
+    return LoginResponse(user_id=user.user_id, position_id=user.position_id, fcm_token=user.fcm_token)
 
 @app.post("/create-request", response_model=dict)
 def create_request(request: RequestCreate, db: Session = Depends(get_db)):
