@@ -154,7 +154,7 @@ class RequestCreate(BaseModel):
 class ApproveRequest(BaseModel):
     user_id: int
     request_id: int
-    deadline: datetime = None
+    deadline: Optional[datetime] = None
 
 class RejectRequest(BaseModel):
     user_id: int
@@ -240,7 +240,7 @@ def approve_request(request: ApproveRequest, db: Session = Depends(get_db)):
 
     # Update request details
     existing_request.updated_at = datetime.now()
-    if request.deadline:
+    if request.deadline is not None:
         existing_request.deadline = request.deadline
 
     # Log status change in request_status_log
