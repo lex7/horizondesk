@@ -394,7 +394,7 @@ def get_under_master_approval_requests(db: Session = Depends(get_db)):
 
 @app.get("/in-progress", response_model=List[dict])
 def get_in_progress_requests(user_id: int, db: Session = Depends(get_db)):
-    requests = db.query(Request).filter(Request.status_id == 2, Request.created_by == user_id).all()
+    requests = db.query(Request).filter(Request.status_id in [1,2,4,5], Request.created_by == user_id).all()
     return [{"request_id": request.request_id,
              "request_type": request.request_type,
              "created_by": request.created_by,

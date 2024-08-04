@@ -24,9 +24,10 @@ VALUES ('Участок #1'),
 
 INSERT INTO statuses (status_name)
 VALUES ('На рассмотрении'),
-       ('В работе'),
+       ('Утверждено'),
        ('Отклонена'),
-       ('На проверке'),
+       ('В работе'),
+       ('Требует подтверждения'),
        ('Завершена'),;
 
 INSERT INTO users (username, password_hash, surname, name, specialization, fcm_token, role_id, shift_id)
