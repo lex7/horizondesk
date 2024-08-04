@@ -254,7 +254,6 @@ def approve_request(request: ApproveRequest, db: Session = Depends(get_db)):
     )
     db.add(log_entry)
 
-    # Update request status to 'approved' (status_id = 2)
     existing_request.status_id = 2
 
     db.commit()
@@ -279,7 +278,6 @@ def reject_request(request: RejectRequest, db: Session = Depends(get_db)):
     )
     db.add(log_entry)
 
-    # Update request status to 'rejected' (status_id = 3)
     existing_request.status_id = 3
     existing_request.rejection_reason = request.reason  # Store the rejection reason
     existing_request.updated_at = datetime.now()
@@ -289,6 +287,31 @@ def reject_request(request: RejectRequest, db: Session = Depends(get_db)):
     db.refresh(log_entry)
 
     return {"message": "Request rejected successfully", "request_id": existing_request.request_id}
+
+@app.post("/take-on-work", response_model=dict)
+def complete_request(request: CompleteRequest, db: Session = Depends(get_db)):
+    # Retrieve the request to be marked as completed
+    existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
+    if existing_request is None:
+        raise HTTPException(status_code=404, detail="Request not found")
+
+    # Log status change in request_status_log
+    log_entry = RequestStatusLog(
+        request_id=existing_request.request_id,
+        old_status_id=existing_request.status_id,
+        new_status_id=4,  
+        changed_by=request.user_id  # Assuming the current user is making the change
+    )
+    db.add(log_entry)
+
+    existing_request.status_id = 4
+    existing_request.updated_at = datetime.now()
+
+    db.commit()
+    db.refresh(existing_request)
+    db.refresh(log_entry)
+
+    return {"message": "Request accepted into work successfully", "request_id": existing_request.request_id}
 
 @app.post("/complete-request", response_model=dict)
 def complete_request(request: CompleteRequest, db: Session = Depends(get_db)):
@@ -301,13 +324,12 @@ def complete_request(request: CompleteRequest, db: Session = Depends(get_db)):
     log_entry = RequestStatusLog(
         request_id=existing_request.request_id,
         old_status_id=existing_request.status_id,
-        new_status_id=4,  # Status ID for 'completed'
+        new_status_id=5,  # Status ID for 'completed'
         changed_by=request.user_id  # Assuming the current user is making the change
     )
     db.add(log_entry)
 
-    # Update request status to 'completed' (status_id = 4)
-    existing_request.status_id = 4
+    existing_request.status_id = 5
     existing_request.updated_at = datetime.now()
 
     db.commit()
@@ -327,13 +349,12 @@ def confirm_request(request: ConfirmRequest, db: Session = Depends(get_db)):
     log_entry = RequestStatusLog(
         request_id=existing_request.request_id,
         old_status_id=existing_request.status_id,
-        new_status_id=5,  # Status ID for 'confirmed'
+        new_status_id=6,  # Status ID for 'confirmed'
         changed_by=request.user_id  # Assuming the current user is making the change
     )
     db.add(log_entry)
 
-    # Update request status to 'confirmed' (status_id = 5)
-    existing_request.status_id = 5
+    existing_request.status_id = 6
     existing_request.updated_at = datetime.now()
 
     db.commit()
@@ -394,18 +415,26 @@ def get_under_master_approval_requests(db: Session = Depends(get_db)):
 
 @app.get("/in-progress", response_model=List[dict])
 def get_in_progress_requests(user_id: int, db: Session = Depends(get_db)):
-    requests = db.query(Request).filter(Request.status_id in [1,2,4,5], Request.created_by == user_id).all()
-    return [{"request_id": request.request_id,
-             "request_type": request.request_type,
-             "created_by": request.created_by,
-             "assigned_to": request.assigned_to,
-             "area_id": request.area_id,
-             "description": request.description,
-             "status_id": request.status_id,
-             "created_at": request.created_at,
-             "updated_at": request.updated_at,
-             "deadline": request.deadline,
-             "rejection_reason": request.rejection_reason} for request in requests]
+    requests = db.query(Request).filter(
+        Request.status_id.in_([1, 2, 4, 5]), 
+        Request.created_by == user_id
+    ).all()
+    return [
+        {
+            "request_id": request.request_id,
+            "request_type": request.request_type,
+            "created_by": request.created_by,
+            "assigned_to": request.assigned_to,
+            "area_id": request.area_id,
+            "description": request.description,
+            "status_id": request.status_id,
+            "created_at": request.created_at,
+            "updated_at": request.updated_at,
+            "deadline": request.deadline,
+            "rejection_reason": request.rejection_reason
+        }
+        for request in requests
+    ]
 
 @app.get("/denied", response_model=List[dict])
 def get_denied_requests(user_id: int, db: Session = Depends(get_db)):
