@@ -8,15 +8,15 @@ import Combine
 
 final class AuthStateEnvObject: ObservableObject {
     
-    @Published var issueArray: [IssueModel] = []
+    @Published var issueArray: [RequestIssueModel] = []
     
     // new, approved, declined, inprogress, review, done
     
-    @Published var issuesInWork: [IssueModel] = []
-    @Published var issuesDone: [IssueModel] = []
-    @Published var issuesDeclined: [IssueModel] = []
-    @Published var issuesApproved: [IssueModel] = []
-    @Published var issuesInProgress: [IssueModel] = []
+    @Published var issuesInWork: [RequestIssueModel] = []
+    @Published var issuesDone: [RequestIssueModel] = []
+    @Published var issuesDeclined: [RequestIssueModel] = []
+    @Published var issuesApproved: [RequestIssueModel] = []
+    @Published var issuesInProgress: [RequestIssueModel] = []
     
     // Auth data
     @Published var username: String = ""
@@ -108,7 +108,7 @@ final class AuthStateEnvObject: ObservableObject {
     }
     ///
         
-    func getIssues() {
+    func getMyRequests() {
         networkManager.requestMoyaData(apis: .requests)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] completion in
@@ -120,15 +120,15 @@ final class AuthStateEnvObject: ObservableObject {
                     debugPrint(String(describing: "[vm: \(error) - ❌ getIssues]"))
                 }
             } receiveValue: { [unowned self] data in
-                if let array = try? JSONDecoder().decode([IssueModel].self, from: data) {
-                    self.issueArray = array.reversed()
-                    
-                    self.issuesInWork = array.filter { $0.statusOfElement != .declined && $0.statusOfElement != .done }.reversed()
-                    self.issuesDeclined = array.filter { $0.statusOfElement == .declined }.reversed()
-                    self.issuesDone = array.filter { $0.statusOfElement == .done }.reversed()
-                    self.issuesApproved = array.filter { $0.statusOfElement == .approved }.reversed()
-                    self.issuesInProgress = array.filter { $0.statusOfElement == .inprogress }.reversed()
-                }
+//                if let array = try? JSONDecoder().decode([RequestIssueModel].self, from: data) {
+//                    self.issueArray = array.reversed()
+//                    
+//                    self.issuesInWork = array.filter { $0.statusOfElement != .declined && $0.statusOfElement != .done }.reversed()
+//                    self.issuesDeclined = array.filter { $0.statusOfElement == .declined }.reversed()
+//                    self.issuesDone = array.filter { $0.statusOfElement == .done }.reversed()
+//                    self.issuesApproved = array.filter { $0.statusOfElement == .approved }.reversed()
+//                    self.issuesInProgress = array.filter { $0.statusOfElement == .inprogress }.reversed()
+//                }
             }
             .store(in: &cancellables)
     }
@@ -169,7 +169,9 @@ final class AuthStateEnvObject: ObservableObject {
             .store(in: &cancellables)
     }
     
-    func inProgressIssue() {
+    /// Creator of Requests:
+    
+    func getInProgressIssue() {
         let model = UserIdModel(user_id: credentialService.getUserId() ?? 777)
         networkManager.requestMoyaData(apis: .inprogress(model: model))
             .receive(on: DispatchQueue.main)
@@ -181,8 +183,65 @@ final class AuthStateEnvObject: ObservableObject {
                 case .failure(let error):
                     debugPrint(String(describing: "[vm: \(error) - ❌ inProgressIssue]"))
                 }
-            } receiveValue: { data in
-                
+            } receiveValue: { [unowned self] data in
+                // self.issuesInWork = array.filter { $0.statusOfElement != .declined && $0.statusOfElement != .done }.reversed()
+                // po String(decoding: data, as: UTF8.self)
+                do {
+                    self.issuesInWork = try RequestIssueModel.decode(from: data)
+                    debugPrint(issuesInWork.count)
+                } catch {
+                    print(error)
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    func getCompletedIssue() {
+        let model = UserIdModel(user_id: credentialService.getUserId() ?? 777)
+        networkManager.requestMoyaData(apis: .completed(model: model))
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] completion in
+                switch completion {
+                case .finished:
+                    debugPrint(String(describing: "[vm: ✅ inProgressIssue successfully]"))
+                    break
+                case .failure(let error):
+                    debugPrint(String(describing: "[vm: \(error) - ❌ inProgressIssue]"))
+                }
+            } receiveValue: { [unowned self] data in
+                // self.issuesDone = array.filter { $0.statusOfElement == .done }.reversed()
+                // po String(decoding: data, as: UTF8.self)
+                do {
+                    self.issuesDone = try RequestIssueModel.decode(from: data)
+                    debugPrint(issuesInWork.count)
+                } catch {
+                    print(error)
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    func getDeniedIssue() {
+        let model = UserIdModel(user_id: credentialService.getUserId() ?? 777)
+        networkManager.requestMoyaData(apis: .denied(model: model))
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] completion in
+                switch completion {
+                case .finished:
+                    debugPrint(String(describing: "[vm: ✅ inProgressIssue successfully]"))
+                    break
+                case .failure(let error):
+                    debugPrint(String(describing: "[vm: \(error) - ❌ inProgressIssue]"))
+                }
+            } receiveValue: { [unowned self] data in
+                // self.issuesInWork = array.filter { $0.statusOfElement != .declined && $0.statusOfElement != .done }.reversed()
+                // po String(decoding: data, as: UTF8.self)
+                do {
+                    self.issuesDeclined = try RequestIssueModel.decode(from: data)
+                    debugPrint(issuesInWork.count)
+                } catch {
+                    print(error)
+                }
             }
             .store(in: &cancellables)
     }

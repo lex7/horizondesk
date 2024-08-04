@@ -70,10 +70,10 @@
 		05D65AF22B6A2157009CF788 /* CustomTabBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D65AF12B6A2157009CF788 /* CustomTabBarView.swift */; };
 		05D65AF62B6A5315009CF788 /* CustomTabBarContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D65AF52B6A5315009CF788 /* CustomTabBarContainer.swift */; };
 		05D7A65B2C5EE4B700275E9D /* StatisticScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D7A65A2C5EE4B700275E9D /* StatisticScreen.swift */; };
-		05D7A65D2C5EE77100275E9D /* FabricModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D7A65C2C5EE77100275E9D /* FabricModel.swift */; };
 		05D7A6602C5EE8DA00275E9D /* RawDataStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D7A65F2C5EE8DA00275E9D /* RawDataStats.swift */; };
 		05D7A6622C5F7A1000275E9D /* RoleEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D7A6612C5F7A1000275E9D /* RoleEnum.swift */; };
 		05D7A6642C5F892C00275E9D /* RequestTypeEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D7A6632C5F892C00275E9D /* RequestTypeEnum.swift */; };
+		05D7A6662C601E6300275E9D /* RegionIssue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D7A6652C601E6300275E9D /* RegionIssue.swift */; };
 		05E353BE2B8BD75800C418B1 /* UIApplication+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05E353BD2B8BD75800C418B1 /* UIApplication+Extension.swift */; };
 		05EC0C7D2B504C6500A5E5D8 /* PickerSegmentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05EC0C7C2B504C6500A5E5D8 /* PickerSegmentsView.swift */; };
 		05F2D9592B92517E00BDDD36 /* MonitorIssueScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F2D9582B92517E00BDDD36 /* MonitorIssueScreen.swift */; };
@@ -136,10 +136,10 @@
 		05D65AF12B6A2157009CF788 /* CustomTabBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTabBarView.swift; sourceTree = "<group>"; };
 		05D65AF52B6A5315009CF788 /* CustomTabBarContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTabBarContainer.swift; sourceTree = "<group>"; };
 		05D7A65A2C5EE4B700275E9D /* StatisticScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticScreen.swift; sourceTree = "<group>"; };
-		05D7A65C2C5EE77100275E9D /* FabricModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FabricModel.swift; sourceTree = "<group>"; };
 		05D7A65F2C5EE8DA00275E9D /* RawDataStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RawDataStats.swift; sourceTree = "<group>"; };
 		05D7A6612C5F7A1000275E9D /* RoleEnum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoleEnum.swift; sourceTree = "<group>"; };
 		05D7A6632C5F892C00275E9D /* RequestTypeEnum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestTypeEnum.swift; sourceTree = "<group>"; };
+		05D7A6652C601E6300275E9D /* RegionIssue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionIssue.swift; sourceTree = "<group>"; };
 		05E353BD2B8BD75800C418B1 /* UIApplication+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+Extension.swift"; sourceTree = "<group>"; };
 		05EC0C7C2B504C6500A5E5D8 /* PickerSegmentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerSegmentsView.swift; sourceTree = "<group>"; };
 		05F2D9582B92517E00BDDD36 /* MonitorIssueScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitorIssueScreen.swift; sourceTree = "<group>"; };
@@ -191,7 +191,6 @@
 		0509CBF52BFC938100FBCEF1 /* HorizonModels */ = {
 			isa = PBXGroup;
 			children = (
-				05D7A65C2C5EE77100275E9D /* FabricModel.swift */,
 				0509CBF62BFC939300FBCEF1 /* IssueModel.swift */,
 				051E62792BFD49E0001FBD74 /* IssueAcceptModel.swift */,
 				0509CBF32BFC854C00FBCEF1 /* LoginModel.swift */,
@@ -248,6 +247,7 @@
 				051E62752BFD255C001FBD74 /* IssueStatus.swift */,
 				052A98DC2B72D8F6002249C5 /* NetworkEnums.swift */,
 				05096EC22B84E9BF003FDB52 /* AuthState.swift */,
+				05D7A6652C601E6300275E9D /* RegionIssue.swift */,
 				05B2304B2B764C4100A5B02A /* EndPointsDolly.swift */,
 				0574698C2B7B3A5700AA0F71 /* NamingEnum.swift */,
 				05D7A6612C5F7A1000275E9D /* RoleEnum.swift */,
@@ -858,7 +858,6 @@
 				05D7A6642C5F892C00275E9D /* RequestTypeEnum.swift in Sources */,
 				051E627A2BFD49E0001FBD74 /* IssueAcceptModel.swift in Sources */,
 				0591187D2B4DAE68006073C3 /* DeskHorizonApp.swift in Sources */,
-				05D7A65D2C5EE77100275E9D /* FabricModel.swift in Sources */,
 				052A98DD2B72D8F6002249C5 /* NetworkEnums.swift in Sources */,
 				0517DCC22B837E4D009F6979 /* MyAccountPickerView.swift in Sources */,
 				05F2D9602B94A52300BDDD36 /* MonitorPickerView.swift in Sources */,
@@ -869,6 +868,7 @@
 				053E61412B86406E00D37C81 /* View+ExtensionExtra.swift in Sources */,
 				05B7CEBB2B4F488400FD502A /* Color.swift in Sources */,
 				0509CBF42BFC854C00FBCEF1 /* LoginModel.swift in Sources */,
+				05D7A6662C601E6300275E9D /* RegionIssue.swift in Sources */,
 				05D65AF62B6A5315009CF788 /* CustomTabBarContainer.swift in Sources */,
 				051E62762BFD255C001FBD74 /* IssueStatus.swift in Sources */,
 			);

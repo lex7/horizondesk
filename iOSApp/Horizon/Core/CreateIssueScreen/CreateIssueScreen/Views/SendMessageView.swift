@@ -134,29 +134,29 @@ private extension SendMessageView {
         HStack {
             // Wrapping Text inside Menu to show options on tap
             Menu {
-                Button(SpecializationIssue.electricity.name) {
-                    vm.requestType = SpecializationIssue.electricity.requestType
-                    titleOfIssue = SpecializationIssue.electricity.name
+                Button(RequestTypeEnum.electricity.name) {
+                    vm.requestType = RequestTypeEnum.electricity.requestType
+                    titleOfIssue = RequestTypeEnum.electricity.name
                 }
-                Button(SpecializationIssue.tools.name) {
-                    vm.requestType = SpecializationIssue.tools.requestType
-                    titleOfIssue = SpecializationIssue.tools.name
+                Button(RequestTypeEnum.tools.name) {
+                    vm.requestType = RequestTypeEnum.tools.requestType
+                    titleOfIssue = RequestTypeEnum.tools.name
                 }
-                Button(SpecializationIssue.docs.name) {
-                    vm.requestType = SpecializationIssue.docs.requestType
-                    titleOfIssue = SpecializationIssue.docs.name
+                Button(RequestTypeEnum.docs.name) {
+                    vm.requestType = RequestTypeEnum.docs.requestType
+                    titleOfIssue = RequestTypeEnum.docs.name
                 }
-                Button(SpecializationIssue.sanpin.name) {
-                    vm.requestType = SpecializationIssue.sanpin.requestType
-                    titleOfIssue = SpecializationIssue.sanpin.name
+                Button(RequestTypeEnum.sanpin.name) {
+                    vm.requestType = RequestTypeEnum.sanpin.requestType
+                    titleOfIssue = RequestTypeEnum.sanpin.name
                 }
-                Button(SpecializationIssue.safety.name) {
-                    vm.requestType = SpecializationIssue.safety.requestType
-                    titleOfIssue = SpecializationIssue.safety.name
+                Button(RequestTypeEnum.safety.name) {
+                    vm.requestType = RequestTypeEnum.safety.requestType
+                    titleOfIssue = RequestTypeEnum.safety.name
                 }
-                Button(SpecializationIssue.empty.name) {
-                    vm.requestType = SpecializationIssue.empty.requestType
-                    titleOfIssue = SpecializationIssue.empty.name
+                Button(RequestTypeEnum.empty.name) {
+                    vm.requestType = RequestTypeEnum.empty.requestType
+                    titleOfIssue = RequestTypeEnum.empty.name
                 }
             } label: {
                 textViewOnBoard($titleOfIssue, focusField: .title)

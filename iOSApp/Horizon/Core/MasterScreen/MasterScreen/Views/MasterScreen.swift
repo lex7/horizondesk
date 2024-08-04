@@ -9,7 +9,10 @@ struct MasterScreen: View {
 
     // MARK: - Private State Variables
     @State private var showIssueConfirm: Bool?
-    @State private var currentNode: IssueModel = IssueModel(id: "", subject: "", message: "", region: "", status: "", created: "", deadline: "", completed: "", addedJustification: nil)
+//    @State private var currentNode: IssueModel = IssueModel(id: "", subject: "", message: "", region: "", status: "", created: "", deadline: "", completed: "", addedJustification: nil)
+    
+    @State private var currentNode: RequestIssueModel = RequestIssueModel(request_id: 1, request_type: 2, created_by: 99, assigned_to: nil, area_id: 3, description: nil, status_id: 99, created_at: nil, updated_at: nil, deadline: nil, rejection_reason: nil)
+    
     // MARK: - Private Constants
     private let generator = UIImpactFeedbackGenerator(style: .light)
     @State private var screenHeight = UIScreen.main.bounds.height
@@ -27,14 +30,14 @@ struct MasterScreen: View {
             Spacer()
         } 
         .sheet(item: $showIssueConfirm, onDismiss: {
-            authStateEnvObject.getIssues()
+            // authStateEnvObject.getIssues()
         }, content: { _ in
             IssueAcceptanceCheck(currentNode: $currentNode)
         })
         .background(Color.theme.background)
         .onChange(of: tabSelection) { value in
             if tabSelection == .executeIssue {
-                authStateEnvObject.getIssues()
+                //authStateEnvObject.getIssues()
             }
         }
     }
@@ -95,12 +98,14 @@ private extension MasterScreen {
     }
     
     @ViewBuilder
-    func issueCellFor(_ issue: IssueModel) -> some View {
+    func issueCellFor(_ issue: RequestIssueModel) -> some View {
         VStack(alignment: .leading) {
             HStack(spacing: 0) {
-                titleHeader(issue.subject, lines: 3)
+                titleHeader(RequestTypeEnum(rawValue: issue.request_type)?.name ?? "",
+                            lines: 3)
                 Spacer()
-                descriptionOfField(issue.region, color: Color.theme.secondary)
+                descriptionOfField(RegionIssue(rawValue: issue.area_id)?.name ?? "",
+                                   color: Color.theme.secondary)
             }
             HStack(spacing: 0) {
                 GeometryReader { geometry in
@@ -115,11 +120,11 @@ private extension MasterScreen {
             HStack {
                 switch authStateEnvObject.issueDebtSegment {
                 case .inProgress:
-                    titleHeader(issue.message, color: .highContrast, uppercase: false)
+                    titleHeader(issue.description ?? "", color: .highContrast, uppercase: false)
                 case .done:
-                    titleHeader(issue.message, color: .theme.positivePrimary, uppercase: false)
+                    titleHeader(issue.description ?? "", color: .theme.positivePrimary, uppercase: false)
                 case .declined:
-                    titleHeader(issue.message, color: .theme.negativePrimary, uppercase: false)
+                    titleHeader(issue.description ?? "", color: .theme.negativePrimary, uppercase: false)
                 }
             }
             .padding(.top, 10)
@@ -162,35 +167,35 @@ private extension MasterScreen {
     }
     
     @ViewBuilder
-    private func createDateString(_ issue: IssueModel) -> some View {
+    private func createDateString(_ issue: RequestIssueModel) -> some View {
         if let status = issue.statusOfElement {
             switch status {
             case .new:
                 HStack(spacing: 3) {
                     descriptionOfField("создано:", color: Color.theme.lowContrast)
-                    descriptionOfField(issue.created.getTimeHorizon(), color: Color.theme.lowContrast)
+                    descriptionOfField(issue.createdAtString, color: Color.theme.lowContrast)
                 }
             case .approved:
                 HStack(spacing: 3) {
                     descriptionOfField("до:", color: Color.theme.lowContrast)
-                    descriptionOfField(issue.deadline.getDateHorizon(), color: Color.theme.lowContrast)
+                    descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
                 }
             case .declined:
-                HStack(spacing: 3) {
-                    descriptionOfField(issue.completed.getTimeHorizon(), color: Color.theme.lowContrast)
+                HStack(spacing: 3) { // completed ??
+                    descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
                 }
             case .inprogress:
                 HStack(spacing: 3) {
                     descriptionOfField("до:", color: Color.theme.lowContrast)
-                    descriptionOfField(issue.deadline.getDateHorizon(), color: Color.theme.lowContrast)
+                    descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
                 }
             case .review:
                 HStack {
-                    descriptionOfField(issue.deadline.getDateHorizon(), color: Color.theme.lowContrast)
+                    descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
                 }
             case .done:
                 HStack {
-                    descriptionOfField(issue.completed.getDateHorizon(), color: Color.theme.lowContrast)
+                    descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
                 }
             }
         } else {

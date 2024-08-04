@@ -37,7 +37,7 @@ struct CreateIssueScreen: View {
             .background(Color.theme.background.ignoresSafeArea(edges: .bottom))
             .onChange(of: tabSelection) { value in
                 if tabSelection == .createIssue {
-                    authStateEnvObject.getIssues()
+//                    authStateEnvObject.getMyRequests()
                 }
             }
         }

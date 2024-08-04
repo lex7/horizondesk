@@ -6,7 +6,6 @@ enum IssuesMontitorSwitcher: String, CaseIterable, Identifiable, Equatable  {
     case inProgress = "MonitorPickerView"
     case done = "MonitorDonePickerView"
     case declined = "MonitorRejectedPickerView"
-
     var id: Self { self }
 }
 

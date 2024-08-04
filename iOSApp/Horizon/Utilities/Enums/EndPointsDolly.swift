@@ -8,10 +8,12 @@ enum EndPointsDolly {
     //case assignFcmToken(model: HorizonFcmModel)
     case login(model: LoginModel)
     case requests
-    case createRequest(message: RequestModelIssue)
+    case createRequest(message: CreateRequestModelIssue)
     case acceptIssue(issue: IssueAcceptModel)
     case declineIssue(issue: IssueDeclineModel)
     case inprogress(model: UserIdModel)
+    case denied(model: UserIdModel)
+    case completed(model: UserIdModel)
     case review(model: IssueIdModel)
     case done(model: IssueDoneModel)
     
@@ -43,7 +45,7 @@ extension EndPointsDolly: Moya.TargetType {
         switch self {
         case .login, .createRequest, .acceptIssue, .declineIssue, .review, .done:
             return .post
-        case .requests, .inprogress:
+        case .requests, .inprogress, .completed, .denied:
             return .get
         }
     }
@@ -61,7 +63,7 @@ extension EndPointsDolly: Moya.TargetType {
             return .requestJSONEncodable(message)
         case .requests:
             return .requestPlain
-        case .inprogress(let model):
+        case .inprogress(let model), .denied(let model), .completed(let model):
             return .requestParameters(parameters: ["user_id": model.user_id], encoding: URLEncoding.queryString)
         case .review(let model):
             return .requestJSONEncodable(model)
@@ -92,6 +94,10 @@ extension EndPointsDolly: Moya.TargetType {
             return "decline-issue"
         case .inprogress:
             return "in-progress"
+        case .completed:
+            return "completed"
+        case .denied:
+            return "denied"
         case .review:
             return "send-review"
         case .done:

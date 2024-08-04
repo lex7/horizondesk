@@ -90,7 +90,7 @@ private extension ExecutorScreen {
                     }
                     Button("Отмена") {
                         generator.impactOccurred()
-                        authStateEnvObject.getIssues()
+                        // authStateEnvObject.getIssues()
                     }
                 } label: {
                     issueCellFor(issue)
@@ -106,13 +106,13 @@ private extension ExecutorScreen {
                 Menu {
                     Button("Отправить на проверку.") {
                         generator.impactOccurred()
-                        authStateEnvObject.toReviewIssue(id: issue.id) {
-                            authStateEnvObject.getIssues()
-                        }
+//                        authStateEnvObject.toReviewIssue(id: issue.id) {
+                            // authStateEnvObject.getIssues()
+//                        }
                     }
                     Button("Отмена") {
                         generator.impactOccurred()
-                        authStateEnvObject.getIssues()
+                        // authStateEnvObject.getIssues()
                     }
                 } label: {
                     issueCellFor(issue)
@@ -158,12 +158,12 @@ private extension ExecutorScreen {
     }
     
     @ViewBuilder
-    func issueCellFor(_ issue: IssueModel) -> some View {
+    func issueCellFor(_ issue: RequestIssueModel) -> some View {
         VStack(alignment: .leading) {
             HStack(spacing: 0) {
-                titleHeader(issue.subject, lines: 3)
+                titleHeader(RequestTypeEnum(rawValue: issue.request_type)?.name ?? "", lines: 3)
                 Spacer()
-                descriptionOfField(issue.region, color: Color.theme.secondary)
+                descriptionOfField(RegionIssue(rawValue: issue.area_id)?.name ?? "", color: Color.theme.secondary)
             }
             HStack(spacing: 0) {
                 GeometryReader { geometry in
@@ -178,9 +178,9 @@ private extension ExecutorScreen {
             HStack {
                 switch authStateEnvObject.transactionSegment {
                 case .history:
-                    titleHeader(issue.message, color: .highContrast, uppercase: false)
+                    titleHeader(RequestTypeEnum(rawValue: issue.request_type)?.name ?? "", color: .highContrast, uppercase: false)
                 case .upcoming:
-                    titleHeader(issue.message, color: .theme.negativePrimary, uppercase: false)
+                    titleHeader(RequestTypeEnum(rawValue: issue.request_type)?.name ?? "", color: .theme.negativePrimary, uppercase: false)
                 }
             }
             .padding(.top, 10)
@@ -212,7 +212,7 @@ private extension ExecutorScreen {
             }
         }
         .onChange(of: authStateEnvObject.transactionSegment) { value in
-            authStateEnvObject.getIssues()
+            // authStateEnvObject.getIssues()
         }
         .padding(.vertical, 20)
         .padding(.horizontal, 20)
@@ -227,35 +227,35 @@ private extension ExecutorScreen {
     }
     
     @ViewBuilder
-    private func createDateString(_ issue: IssueModel) -> some View {
+    private func createDateString(_ issue: RequestIssueModel) -> some View {
         if let status = issue.statusOfElement {
             switch status {
             case .new:
                 HStack(spacing: 3) {
                     descriptionOfField("создано:", color: Color.theme.lowContrast)
-                    descriptionOfField(issue.created.getTimeHorizon(), color: Color.theme.lowContrast)
+                    descriptionOfField(issue.createdAtString, color: Color.theme.lowContrast)
                 }
             case .approved:
                 HStack(spacing: 3) {
                     descriptionOfField("до:", color: Color.theme.lowContrast)
-                    descriptionOfField(issue.deadline.getDateHorizon(), color: Color.theme.lowContrast)
+                    descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
                 }
             case .declined:
-                HStack(spacing: 3) {
-                    descriptionOfField(issue.completed.getTimeHorizon(), color: Color.theme.lowContrast)
+                HStack(spacing: 3) { // completed ??
+                    descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
                 }
             case .inprogress:
                 HStack(spacing: 3) {
                     descriptionOfField("до:", color: Color.theme.lowContrast)
-                    descriptionOfField(issue.deadline.getDateHorizon(), color: Color.theme.lowContrast)
+                    descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
                 }
             case .review:
                 HStack {
-                    descriptionOfField(issue.deadline.getDateHorizon(), color: Color.theme.lowContrast)
+                    descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
                 }
             case .done:
                 HStack {
-                    descriptionOfField(issue.completed.getDateHorizon(), color: Color.theme.lowContrast)
+                    descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
                 }
             }
         } else {

@@ -41,7 +41,7 @@ struct MonitorIssueScreen: View {
             Group {
                 switch authStateEnvObject.issueDebtSegment {
                 case .inProgress:
-                    switch authStateEnvObject.issueArray.isEmpty {
+                    switch authStateEnvObject.issuesInWork.isEmpty {
                     case true:
                         ScrollView(.vertical, showsIndicators: false) {
                             messageForEmptyList
@@ -83,15 +83,21 @@ struct MonitorIssueScreen: View {
             .padding(.top, 5)
             .padding(.top, 2)
             .onAppear {
-                authStateEnvObject.inProgressIssue()
+                authStateEnvObject.getInProgressIssue()
+                authStateEnvObject.getInProgressIssue()
+                authStateEnvObject.getDeniedIssue()
             }
             .onChange(of: tabSelection) { value in
                 if tabSelection == .monitorIssue {
-                    authStateEnvObject.inProgressIssue()
+                    authStateEnvObject.getInProgressIssue()
+                    authStateEnvObject.getInProgressIssue()
+                    authStateEnvObject.getDeniedIssue()
                 }
             }
             .onChange(of: authStateEnvObject.issueDebtSegment) { value in
-                authStateEnvObject.getIssues()
+                authStateEnvObject.getInProgressIssue()
+                authStateEnvObject.getInProgressIssue()
+                authStateEnvObject.getDeniedIssue()
             }
             .padding(.horizontal, 12)
         } 
@@ -109,13 +115,13 @@ private extension MonitorIssueScreen {
                     Menu {
                         Button("Подтвердить выполнение") {
                             generator.impactOccurred()
-                            authStateEnvObject.doneIssue(id: issue.id) {
-                                authStateEnvObject.getIssues()
-                            }
+//                            authStateEnvObject.doneIssue(id: issue.request_id) {
+//                                authStateEnvObject.getMyRequests()
+//                            }
                         }
                         Button("Отмена") {
                             generator.impactOccurred()
-                            authStateEnvObject.getIssues()
+//                            authStateEnvObject.getMyRequests()
                         }
                     } label: {
                         issueCellFor(issue)
@@ -142,7 +148,6 @@ private extension MonitorIssueScreen {
             }
         }
     }
-    
 }
 
 
@@ -181,12 +186,12 @@ private extension MonitorIssueScreen {
     }
     
     @ViewBuilder
-    func issueCellFor(_ issue: IssueModel) -> some View {
+    func issueCellFor(_ issue: RequestIssueModel) -> some View {
         VStack(alignment: .leading) {
             HStack(spacing: 0) {
-                titleHeader(issue.subject, lines: 3)
+                titleHeader(RequestTypeEnum(rawValue: issue.request_type)?.name ?? "", lines: 3)
                 Spacer()
-                descriptionOfField(issue.region, color: Color.theme.secondary)
+                descriptionOfField(RegionIssue(rawValue: issue.area_id)?.name ?? "", color: Color.theme.secondary)
             }
             HStack(spacing: 0) {
                 GeometryReader { geometry in
@@ -201,11 +206,11 @@ private extension MonitorIssueScreen {
             HStack {
                 switch authStateEnvObject.issueDebtSegment {
                 case .inProgress:
-                    titleHeader(issue.message, color: .highContrast, uppercase: false)
+                    titleHeader(issue.description ?? "", color: .highContrast, uppercase: false)
                 case .done:
-                    titleHeader(issue.message, color: .theme.positivePrimary, uppercase: false)
+                    titleHeader(issue.description ?? "", color: .theme.positivePrimary, uppercase: false)
                 case .declined:
-                    titleHeader(issue.message, color: .theme.negativePrimary, uppercase: false)
+                    titleHeader(issue.description ?? "", color: .theme.negativePrimary, uppercase: false)
                 }
             }
             switch authStateEnvObject.issueDebtSegment {
@@ -248,37 +253,38 @@ private extension MonitorIssueScreen {
     }
     
     @ViewBuilder
-    private func createDateString(_ issue: IssueModel) -> some View {
+    private func createDateString(_ issue: RequestIssueModel) -> some View {
         if let status = issue.statusOfElement {
-            switch status {
-            case .new:
-                HStack(spacing: 3) {
-                    descriptionOfField("создано:", color: Color.theme.lowContrast)
-                    descriptionOfField(issue.created.getTimeHorizon(), color: Color.theme.lowContrast)
-                }
-            case .approved:
-                HStack(spacing: 3) {
-                    descriptionOfField("до:", color: Color.theme.lowContrast)
-                    descriptionOfField(issue.deadline.getDateHorizon(), color: Color.theme.lowContrast)
-                }
-            case .declined:
-                HStack(spacing: 3) {
-                    descriptionOfField(issue.completed.getTimeHorizon(), color: Color.theme.lowContrast)
-                }
-            case .inprogress:
-                HStack(spacing: 3) {
-                    descriptionOfField("до:", color: Color.theme.lowContrast)
-                    descriptionOfField(issue.deadline.getDateHorizon(), color: Color.theme.lowContrast)
-                }
-            case .review:
-                HStack {
-                    descriptionOfField(issue.deadline.getDateHorizon(), color: Color.theme.lowContrast)
-                }
-            case .done:
-                HStack {
-                    descriptionOfField(issue.completed.getDateHorizon(), color: Color.theme.lowContrast)
-                }
-            }
+            EmptyView()
+//            switch status {
+//            case .new:
+//                HStack(spacing: 3) {
+//                    descriptionOfField("создано:", color: Color.theme.lowContrast)
+//                    descriptionOfField(issue.created_at.getTimeHorizon(), color: Color.theme.lowContrast)
+//                }
+//            case .approved:
+//                HStack(spacing: 3) {
+//                    descriptionOfField("до:", color: Color.theme.lowContrast)
+//                    descriptionOfField(issue.deadline.getDateHorizon(), color: Color.theme.lowContrast)
+//                }
+//            case .declined:
+//                HStack(spacing: 3) {
+//                    descriptionOfField(issue.completed.getTimeHorizon(), color: Color.theme.lowContrast)
+//                }
+//            case .inprogress:
+//                HStack(spacing: 3) {
+//                    descriptionOfField("до:", color: Color.theme.lowContrast)
+//                    descriptionOfField(issue.deadline.getDateHorizon(), color: Color.theme.lowContrast)
+//                }
+//            case .review:
+//                HStack {
+//                    descriptionOfField(issue.deadline.getDateHorizon(), color: Color.theme.lowContrast)
+//                }
+//            case .done:
+//                HStack {
+//                    descriptionOfField(issue.completed.getDateHorizon(), color: Color.theme.lowContrast)
+//                }
+//            }
         } else {
             EmptyView()
         }
@@ -292,6 +298,7 @@ private extension MonitorIssueScreen {
                 .frame(maxWidth: (screenWidth/4), alignment: .leading)
                 .onTapGesture {
                     authStateEnvObject.issueDebtSegment = .inProgress
+                    authStateEnvObject.getInProgressIssue()
                 }
                 .allowsHitTesting(authStateEnvObject.issueDebtSegment != .inProgress)
             MonitorDonePickerView(sectionSelected: $authStateEnvObject.issueDebtSegment, label: "Исполнены")

@@ -7,26 +7,26 @@
 
 import Foundation
 
-enum SpecializationIssue: String, CaseIterable {
-    case electricity
-    case tools
-    case sanpin
-    case safety
-    case docs
-    case empty
+enum RequestTypeEnum: Int, CaseIterable {
+    case electricity = 1
+    case tools = 2
+    case sanpin = 3
+    case safety = 4
+    case docs = 5
+    case empty = 6
     
     var name: String {
         switch self {
         case .electricity:
-            return "Электричество"
+            return "Электрика"
         case .tools:
             return "Инструменты"
-        case .docs:
-            return "Документооборот"
         case .sanpin:
             return "Санитарно-Бытовые условия"
         case .safety:
             return "Безопасность Труда"
+        case .docs:
+            return "Документооборот"
         case .empty:
             return ""
         }

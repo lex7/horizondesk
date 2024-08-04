@@ -6,15 +6,13 @@
 import Foundation
 import SwiftUI
 
-
-
-enum IssueStatus: String, CaseIterable {
-    case new
-    case approved
-    case declined
-    case inprogress
-    case review
-    case done
+enum IssueStatus: Int, CaseIterable {
+    case new = 1
+    case approved = 2
+    case declined = 3
+    case inprogress = 4
+    case review = 5
+    case done = 6
     
     var descriptionIssuer: String {
         switch self {
@@ -22,10 +20,10 @@ enum IssueStatus: String, CaseIterable {
             return "на рассмотрении"
         case .approved:
             return "утверждено"
-        case .inprogress:
-            return "в работе"
         case .declined:
             return "отклонено"
+        case .inprogress:
+            return "в работе"
         case .review:
             return "требует подтверждения"
         case .done:
@@ -39,10 +37,10 @@ enum IssueStatus: String, CaseIterable {
             return .theme.primary
         case .approved:
             return .theme.primary
-        case .inprogress:
-            return .theme.primary
         case .declined:
             return .theme.negativePrimary
+        case .inprogress:
+            return .theme.primary
         case .review:
             return .theme.primaryFire
         case .done:
@@ -56,10 +54,10 @@ enum IssueStatus: String, CaseIterable {
             return .theme.primary
         case .approved:
             return .theme.primaryAmber
-        case .inprogress:
-            return .theme.primaryFire
         case .declined:
             return .theme.negativePrimary
+        case .inprogress:
+            return .theme.primaryFire
         case .review:
             return .theme.positiveSecondary
         case .done:

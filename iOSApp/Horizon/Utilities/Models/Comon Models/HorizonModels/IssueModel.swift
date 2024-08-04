@@ -6,45 +6,80 @@
 import Foundation
 import SwiftUI
 
-struct RequestModelIssue: Codable, Hashable {
+struct CreateRequestModelIssue: Codable, Hashable {
     let request_type: Int
     let user_id: Int
     let area_id: Int
     let description: String
 }
 
-struct IssueModel: Hashable, Codable {
-    let id: String
-    let subject: String
-    let message: String
-    let region: String
-    let status: String
-    let created: String
-    let deadline: String
-    let completed: String
-    // New
-    let addedJustification: String?
+/*
+ {
+   "request_id": 8,
+   "request_type": 2,
+   "created_by": 11,
+   "assigned_to": null,
+   "area_id": 2,
+   "description": "Hello World",
+   "status_id": 1,
+   "created_at": "2024-08-04T10:33:56.388073",
+   "updated_at": null,
+   "deadline": null,
+   "rejection_reason": null
+ }
+ */
+
+struct RequestIssueModel: Hashable, Codable {
+    let request_id: Int
+    let request_type: Int
+    let created_by: Int
+    let assigned_to: Int?
+    let area_id: Int
+    let description: String?
+    let status_id: Int
+    let created_at: Date?
+    let updated_at: Date?
+    let deadline: Date?
+    let rejection_reason: String?
+    
+    var createdAtString: String {
+        guard let created = created_at else { return "N/A" }
+        return DateFormatter.localizedString(from: created, dateStyle: .medium, timeStyle: .medium)
+    }
+    
+    var updatedAtString: String {
+        guard let updated = updated_at else { return "N/A" }
+        return DateFormatter.localizedString(from: updated, dateStyle: .medium, timeStyle: .medium)
+    }
+    
+    var deadlineAtString: String {
+        guard let deadline = deadline else { return "N/A" }
+        return DateFormatter.localizedString(from: deadline, dateStyle: .medium, timeStyle: .medium)
+    }
     
     var readableStatus: String {
-        return IssueStatus(rawValue: status)?.descriptionIssuer ?? "unknown"
+        return IssueStatus(rawValue: status_id)?.descriptionIssuer ?? "unknown"
     }
     
     var progressIssuerColor: Color {
-        return IssueStatus(rawValue: status)?.colorIssuer ?? .highContrast
+        return IssueStatus(rawValue: status_id)?.colorIssuer ?? .highContrast
     }
     
     var progressSolverColor: Color {
-        return IssueStatus(rawValue: status)?.colorSolver ?? .highContrast
+        return IssueStatus(rawValue: status_id)?.colorSolver ?? .highContrast
     }
     
     var statusOfElement: IssueStatus? {
-        return IssueStatus(rawValue: status)
+        return IssueStatus(rawValue: status_id)
     }
 }
 
-extension IssueModel {
-    init(data: Data) throws {
+extension RequestIssueModel {
+    static func decode(from data: Data) throws -> [RequestIssueModel] {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
         let decoder = JSONDecoder()
-        self = try decoder.decode(IssueModel.self, from: data)
+        decoder.dateDecodingStrategy = .formatted(dateFormatter)
+        return try decoder.decode([RequestIssueModel].self, from: data)
     }
 }

@@ -89,7 +89,7 @@ extension CustomTabBarView {
                 tabView2(tab: tab)
                     .contentShape(Circle())
                     .onTapGesture {
-                        authStateEnvObject.getIssues()
+//                        authStateEnvObject.getMyRequests()
                         switchToTab(tab: tab)
                     }
             }

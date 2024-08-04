@@ -19,7 +19,7 @@ struct IssueAcceptanceCheck: View {
     @State private var screenHeight = UIScreen.main.bounds.height
     private let generator = UIImpactFeedbackGenerator(style: .light)
 
-    @Binding var currentNode: IssueModel
+    @Binding var currentNode: RequestIssueModel
     
     var body: some View {
         VStack {
@@ -28,17 +28,17 @@ struct IssueAcceptanceCheck: View {
             Divider()
             defaultSpacer
             // 2. Date Block
-            dateTitleAndValue(title: "Дата создания", value: currentNode.created)
+            dateTitleAndValue(title: "Дата создания", value: currentNode.createdAtString)
             defaultSpacer
             // 3. Transaction TypeName Block
-            titleAndValue(title: "Cпециализация", value: currentNode.subject)
+            titleAndValue(title: "Cпециализация", value: RequestTypeEnum(rawValue: currentNode.request_type)?.name ?? "" )
             defaultSpacer
             Divider()
             defaultSpacer
             // 3. Transaction ID Block
-            titleAndValue(title: "Участок", value: currentNode.region)
+            titleAndValue(title: "Участок", value: RegionIssue(rawValue: currentNode.area_id)?.name ?? "")
             defaultSpacer
-            titleAndValueMultiLines(title: "Текст заявки", value: currentNode.message, lines: 20)
+            titleAndValueMultiLines(title: "Текст заявки", value: currentNode.description ?? "", lines: 20)
                 .padding(.horizontal, 28)
             monsterSpacer
             doubleSpacer
@@ -48,22 +48,21 @@ struct IssueAcceptanceCheck: View {
                     .padding(.horizontal, 30)
                     .onTapGesture {
                         generator.impactOccurred()
-                        authStateEnvObject.declineIssue(id: currentNode.id) {
-                            presentationMode.wrappedValue.dismiss()
-                        }
+//                        authStateEnvObject.declineIssue(id: currentNode.id) {
+//                            presentationMode.wrappedValue.dismiss()
+//                        }
                     }
                 Spacer()
                 makeMediumContrastView(text: "Подтвердить", image: "checkmark", imageFirst: false, color: .positivePrimary)
                     .padding(.horizontal, 30)
                     .onTapGesture {
                         generator.impactOccurred()
-                        authStateEnvObject.acceptIssue(id: currentNode.id) {
-                            presentationMode.wrappedValue.dismiss()
-                        }
+//                        authStateEnvObject.acceptIssue(id: currentNode.id) {
+//                            presentationMode.wrappedValue.dismiss()
+//                        }
                     }
             }
             .padding(.bottom, screenHeight/20)
-            
         } 
         .background(
             colorScheme == .dark ? Color.gradient.bkGradientDarkToExtraLowContrast : Color.gradient.bkGradientLightToExtraLowContrast
