@@ -38,17 +38,43 @@ class User(Base):
     user_id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True, nullable=False)
     password_hash = Column(String, nullable=False)
-    position_id = Column(Integer, ForeignKey('positions.position_id'))
-    fcm_token = Column(String, nullable=True)  # Make sure this field is included
+    surname = Column(String)
+    name = Column(String)
+    specialization = Column(String)
+    fcm_token = Column(String, nullable=True)
+    role_id = Column(Integer, ForeignKey('roles.role_id'))
+    shift_id = Column(Integer, ForeignKey('worker_shifts.shift_id'))
 
-    position = relationship("Position", back_populates="users")
+    role = relationship("Role", back_populates="users")
+    shift = relationship("WorkerShift", back_populates="users")
 
-class Position(Base):
-    __tablename__ = 'positions'
-    position_id = Column(Integer, primary_key=True, index=True)
-    position_name = Column(String, unique=True, index=True, nullable=False)
+class Role(Base):
+    __tablename__ = 'roles'
+    role_id = Column(Integer, primary_key=True, index=True)
+    role_name = Column(String, unique=True, index=True, nullable=False)
     
-    users = relationship("User", back_populates="position")
+    users = relationship("User", back_populates="role")
+
+class WorkerShift(Base):
+    __tablename__ = 'worker_shifts'
+    shift_id = Column(Integer, primary_key=True, index=True)
+    start_time = Column(TIMESTAMP, nullable=False)
+    end_time = Column(TIMESTAMP, nullable=False)
+    
+    users = relationship("User", back_populates="shift")
+
+class UserModel(BaseModel):
+    user_id: int
+    username: str
+    surname: Optional[str]
+    name: Optional[str]
+    specialization: Optional[str]
+    fcm_token: Optional[str]
+    role_id: int
+    shift_id: Optional[int]
+
+    class Config:
+        orm_mode = True
 
 class RequestType(Base):
     __tablename__ = 'request_types'
@@ -105,12 +131,12 @@ class LoginRequest(BaseModel):
 
 class LoginResponse(BaseModel):
     user_id: int
-    position_id: int
+    role_id: int
 
 class RegisterRequest(BaseModel):
     username: str
     password: str
-    position_id: int
+    role_id: int
 
 class RequestCreate(BaseModel):
     request_type: int
@@ -144,9 +170,9 @@ class RequestTypeModel(BaseModel):
     class Config:
         orm_mode = True
 
-class PositionModel(BaseModel):
-    position_id: int
-    position_name: str
+class RoleModel(BaseModel):
+    role_id: int
+    role_name: str
 
     class Config:
         orm_mode = True
@@ -167,7 +193,7 @@ def hash_password(password):
 @app.post("/register")
 def register(request: RegisterRequest, db: Session = Depends(get_db)):
     hashed_password = hash_password(request.password)
-    user = User(username=request.username, password_hash=hashed_password, position_id=request.position_id)
+    user = User(username=request.username, password_hash=hashed_password, role_id=request.role_id)
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -184,7 +210,7 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
         user.fcm_token = request.fcm_token
         db.commit()
     
-    return LoginResponse(user_id=user.user_id, position_id=user.position_id)
+    return LoginResponse(user_id=user.user_id, role_id=user.role_id)
 
 @app.post("/create-request", response_model=dict)
 def create_request(request: RequestCreate, db: Session = Depends(get_db)):
@@ -329,7 +355,12 @@ def get_request_types(db: Session = Depends(get_db)):
     request_types = db.query(RequestType).all()
     return request_types
 
-@app.get("/positions", response_model=List[PositionModel])
-def get_positions(db: Session = Depends(get_db)):
-    positions = db.query(Position).all()
-    return positions
+@app.get("/roles", response_model=List[RoleModel])
+def get_roles(db: Session = Depends(get_db)):
+    roles = db.query(Role).all()
+    return roles
+
+@app.get("/users", response_model=List[UserModel])
+def get_users(db: Session = Depends(get_db)):
+    users = db.query(User).all()
+    return users

@@ -1,4 +1,4 @@
-INSERT INTO positions (position_name)
+INSERT INTO roles (role_name)
 VALUES ('Рабочий'),
        ('Мастер'),
        ('Начальник'),
@@ -29,7 +29,7 @@ VALUES ('На рассмотрении'),
        ('На проверке'),
        ('Завершена'),;
 
-INSERT INTO users (username, password_hash, surname, name, specialization, fcm_token, position_id, shift_id)
+INSERT INTO users (username, password_hash, surname, name, specialization, fcm_token, role_id, shift_id)
 VALUES 
     ('ivan', 'password123', 'Иван', 'Иванов', 'Инженер', 'abc123xyz456', 1, 1),
     ('vasya', 'password456', 'Василий', 'Васильев', 'Мастер', 'def456ghi789', 2, 1),

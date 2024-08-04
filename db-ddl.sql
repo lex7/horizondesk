@@ -1,7 +1,7 @@
--- Table: positions
-CREATE TABLE positions (
-    position_id SERIAL PRIMARY KEY,
-    position_name VARCHAR(50) NOT NULL UNIQUE
+-- Table: roles
+CREATE TABLE roles (
+    role_id SERIAL PRIMARY KEY,
+    role_name VARCHAR(50) NOT NULL UNIQUE
 );
 
 -- Table: worker_shifts
@@ -20,7 +20,7 @@ CREATE TABLE users (
     name VARCHAR(50),
     specialization VARCHAR(100),
     fcm_token VARCHAR(255),
-    position_id INTEGER NOT NULL REFERENCES positions(position_id),
+    role_id INTEGER NOT NULL REFERENCES roles(role_id),
     shift_id INTEGER REFERENCES worker_shifts(shift_id)
 );
 
