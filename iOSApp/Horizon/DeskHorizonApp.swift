@@ -13,6 +13,7 @@ struct DeskHorizonApp: App {
     
     var body: some Scene {
         WindowGroup {
+//            StatisticScreen()
             RootContentView()
                 .environmentObject(authStateEnvObject)
                 .navigationViewStyle(StackNavigationViewStyle())

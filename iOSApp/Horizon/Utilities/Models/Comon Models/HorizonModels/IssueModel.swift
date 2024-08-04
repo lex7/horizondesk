@@ -6,6 +6,13 @@
 import Foundation
 import SwiftUI
 
+struct RequestModelIssue: Codable, Hashable {
+    let request_type: Int
+    let user_id: Int
+    let area_id: Int
+    let description: String
+}
+
 struct IssueModel: Hashable, Codable {
     let id: String
     let subject: String
@@ -15,6 +22,8 @@ struct IssueModel: Hashable, Codable {
     let created: String
     let deadline: String
     let completed: String
+    // New
+    let addedJustification: String?
     
     var readableStatus: String {
         return IssueStatus(rawValue: status)?.descriptionIssuer ?? "unknown"

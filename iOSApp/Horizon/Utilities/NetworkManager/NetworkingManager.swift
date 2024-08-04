@@ -21,10 +21,11 @@ final class NetworkManager {
             debugPrint("[🌏 request: \(apis.path)]")
             provider.requestPublisher(apis)
                 .sink(receiveCompletion: { completion in
-                    switch completion{
+                    switch completion {
                     case .finished:
                         debugPrint("🌏 RECEIVE VALUE COMPLETED: ✅\(apis.path)")
-                    case .failure:
+                    case .failure(let error):
+                        error.response
                         promise(.failure(.apiError(reason: "Response takes too much time")))
                     }
                 }, receiveValue: { response in
@@ -35,6 +36,7 @@ final class NetworkManager {
                         promise(.failure(.apiResponseCode(code: response.statusCode)))
                     }
                     // po String(decoding: response.data, as: UTF8.self)
+                    // po String(decoding: data, as: UTF8.self)
                     // po String(decoding: response.request!.httpBody!, as: UTF8.self)
                 })
                 .store(in: &NetworkManager.cancelable)

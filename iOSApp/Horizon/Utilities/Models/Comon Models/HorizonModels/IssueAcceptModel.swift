@@ -23,3 +23,7 @@ struct IssueDoneModel: Encodable {
 struct IssueIdModel: Encodable {
     let id: String
 }
+
+struct UserIdModel: Encodable {
+    let user_id: Int
+}

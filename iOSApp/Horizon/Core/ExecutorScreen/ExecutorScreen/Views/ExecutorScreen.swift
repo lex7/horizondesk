@@ -84,9 +84,9 @@ private extension ExecutorScreen {
                 Menu {
                     Button("Взять в работу") {
                         generator.impactOccurred()
-                        authStateEnvObject.inProgressIssue(id: issue.id) {
-                            authStateEnvObject.getIssues()
-                        }
+//                        authStateEnvObject.inProgressIssue(id: issue.id) {
+//                            authStateEnvObject.getIssues()
+//                        }
                     }
                     Button("Отмена") {
                         generator.impactOccurred()

@@ -35,9 +35,6 @@ struct CreateIssueScreen: View {
             } // End of VStack
             .mask(LinearGradient(gradient: Gradient(colors: [.black, .black, .black, .black, .black, .clear]), startPoint: .top, endPoint: .bottom).ignoresSafeArea(edges: .top))
             .background(Color.theme.background.ignoresSafeArea(edges: .bottom))
-            .onAppear {
-                authStateEnvObject.assignFcmHorizon()
-            }
             .onChange(of: tabSelection) { value in
                 if tabSelection == .createIssue {
                     authStateEnvObject.getIssues()

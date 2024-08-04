@@ -9,7 +9,7 @@ struct MasterScreen: View {
 
     // MARK: - Private State Variables
     @State private var showIssueConfirm: Bool?
-    @State private var currentNode: IssueModel = IssueModel(id: "", subject: "", message: "", region: "", status: "", created: "", deadline: "", completed: "")
+    @State private var currentNode: IssueModel = IssueModel(id: "", subject: "", message: "", region: "", status: "", created: "", deadline: "", completed: "", addedJustification: nil)
     // MARK: - Private Constants
     private let generator = UIImpactFeedbackGenerator(style: .light)
     @State private var screenHeight = UIScreen.main.bounds.height

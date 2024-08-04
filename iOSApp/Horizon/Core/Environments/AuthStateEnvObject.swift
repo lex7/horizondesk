@@ -23,6 +23,7 @@ final class AuthStateEnvObject: ObservableObject {
     @Published var password: String = ""
     
     // MARK: - Published variables
+    @Published private (set) var showProgress: Bool = false
     @Published var authState: AuthState = .unauthorized
     @Published var isStatistic: Bool = false
     @Published var goingFromLogin: Bool = false
@@ -61,29 +62,54 @@ final class AuthStateEnvObject: ObservableObject {
         
     }
     
-    func assignFcmHorizon() {
-        if let id = credentialService.getUserRole(),
-           let token = credentialService.getFcm() {
-            let model = HorizonFcmModel(id: id, fcmToken: token)
-            networkManager.requestMoyaData(apis: .assignFcmToken(model: model))
-                .receive(on: DispatchQueue.main)
-                .sink { completion in
-                    switch completion {
-                    case .finished:
-                        debugPrint(String(describing: "[vm: ✅ assignFcmHorizon successfully]"))
-                        break
-                    case .failure(let error):
-                        debugPrint(String(describing: "[vm: \(error) - ❌ assignFcmHorizon]"))
-                    }
-                } receiveValue: { [weak self] _ in
-                    
+    
+    func userLogin() {
+        showProgress = true
+        let token = credentialService.getFcm() ?? "EmptyFCM"
+        let model = LoginModel(username: username, password: password, fcm_token: token)
+        networkManager.requestMoyaData(apis: .login(model: model))
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] completion in
+                switch completion {
+                case .finished:
+                    debugPrint(String(describing: "[vm: ✅ assignFcmHorizon successfully]"))
+                    break
+                case .failure(let error):
+                    debugPrint(String(describing: "[vm: \(error) - ❌ assignFcmHorizon]"))
                 }
-                .store(in: &cancellables)
-        }
+                self.showProgress = false
+            } receiveValue: { [weak self] data in
+                if let userModel = try? LoginData(data: data) {
+                    guard let self = self else { return }
+                    self.credentialService.saveUserId(userModel.user_id)
+                    self.credentialService.saveUserRole(userModel.role_id)
+                    self.tabBarSelection = .createIssue
+                    self.authState = .authorized
+                }
+            }
+            .store(in: &cancellables)
     }
     
+    private func authorize(_ state: AuthState) {
+        switch state {
+        case .authorized:
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [unowned self] in
+                self.authState = .authorized
+                self.isStatistic = true
+            }
+        case .authorizedStatistic:
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [unowned self] in
+                self.authState = .authorizedStatistic
+                self.isStatistic = true
+            }
+        default:
+            authState = .unauthorized
+        }
+    }
+    ///
+        
     func getIssues() {
-        networkManager.requestMoyaData(apis: .getIssues)
+        networkManager.requestMoyaData(apis: .requests)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] completion in
                 switch completion {
@@ -143,11 +169,11 @@ final class AuthStateEnvObject: ObservableObject {
             .store(in: &cancellables)
     }
     
-    func inProgressIssue(id: String, action: @escaping (()->Void)) {
-        let model = IssueIdModel(id: id)
+    func inProgressIssue() {
+        let model = UserIdModel(user_id: credentialService.getUserId() ?? 777)
         networkManager.requestMoyaData(apis: .inprogress(model: model))
             .receive(on: DispatchQueue.main)
-            .sink { completion in
+            .sink { [unowned self] completion in
                 switch completion {
                 case .finished:
                     debugPrint(String(describing: "[vm: ✅ inProgressIssue successfully]"))
@@ -155,8 +181,8 @@ final class AuthStateEnvObject: ObservableObject {
                 case .failure(let error):
                     debugPrint(String(describing: "[vm: \(error) - ❌ inProgressIssue]"))
                 }
-            } receiveValue: { _ in
-                action()
+            } receiveValue: { data in
+                
             }
             .store(in: &cancellables)
     }
@@ -217,7 +243,6 @@ final class AuthStateEnvObject: ObservableObject {
 }
 
 extension AuthStateEnvObject {
-    
     func clearToken() {
         resetFirebaseFCMToken { [weak self] in
             self?.permissionIsDownloaded  = false
@@ -232,9 +257,7 @@ extension AuthStateEnvObject {
     }
 }
 
-
 private extension AuthStateEnvObject {
-    
     private func resetFirebaseFCMToken(completion: @escaping () -> Void) {
         completion()
         if let senderId = fcmTokenManager.getSenderId() {
@@ -251,30 +274,16 @@ private extension AuthStateEnvObject {
     }
 }
 
+/*
+user_id - add to other requests
+position_id:
+1 - рабочий
+2 - мастер
+3 - начальник
+4 - босс
+*/
+
+
 extension AuthStateEnvObject {
-    func checkPass() {
-        credentialService.deleteUserRole()
-        let validUsernames = ["TMK-328654", "TMK-328655", "TMK-328656"]
-        let validPassword = "123456"
-        
-        if validUsernames.contains(username) && password == validPassword {
-            if username == validUsernames[0] {
-                tabBarSelection = .createIssue
-                credentialService.saveUserRole("1")
-            } else if username == validUsernames[1] {
-                tabBarSelection = .executeIssue
-                credentialService.saveUserRole("2")
-            } else if username == validUsernames[2] {
-                tabBarSelection = .reviewIssue
-                credentialService.saveUserRole("3")
-            }
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [unowned self] in
-                self.authState = .authorized
-                self.isStatistic = true
-            }
-        } else {
-            authState = .unauthorized
-        }
-    }
+    
 }

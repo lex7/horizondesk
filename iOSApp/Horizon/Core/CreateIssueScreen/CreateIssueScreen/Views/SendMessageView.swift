@@ -26,7 +26,7 @@ struct SendMessageView: View {
     @State private var titleOfIssue: String = ""
     @State private var areaOfIssueNumber: String = ""
     @State private var inputTextIssue: String = ""
-var body: some View {
+    var body: some View {
         ZStack {
             Color.theme.background.ignoresSafeArea()
             VStack(alignment: .leading, spacing: 0) {
@@ -44,11 +44,6 @@ var body: some View {
                 Spacer()
                 sendMessage
                     .padding(.vertical, screenHeight/12)
-                    .onTapGesture {
-                        vm.sendIssues {
-                            debugPrint(vm.areaOfIssueNumber, vm.issueTheme, vm.issueMessage)
-                        }
-                    }
             }
             .alert("Заявка успешно создана", isPresented: $vm.isIssueCreated) {
                 // Buttons as actions for the alert
@@ -81,13 +76,11 @@ private extension SendMessageView {
                 .onTapGesture {
                     vm.issueMessage = inputTextIssue
                     generator.impactOccurred()
-                    vm.sendIssues {
-                        
-                    }
+                    vm.createRequestIssue()
                 }
         }
     }
-var customTextEditor: some View {
+    var customTextEditor: some View {
         GeometryReader { geometry in
             ZStack {
                 VStack {
@@ -141,24 +134,28 @@ var customTextEditor: some View {
         HStack {
             // Wrapping Text inside Menu to show options on tap
             Menu {
+                Button(SpecializationIssue.electricity.name) {
+                    vm.requestType = SpecializationIssue.electricity.requestType
+                    titleOfIssue = SpecializationIssue.electricity.name
+                }
                 Button(SpecializationIssue.tools.name) {
-                    vm.issueTheme = SpecializationIssue.tools.name
+                    vm.requestType = SpecializationIssue.tools.requestType
                     titleOfIssue = SpecializationIssue.tools.name
                 }
                 Button(SpecializationIssue.docs.name) {
-                    vm.issueTheme = SpecializationIssue.docs.name
+                    vm.requestType = SpecializationIssue.docs.requestType
                     titleOfIssue = SpecializationIssue.docs.name
                 }
                 Button(SpecializationIssue.sanpin.name) {
-                    vm.issueTheme = SpecializationIssue.sanpin.name
+                    vm.requestType = SpecializationIssue.sanpin.requestType
                     titleOfIssue = SpecializationIssue.sanpin.name
                 }
                 Button(SpecializationIssue.safety.name) {
-                    vm.issueTheme = SpecializationIssue.safety.name
+                    vm.requestType = SpecializationIssue.safety.requestType
                     titleOfIssue = SpecializationIssue.safety.name
                 }
                 Button(SpecializationIssue.empty.name) {
-                    vm.issueTheme = SpecializationIssue.empty.name
+                    vm.requestType = SpecializationIssue.empty.requestType
                     titleOfIssue = SpecializationIssue.empty.name
                 }
             } label: {
@@ -167,28 +164,28 @@ var customTextEditor: some View {
             Spacer()
         }
     }
-var areaIssue: some View {
+    var areaIssue: some View {
         HStack {
             // Wrapping Text inside Menu to show options on tap
             Menu {
                 Button(RegionIssue.areaOne.name) {
-                    vm.areaOfIssueNumber = RegionIssue.areaOne.name
+                    vm.areaOfIssueNumber = RegionIssue.areaOne.rawValue
                     areaOfIssueNumber = RegionIssue.areaOne.name
                 }
                 Button(RegionIssue.areaTwo.name) {
-                    vm.areaOfIssueNumber = RegionIssue.areaTwo.name
+                    vm.areaOfIssueNumber = RegionIssue.areaTwo.rawValue
                     areaOfIssueNumber = RegionIssue.areaTwo.name
                 }
                 Button(RegionIssue.areaThree.name) {
-                    vm.areaOfIssueNumber = RegionIssue.areaThree.name
+                    vm.areaOfIssueNumber = RegionIssue.areaThree.rawValue
                     areaOfIssueNumber = RegionIssue.areaThree.name
                 }
                 Button(RegionIssue.areaFour.name) {
-                    vm.areaOfIssueNumber = RegionIssue.areaFour.name
+                    vm.areaOfIssueNumber = RegionIssue.areaFour.rawValue
                     areaOfIssueNumber = RegionIssue.areaFour.name
                 }
                 Button(RegionIssue.empty.name) {
-                    vm.areaOfIssueNumber = RegionIssue.empty.name
+                    vm.areaOfIssueNumber = RegionIssue.empty.rawValue
                     areaOfIssueNumber = RegionIssue.empty.name
                 }
             } label: {
@@ -197,7 +194,7 @@ var areaIssue: some View {
             Spacer()
         }
     }
-
+    
     var titleMessage: some View {
         HStack {
             Text("Создание заявки")
@@ -213,7 +210,7 @@ var areaIssue: some View {
             Spacer()
         }
     }
-@ViewBuilder
+    @ViewBuilder
     func textViewOnBoard(
         _ txt: Binding<String>,
         secure: Bool = false,

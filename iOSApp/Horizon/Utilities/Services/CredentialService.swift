@@ -20,27 +20,28 @@ final class CredentialService {
     private init() {}
     
     // MARK: - Public Methods
-    func saveUserRole(_ user: String) {
+    func saveUserRole(_ user: Int) {
         lock.lock()
         defer { lock.unlock() }
-        keychain["_userRole"] = user
+        keychain["_userRole"] = String(user)
     }
-func saveUser(_ user: String) {
+    
+    func saveUser(_ user: String) {
         lock.lock()
         defer { lock.unlock() }
         keychain["_userName"] = user
     }
     
-    func saveUserId(_ user: String) {
-        keychain["_saveUserId"] = user
+    func saveUserId(_ user: Int) {
+        keychain["_saveUserId"] = String(user)
     }
     
-    func getUserId() -> String? {
-        return keychain["_saveUserId"]
+    func getUserId() -> Int? {
+        return Int(keychain["_saveUserId"] ?? "0")
     }
     
-    func getUserRole() -> String? {
-        return keychain["_userRole"]
+    func getUserRole() -> Int? {
+        return Int(keychain["_userRole"] ?? "0")
     }
     
     func getUser() -> String? {

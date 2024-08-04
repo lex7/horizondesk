@@ -8,7 +8,7 @@ import SwiftUI
 
 
 
-enum IssueStatus: String {
+enum IssueStatus: String, CaseIterable {
     case new
     case approved
     case declined
@@ -32,7 +32,7 @@ enum IssueStatus: String {
             return "выполнено"
         }
     }
-    
+
     var colorIssuer: Color {
         switch self {
         case .new:

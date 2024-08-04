@@ -83,11 +83,11 @@ struct MonitorIssueScreen: View {
             .padding(.top, 5)
             .padding(.top, 2)
             .onAppear {
-                authStateEnvObject.getIssues()
+                authStateEnvObject.inProgressIssue()
             }
             .onChange(of: tabSelection) { value in
                 if tabSelection == .monitorIssue {
-                    authStateEnvObject.getIssues()
+                    authStateEnvObject.inProgressIssue()
                 }
             }
             .onChange(of: authStateEnvObject.issueDebtSegment) { value in
@@ -101,7 +101,6 @@ struct MonitorIssueScreen: View {
 }
 
 private extension MonitorIssueScreen {
-    
     var inProgressIssue: some View {
         ScrollView {
             ForEach(authStateEnvObject.issuesInWork, id: \.self) { issue in

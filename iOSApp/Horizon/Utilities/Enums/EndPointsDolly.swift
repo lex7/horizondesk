@@ -5,19 +5,20 @@ import Combine
 import Moya
 
 enum EndPointsDolly {
-    case assignFcmToken(model: HorizonFcmModel)
-    case getIssues
-    case sendIssue(message: IssueModel)
+    //case assignFcmToken(model: HorizonFcmModel)
+    case login(model: LoginModel)
+    case requests
+    case createRequest(message: RequestModelIssue)
     case acceptIssue(issue: IssueAcceptModel)
     case declineIssue(issue: IssueDeclineModel)
-    case inprogress(model: IssueIdModel)
+    case inprogress(model: UserIdModel)
     case review(model: IssueIdModel)
     case done(model: IssueDoneModel)
     
     var baseStrUrl: String {
         switch self {
         default:
-            return "http://158.160.66.207:8000/"
+            return "http://34.141.180.59:443/"
         }
     }
     
@@ -28,8 +29,6 @@ enum EndPointsDolly {
         }
     }
 }
-
-
 
 extension EndPointsDolly: Moya.TargetType {
     
@@ -42,9 +41,9 @@ extension EndPointsDolly: Moya.TargetType {
     
     var method: Moya.Method {
         switch self {
-        case .assignFcmToken, .sendIssue, .acceptIssue, .declineIssue, .inprogress, .review, .done:
+        case .login, .createRequest, .acceptIssue, .declineIssue, .review, .done:
             return .post
-        case .getIssues:
+        case .requests, .inprogress:
             return .get
         }
     }
@@ -52,18 +51,18 @@ extension EndPointsDolly: Moya.TargetType {
     var task: Moya.Task {
         // FIXME: - IN future refactoring add replace parameters with appropriate model, ex.: case - updateSetting
         switch self {
-        case .assignFcmToken(let model):
+        case .login(let model):
             return .requestJSONEncodable(model)
-        case .sendIssue(let message):
+        case .createRequest(let message):
             return .requestJSONEncodable(message)
         case .acceptIssue(let message):
             return .requestJSONEncodable(message)
         case .declineIssue(let message):
             return .requestJSONEncodable(message)
-        case .getIssues:
+        case .requests:
             return .requestPlain
         case .inprogress(let model):
-            return .requestJSONEncodable(model)
+            return .requestParameters(parameters: ["user_id": model.user_id], encoding: URLEncoding.queryString)
         case .review(let model):
             return .requestJSONEncodable(model)
         case .done(let model):
@@ -81,18 +80,18 @@ extension EndPointsDolly: Moya.TargetType {
     
     var path: String {
         switch self {
-        case .assignFcmToken:
-            return "assign-fcm"
-        case .getIssues:
-            return "get-issues"
-        case .sendIssue:
-            return "send-issue"
+        case .login:
+            return "login"
+        case .requests:
+            return "requests"
+        case .createRequest:
+            return "create-request"
         case .acceptIssue:
             return "approve-issue"
         case .declineIssue:
             return "decline-issue"
         case .inprogress:
-            return "inprogress"
+            return "in-progress"
         case .review:
             return "send-review"
         case .done:

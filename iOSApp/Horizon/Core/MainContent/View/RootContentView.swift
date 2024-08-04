@@ -13,6 +13,8 @@ struct RootContentView: View {
             LoginScreen()
         case .forgotPassword:
             ForgotPasswordScreen()
+        case .authorizedStatistic:
+            StatisticScreen()
         }
     }
 }

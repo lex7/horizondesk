@@ -4,16 +4,16 @@ import Foundation
 import Combine
 
 final class EnvSupportObj: ObservableObject {
-    
-    @Published var issueTheme: String = ""
+    @Published var requestType: Int = 0
     @Published var issueMessage: String = ""
-    @Published var areaOfIssueNumber: String = ""
+    @Published var areaOfIssueNumber: Int = 999
     // MARK: - Published properties
     @Published var isIssueCreated: Bool = false
     @Published var isErrorOccured: Bool = false
     
     // MARK: - Private constants
     private let networkManager = NetworkManager.standard
+    private var credentialService = CredentialService.standard
     
     // MARK: - Private variables
     private var cancellables: Set<AnyCancellable> = []
@@ -25,11 +25,13 @@ final class EnvSupportObj: ObservableObject {
         return timeCreate
     }
     
-    func sendIssues(action: @escaping () -> ()) {
-        action()
+    func createRequestIssue() {
         isIssueCreated = false
-        let model = IssueModel(id: "", subject: issueTheme, message: issueMessage, region: areaOfIssueNumber, status: "", created: makeDateStamp(), deadline: "", completed: "")
-        networkManager.requestMoyaData(apis: .sendIssue(message: model))
+        let model = RequestModelIssue(request_type: requestType,
+                                      user_id: credentialService.getUserId() ?? 777,
+                                      area_id: areaOfIssueNumber,
+                                      description: issueMessage)
+        networkManager.requestMoyaData(apis: .createRequest(message: model))
             .receive(on: DispatchQueue.main)
             .sink { completion in
                 switch completion {
@@ -40,42 +42,20 @@ final class EnvSupportObj: ObservableObject {
                     debugPrint(String(describing: "[vm: \(error) - ❌ sendIssues]"))
                 }
             } receiveValue: { [weak self] _ in
+                debugPrint(model)
                 self?.isIssueCreated = true
-                
             }
             .store(in: &cancellables)
     }
 }
 
-enum SpecializationIssue {
-    case tools
-    case docs
-    case sanpin
-    case safety
-    case empty
-    
-    var name: String {
-        switch self {
-        case .tools:
-            return "Инструменты"
-        case .docs:
-            return "Документооборот"
-        case .sanpin:
-            return "Санитарно-Бытовые условия"
-        case .safety:
-            return "Безопасность Труда"
-        case .empty:
-            return ""
-        }
-    }
-}
 
-enum RegionIssue {
-    case areaOne
-    case areaTwo
-    case areaThree
-    case areaFour
-    case empty
+enum RegionIssue: Int {
+    case areaOne = 1
+    case areaTwo = 2
+    case areaThree = 3
+    case areaFour = 4
+    case empty = 5
     
     var name: String {
         switch self {

@@ -15,8 +15,8 @@ struct LoginScreen: View {
     // MARK: - Private Variables
 
     #if DEBUG
-    @State private var username: String = "TMK-328654"
-    @State private var password: String = "123456"
+    @State private var username: String = "TMK-328656" //"TMK-Stat"
+    @State private var password: String = "1234"
     #else
         @State private var username: String = ""
         @State private var password: String = ""
@@ -27,7 +27,6 @@ struct LoginScreen: View {
     
     @State private var scaleForgot: Bool = false
     @State private var enableForgot: Bool = true
-    @State private var showProgress: Bool = false
     
     @State private var goToForgotPassword: Bool = false
     
@@ -44,7 +43,6 @@ struct LoginScreen: View {
                     loginView
                     Spacer()
                     passwordView
-                    
                         .fullScreenCover(isPresented: $goToForgotPassword) {
                             ForgotPasswordScreen()
                         }
@@ -58,11 +56,11 @@ struct LoginScreen: View {
                 colorScheme == .dark ? Color.gradient.bkGradientDarkToExtraLowContrast : Color.gradient.bkGradientLightToExtraLowContrast
             )
             .overlay {
-                if showProgress {
+                if authStateEnvObject.showProgress {
                     ProgressView()
                         .onAppear {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                showProgress = false
+//                                showProgress = false
                         }
                     }
                 }
@@ -92,10 +90,9 @@ private extension LoginScreen {
                     enableLogin = true
                     scaleLogin.toggle()
                 }
-                showProgress = true
                 authStateEnvObject.username = username
                 authStateEnvObject.password = password
-                authStateEnvObject.checkPass()
+                authStateEnvObject.userLogin()
             }
     }
     

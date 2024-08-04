@@ -8,23 +8,40 @@ struct AppTabBarView: View {
     
     // MARK: - State variables
     @State private var selection: String = "home"
-
+    
+    // Access Level for Roles
+    @State private var masterIsVisible: Bool = false
+    
+    // MARK: - Services
+    private var credentialService = CredentialService.standard
+    
+    
     var body: some View {
         CustomTabBarContainer(selection: $authStateEnvObject.tabBarSelection) {
-            
             CreateIssueScreen(tabSelection: $authStateEnvObject.tabBarSelection)
                 .tabBarItem(tab: .createIssue, selection: $authStateEnvObject.tabBarSelection)
             MonitorIssueScreen(tabSelection: $authStateEnvObject.tabBarSelection)
                 .tabBarItem(tab: .monitorIssue, selection: $authStateEnvObject.tabBarSelection)
-            
             ExecutorScreen()
                 .tabBarItem(tab: .reviewIssue, selection: $authStateEnvObject.tabBarSelection)
-            MasterScreen(tabSelection: $authStateEnvObject.tabBarSelection)
-                .tabBarItem(tab: .executeIssue, selection: $authStateEnvObject.tabBarSelection)
-            
+            if masterIsVisible {
+                MasterScreen(tabSelection: $authStateEnvObject.tabBarSelection)
+                    .tabBarItem(tab: .executeIssue, selection: $authStateEnvObject.tabBarSelection)
+                
+            }
             MyAccountScreen(tabSelection: $authStateEnvObject.tabBarSelection)
                 .tabBarItem(tab: .account, selection: $authStateEnvObject.tabBarSelection)
-        } 
+        }
+        .onAppear {
+            if let role = credentialService.getUserRole() {
+                guard let master = RoleEnum(rawValue: 2) else { return }
+                if role == master.rawValue {
+                    masterIsVisible = true
+                } else {
+                    masterIsVisible = false
+                }
+            }
+        }
     }
 }
 
