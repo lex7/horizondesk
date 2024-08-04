@@ -78,7 +78,7 @@ class UserModel(BaseModel):
 
 class RequestType(Base):
     __tablename__ = 'request_types'
-    type_id = Column(Integer, primary_key=True, index=True)
+    request_type = Column(Integer, primary_key=True, index=True)
     type_name = Column(String, unique=True, index=True, nullable=False)
 
 class Area(Base):
@@ -101,7 +101,7 @@ class StatusModel(BaseModel):
 class Request(Base):
     __tablename__ = 'requests'
     request_id = Column(Integer, primary_key=True, index=True)
-    request_type = Column(Integer, ForeignKey('request_types.type_id'), nullable=False)
+    request_type = Column(Integer, ForeignKey('request_types.request_type'), nullable=False)
     created_by = Column(Integer, ForeignKey('users.user_id'), nullable=False)
     assigned_to = Column(Integer, ForeignKey('users.user_id'))
     area_id = Column(Integer, ForeignKey('areas.area_id'), nullable=False)
@@ -171,7 +171,7 @@ class ConfirmRequest(BaseModel):
     request_id: int
 
 class RequestTypeModel(BaseModel):
-    type_id: int
+    request_type: int
     type_name: str
 
     class Config:
@@ -451,3 +451,33 @@ def get_completed_requests(user_id: int, db: Session = Depends(get_db)):
              "updated_at": request.updated_at,
              "deadline": request.deadline,
              "rejection_reason": request.rejection_reason} for request in requests]
+
+@app.get("/my-tasks")
+def get_my_tasks(user_id: int, db: Session = Depends(get_db)):
+    tasks = db.query(Request).filter(Request.assigned_to == user_id).all()
+    return [{"request_id": task.request_id,
+             "request_type": task.request_type,
+             "created_by": task.created_by,
+             "assigned_to": task.assigned_to,
+             "area_id": task.area_id,
+             "description": task.description,
+             "status_id": task.status_id,
+             "created_at": task.created_at,
+             "updated_at": task.updated_at,
+             "deadline": task.deadline,
+             "rejection_reason": task.rejection_reason} for task in tasks]
+
+@app.get("/unassigned")
+def get_unassigned(db: Session = Depends(get_db)):
+    tasks = db.query(Request).filter(Request.assigned_to.is_(None)).all()
+    return [{"request_id": task.request_id,
+             "request_type": task.request_type,
+             "created_by": task.created_by,
+             "assigned_to": task.assigned_to,
+             "area_id": task.area_id,
+             "description": task.description,
+             "status_id": task.status_id,
+             "created_at": task.created_at,
+             "updated_at": task.updated_at,
+             "deadline": task.deadline,
+             "rejection_reason": task.rejection_reason} for task in tasks]

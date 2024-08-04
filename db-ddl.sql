@@ -26,7 +26,7 @@ CREATE TABLE users (
 
 -- Table: request_types
 CREATE TABLE request_types (
-    type_id SERIAL PRIMARY KEY,
+    request_type SERIAL PRIMARY KEY,
     type_name VARCHAR(50) NOT NULL UNIQUE
 );
 
@@ -45,7 +45,7 @@ CREATE TABLE statuses (
 -- Table: requests
 CREATE TABLE requests (
     request_id SERIAL PRIMARY KEY,
-    request_type INTEGER NOT NULL REFERENCES request_types(type_id),
+    request_type INTEGER NOT NULL REFERENCES request_types(request_type),
     created_by INTEGER NOT NULL REFERENCES users(user_id),
     assigned_to INTEGER REFERENCES users(user_id),
     area_id INTEGER NOT NULL REFERENCES areas(area_id),
