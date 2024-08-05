@@ -146,6 +146,7 @@ class RegisterRequest(BaseModel):
     username: str
     password: str
     role_id: int
+    spec_id: Optional[int] = None
 
 class RequestCreate(BaseModel):
     request_type: int
