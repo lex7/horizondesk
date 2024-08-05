@@ -13,7 +13,6 @@ from typing import List, Optional
 
 load_dotenv()
 
-# Load environment variables from system
 DATABASE_USER = os.getenv("DATABASE_USER")
 DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
 DATABASE_HOST = os.getenv("DATABASE_HOST")
@@ -167,14 +166,13 @@ class RequestModel(BaseModel):
     status_id: int
     created_at: datetime
     updated_at: Optional[datetime]
-    deadline: Optional[date]
+    deadline: Optional[datetime]
     rejection_reason: Optional[str]
 
     class Config:
         orm_mode = True
         json_encoders = {
-            datetime: lambda v: v.strftime("%Y-%m-%dT%H:%M:%S"),
-            date: lambda v: v.strftime("%Y-%m-%d")
+            datetime: lambda v: v.strftime("%Y-%m-%dT%H:%M:%S")
         }
 
 class RequestCreate(BaseModel):
@@ -193,11 +191,7 @@ class RejectRequest(BaseModel):
     request_id: int
     reason: str
 
-class CompleteRequest(BaseModel):
-    user_id: int
-    request_id: int
-
-class ConfirmRequest(BaseModel):
+class UpdateRequest(BaseModel):
     user_id: int
     request_id: int
 
@@ -243,7 +237,6 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     if user is None or not verify_password(request.password, user.password_hash):
         raise HTTPException(status_code=400, detail="Invalid username or password")
     
-    # Update the fcm_token if provided
     if request.fcm_token:
         user.fcm_token = request.fcm_token
         db.commit()
@@ -316,13 +309,11 @@ def reject_request(request: RejectRequest, db: Session = Depends(get_db)):
 
 
 @app.post("/take-on-work", response_model=dict)
-def complete_request(request: CompleteRequest, db: Session = Depends(get_db)):
-    # Retrieve the request to be marked as completed
+def complete_request(request: UpdateRequest, db: Session = Depends(get_db)):
     existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
     if existing_request is None:
         raise HTTPException(status_code=404, detail="Request not found")
     
-    # Log status change in request_status_log
     log_entry = RequestStatusLog(
         request_id=existing_request.request_id,
         old_status_id=existing_request.status_id,
@@ -342,7 +333,7 @@ def complete_request(request: CompleteRequest, db: Session = Depends(get_db)):
     return {"message": "Request accepted into work successfully", "request_id": existing_request.request_id}
 
 @app.post("/complete-request", response_model=dict)
-def complete_request(request: CompleteRequest, db: Session = Depends(get_db)):
+def complete_request(request: UpdateRequest, db: Session = Depends(get_db)):
     existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
     if existing_request is None:
         raise HTTPException(status_code=404, detail="Request not found")
@@ -367,7 +358,7 @@ def complete_request(request: CompleteRequest, db: Session = Depends(get_db)):
 
 
 @app.post("/confirm-request", response_model=dict)
-def confirm_request(request: ConfirmRequest, db: Session = Depends(get_db)):
+def confirm_request(request: UpdateRequest, db: Session = Depends(get_db)):
     existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
     if existing_request is None:
         raise HTTPException(status_code=404, detail="Request not found")
