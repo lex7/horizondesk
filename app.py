@@ -289,12 +289,12 @@ def create_request(request: RequestCreate, db: Session = Depends(get_db)):
     db.refresh(new_request)
     return {"message": "Request created successfully", "request_id": new_request.request_id}
 
-@app.post("/master-approve-request", response_model=dict)
+@app.post("/master-approve", response_model=dict)
 def approve_request(request: ApproveRequest, db: Session = Depends(get_db)):
     update_request_status(request.request_id, 2, request.user_id, db)
     return {"message": "Request approved successfully", "request_id": request.request_id}
 
-@app.post("/master-deny-request", response_model=dict)
+@app.post("/master-deny", response_model=dict)
 def deny_request(request: DenyRequest, db: Session = Depends(get_db)):
     existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
     if existing_request is None:
@@ -343,17 +343,63 @@ def complete_request(request: UpdateRequest, db: Session = Depends(get_db)):
 
     return {"message": "Request accepted into work successfully", "request_id": existing_request.request_id}
 
-@app.post("/executor-complete-request", response_model=dict)
+@app.post("/executor-cancel", response_model=dict)
+def cancel_request(request: UpdateRequest, db: Session = Depends(get_db)):
+    existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
+    if existing_request is None:
+        raise HTTPException(status_code=404, detail="Request not found")
+    
+    log_entry = RequestStatusLog(
+        request_id=existing_request.request_id,
+        old_status_id=existing_request.status_id,
+        new_status_id=2,
+        changed_by=request.user_id
+    )
+    db.add(log_entry)
+
+    existing_request.status_id = 2
+    existing_request.assigned_to = None
+    existing_request.updated_at = datetime.now(timezone.utc)
+
+    db.commit()
+    db.refresh(existing_request)
+    db.refresh(log_entry)
+
+    return {"message": "Request canceled successfully", "request_id": existing_request.request_id}
+
+@app.post("/executor-complete", response_model=dict)
 def complete_request(request: UpdateRequest, db: Session = Depends(get_db)):
     update_request_status(request.request_id, 5, request.user_id, db)
     return {"message": "Request completed successfully", "request_id": request.request_id}
 
-@app.post("/requestor-confirm-request", response_model=dict)
+@app.post("/requestor-confirm", response_model=dict)
 def confirm_request(request: UpdateRequest, db: Session = Depends(get_db)):
     update_request_status(request.request_id, 6, request.user_id, db)
-
     return {"message": "Request confirmed successfully", "request_id": request.request_id}
 
+@app.post("/requestor-deny", response_model=dict)
+def deny_request(request: DenyRequest, db: Session = Depends(get_db)):
+    existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
+    if existing_request is None:
+        raise HTTPException(status_code=404, detail="Request not found")
+
+    log_entry = RequestStatusLog(
+        request_id=existing_request.request_id,
+        old_status_id=existing_request.status_id,
+        new_status_id=4,
+        changed_by=request.user_id
+    )
+    db.add(log_entry)
+
+    existing_request.status_id = 4
+    existing_request.rejection_reason = request.reason
+    existing_request.updated_at = datetime.now(timezone.utc)
+
+    db.commit()
+    db.refresh(existing_request)
+    db.refresh(log_entry)
+
+    return {"message": "Request denied successfully", "request_id": existing_request.request_id}
 
 @app.get("/requests", response_model=List[RequestModel])
 def get_requests(db: Session = Depends(get_db)):
