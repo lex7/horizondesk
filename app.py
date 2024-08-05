@@ -157,6 +157,26 @@ class RegisterRequest(BaseModel):
     role_id: int
     spec_id: Optional[int] = None
 
+class RequestModel(BaseModel):
+    request_id: int
+    request_type: int
+    created_by: int
+    assigned_to: Optional[int]
+    area_id: int
+    description: str
+    status_id: int
+    created_at: datetime
+    updated_at: Optional[datetime]
+    deadline: Optional[date]
+    rejection_reason: Optional[str]
+
+    class Config:
+        orm_mode = True
+        json_encoders = {
+            datetime: lambda v: v.strftime("%Y-%m-%dT%H:%M:%S"),
+            date: lambda v: v.strftime("%Y-%m-%d")
+        }
+
 class RequestCreate(BaseModel):
     request_type: int
     user_id: int
@@ -370,25 +390,10 @@ def confirm_request(request: ConfirmRequest, db: Session = Depends(get_db)):
     return {"message": "Request confirmed successfully", "request_id": existing_request.request_id}
 
 
-@app.get("/requests")
+@app.get("/requests", response_model=List[RequestModel])
 def get_requests(db: Session = Depends(get_db)):
     requests = db.query(Request).all()
-    return [
-        {
-            "request_id": request.request_id,
-            "request_type": request.request_type,
-            "created_by": request.created_by,
-            "assigned_to": request.assigned_to,
-            "area_id": request.area_id,
-            "description": request.description,
-            "status_id": request.status_id,
-            "created_at": request.created_at,
-            "updated_at": request.updated_at,
-            "deadline": request.deadline,
-            "rejection_reason": request.rejection_reason
-        }
-        for request in requests
-    ]
+    return requests
 
 @app.get("/request-types", response_model=List[RequestTypeModel])
 def get_request_types(db: Session = Depends(get_db)):
@@ -410,115 +415,40 @@ def get_statuses(db: Session = Depends(get_db)):
     statuses = db.query(Status).all()
     return statuses
 
-@app.get("/under-master-approval", response_model=List[dict])
+@app.get("/under-master-approval", response_model=List[RequestModel])
 def get_under_master_approval_requests(db: Session = Depends(get_db)):
     requests = db.query(Request).filter(Request.status_id == 1).all()
-    return [{"request_id": request.request_id,
-             "request_type": request.request_type,
-             "created_by": request.created_by,
-             "assigned_to": request.assigned_to,
-             "area_id": request.area_id,
-             "description": request.description,
-             "status_id": request.status_id,
-             "created_at": request.created_at,
-             "updated_at": request.updated_at,
-             "deadline": request.deadline,
-             "rejection_reason": request.rejection_reason} for request in requests]
+    return requests
 
-@app.get("/in-progress", response_model=List[dict])
+@app.get("/in-progress", response_model=List[RequestModel])
 def get_in_progress_requests(user_id: int, db: Session = Depends(get_db)):
     requests = db.query(Request).filter(
         Request.status_id.in_([1, 2, 4, 5]), 
         Request.created_by == user_id
     ).all()
-    return [
-        {
-            "request_id": request.request_id,
-            "request_type": request.request_type,
-            "created_by": request.created_by,
-            "assigned_to": request.assigned_to,
-            "area_id": request.area_id,
-            "description": request.description,
-            "status_id": request.status_id,
-            "created_at": request.created_at,
-            "updated_at": request.updated_at,
-            "deadline": request.deadline,
-            "rejection_reason": request.rejection_reason
-        }
-        for request in requests
-    ]
+    return requests
 
-@app.get("/denied", response_model=List[dict])
+@app.get("/denied", response_model=List[RequestModel])
 def get_denied_requests(user_id: int, db: Session = Depends(get_db)):
     requests = db.query(Request).filter(Request.status_id == 3, Request.created_by == user_id).all()
-    return [{"request_id": request.request_id,
-             "request_type": request.request_type,
-             "created_by": request.created_by,
-             "assigned_to": request.assigned_to,
-             "area_id": request.area_id,
-             "description": request.description,
-             "status_id": request.status_id,
-             "created_at": request.created_at,
-             "updated_at": request.updated_at,
-             "deadline": request.deadline,
-             "rejection_reason": request.rejection_reason} for request in requests]
+    return requests
 
-@app.get("/under-user-approval", response_model=List[dict])
+@app.get("/under-user-approval", response_model=List[RequestModel])
 def get_under_user_approval_requests(user_id: int, db: Session = Depends(get_db)):
     requests = db.query(Request).filter(Request.status_id == 5, Request.created_by == user_id).all()
-    return [{"request_id": request.request_id,
-             "request_type": request.request_type,
-             "created_by": request.created_by,
-             "assigned_to": request.assigned_to,
-             "area_id": request.area_id,
-             "description": request.description,
-             "status_id": request.status_id,
-             "created_at": request.created_at,
-             "updated_at": request.updated_at,
-             "deadline": request.deadline,
-             "rejection_reason": request.rejection_reason} for request in requests]
+    return requests
 
-@app.get("/completed", response_model=List[dict])
+@app.get("/completed", response_model=List[RequestModel])
 def get_completed_requests(user_id: int, db: Session = Depends(get_db)):
     requests = db.query(Request).filter(Request.status_id == 6, Request.created_by == user_id).all()
-    return [{"request_id": request.request_id,
-             "request_type": request.request_type,
-             "created_by": request.created_by,
-             "assigned_to": request.assigned_to,
-             "area_id": request.area_id,
-             "description": request.description,
-             "status_id": request.status_id,
-             "created_at": request.created_at,
-             "updated_at": request.updated_at,
-             "deadline": request.deadline,
-             "rejection_reason": request.rejection_reason} for request in requests]
+    return requests
 
-@app.get("/my-tasks")
+@app.get("/my-tasks", response_model=List[RequestModel])
 def get_my_tasks(user_id: int, db: Session = Depends(get_db)):
     tasks = db.query(Request).filter(Request.assigned_to == user_id).all()
-    return [{"request_id": task.request_id,
-             "request_type": task.request_type,
-             "created_by": task.created_by,
-             "assigned_to": task.assigned_to,
-             "area_id": task.area_id,
-             "description": task.description,
-             "status_id": task.status_id,
-             "created_at": task.created_at,
-             "updated_at": task.updated_at,
-             "deadline": task.deadline,
-             "rejection_reason": task.rejection_reason} for task in tasks]
+    return tasks
 
-@app.get("/unassigned")
+@app.get("/unassigned", response_model=List[RequestModel])
 def get_unassigned(db: Session = Depends(get_db)):
     tasks = db.query(Request).filter(Request.assigned_to.is_(None)).all()
-    return [{"request_id": task.request_id,
-             "request_type": task.request_type,
-             "created_by": task.created_by,
-             "assigned_to": task.assigned_to,
-             "area_id": task.area_id,
-             "description": task.description,
-             "status_id": task.status_id,
-             "created_at": task.created_at,
-             "updated_at": task.updated_at,
-             "deadline": task.deadline,
-             "rejection_reason": task.rejection_reason} for task in tasks]
+    return tasks
