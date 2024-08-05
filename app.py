@@ -320,7 +320,7 @@ def deny_request(request: DenyRequest, db: Session = Depends(get_db)):
 
 
 @app.post("/take-on-work", response_model=dict)
-def complete_request(request: UpdateRequest, db: Session = Depends(get_db)):
+def take_request(request: UpdateRequest, db: Session = Depends(get_db)):
     existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
     if existing_request is None:
         raise HTTPException(status_code=404, detail="Request not found")
