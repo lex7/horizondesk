@@ -1,13 +1,13 @@
 import os
 from fastapi import FastAPI, HTTPException, Depends
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, TIMESTAMP
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, TIMESTAMP, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, date
 from typing import List, Optional
 
 load_dotenv()
@@ -109,7 +109,7 @@ class Request(Base):
     status_id = Column(Integer, ForeignKey('statuses.status_id'), default=1, nullable=False)
     created_at = Column(TIMESTAMP, nullable=False, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP)
-    deadline = Column(TIMESTAMP)
+    deadline = Column(Date)
     rejection_reason = Column(String)
 
     creator = relationship("User", foreign_keys=[created_by])
@@ -154,7 +154,7 @@ class RequestCreate(BaseModel):
 class ApproveRequest(BaseModel):
     user_id: int
     request_id: int
-    deadline: Optional[datetime] = None
+    deadline: Optional[date] = None
 
 class RejectRequest(BaseModel):
     user_id: int
