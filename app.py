@@ -407,8 +407,20 @@ def get_statuses(db: Session = Depends(get_db)):
     return statuses
 
 @app.get("/under-master-approval", response_model=List[RequestModel])
-def get_under_master_approval_requests(db: Session = Depends(get_db)):
-    requests = db.query(Request).filter(Request.status_id == 1).all()
+def get_under_master_approval_requests(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    spec_id = user.spec_id
+    if spec_id is None:
+        raise HTTPException(status_code=400, detail="User does not have a spec_id")
+    
+    requests = db.query(Request).filter(
+        Request.status_id == 1,
+        Request.request_type == spec_id
+    ).all()
+    
     return requests
 
 @app.get("/in-progress", response_model=List[RequestModel])
@@ -440,6 +452,18 @@ def get_my_tasks(user_id: int, db: Session = Depends(get_db)):
     return tasks
 
 @app.get("/unassigned", response_model=List[RequestModel])
-def get_unassigned(db: Session = Depends(get_db)):
-    tasks = db.query(Request).filter(Request.assigned_to.is_(None)).all()
+def get_unassigned(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    spec_id = user.spec_id
+    if spec_id is None:
+        raise HTTPException(status_code=400, detail="User does not have a spec_id")
+    
+    tasks = db.query(Request).filter(
+        Request.assigned_to.is_(None),
+        Request.request_type == spec_id
+    ).all()
+    
     return tasks
