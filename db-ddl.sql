@@ -4,8 +4,8 @@ CREATE TABLE roles (
     role_name VARCHAR(50) NOT NULL UNIQUE
 );
 
--- Table: spceializations
-CREATE TABLE spceializations (
+-- Table: specializations
+CREATE TABLE specializations (
     spec_id SERIAL PRIMARY KEY,
     spec_name VARCHAR(50) NOT NULL UNIQUE
 );
@@ -24,7 +24,7 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL,
     surname VARCHAR(50),
     name VARCHAR(50),
-    spec_id INTEGER NOT NULL REFERENCES spceializations(spec_id),
+    spec_id INTEGER NOT NULL REFERENCES specializations(spec_id),
     fcm_token VARCHAR(255),
     role_id INTEGER NOT NULL REFERENCES roles(role_id),
     shift_id INTEGER REFERENCES worker_shifts(shift_id)

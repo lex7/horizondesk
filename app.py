@@ -40,13 +40,14 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     surname = Column(String)
     name = Column(String)
-    specialization = Column(String)
+    spec_id = Column(Integer, ForeignKey('specializations.spec_id'))
     fcm_token = Column(String, nullable=True)
     role_id = Column(Integer, ForeignKey('roles.role_id'))
     shift_id = Column(Integer, ForeignKey('worker_shifts.shift_id'))
 
     role = relationship("Role", back_populates="users")
     shift = relationship("WorkerShift", back_populates="users")
+    specialization_rel = relationship("Specialization", back_populates="users")
 
 class Role(Base):
     __tablename__ = 'roles'
@@ -68,7 +69,7 @@ class UserModel(BaseModel):
     username: str
     surname: Optional[str]
     name: Optional[str]
-    specialization: Optional[str]
+    spec_id: Optional[str]
     fcm_token: Optional[str]
     role_id: int
     shift_id: Optional[int]
@@ -199,7 +200,7 @@ def hash_password(password):
 @app.post("/register")
 def register(request: RegisterRequest, db: Session = Depends(get_db)):
     hashed_password = hash_password(request.password)
-    user = User(username=request.username, password_hash=hashed_password, role_id=request.role_id)
+    user = User(username=request.username, password_hash=hashed_password, role_id=request.role_id, spec_id=request.spec_id)
     db.add(user)
     db.commit()
     db.refresh(user)
