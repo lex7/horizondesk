@@ -209,6 +209,20 @@ class RoleModel(BaseModel):
     class Config:
         orm_mode = True
 
+class RequestStatusLogModel(BaseModel):
+    log_id: int
+    request_id: int
+    old_status_id: int
+    new_status_id: int
+    changed_at: datetime
+    changed_by: int
+
+    class Config:
+        orm_mode = True
+        json_encoders = {
+            datetime: lambda v: v.strftime("%Y-%m-%dT%H:%M:%S")
+        }
+
 def get_db():
     db = SessionLocal()
     try:
@@ -467,3 +481,8 @@ def get_unassigned(user_id: int, db: Session = Depends(get_db)):
     ).all()
     
     return tasks
+
+@app.get("/request-status-log", response_model=List[RequestStatusLogModel])
+def get_request_status_log(db: Session = Depends(get_db)):
+    logs = db.query(RequestStatusLog).all()
+    return logs
