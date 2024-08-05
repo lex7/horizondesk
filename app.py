@@ -294,7 +294,7 @@ def approve_request(request: ApproveRequest, db: Session = Depends(get_db)):
     update_request_status(request.request_id, 2, request.user_id, db)
     return {"message": "Request approved successfully", "request_id": request.request_id}
 
-@app.post("/deny-request", response_model=dict)
+@app.post("/master-deny-request", response_model=dict)
 def deny_request(request: DenyRequest, db: Session = Depends(get_db)):
     existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
     if existing_request is None:
