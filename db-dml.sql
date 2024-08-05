@@ -37,9 +37,9 @@ VALUES ('На рассмотрении'),
        ('Требует подтверждения'),
        ('Завершена'),;
 
-INSERT INTO users (username, password_hash, surname, name, specialization, fcm_token, role_id, shift_id)
+INSERT INTO users (username, password_hash, surname, name, spec_id, fcm_token, role_id, shift_id)
 VALUES 
-    ('ivan', 'password123', 'Иван', 'Иванов', 'Инженер', 'abc123xyz456', 1, 1),
-    ('vasya', 'password456', 'Василий', 'Васильев', 'Мастер', 'def456ghi789', 2, 1),
-    ('masha', 'password789', 'Мария', 'Мариевна', 'Аналитик', 'xyz789abc123', 1, 1);
+    ('ivan', 'password123', 'Иван', 'Иванов', 1, NULL, 1, 1),
+    ('vasya', 'password456', 'Василий', 'Васильев', 2, NULL, 2, 1),
+    ('masha', 'password789', 'Мария', 'Мариевна', 3, NULL, 1, 1);
 
