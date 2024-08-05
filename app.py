@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from dotenv import load_dotenv
 from datetime import datetime, date
-from sqlalchemy.types import TIMESTAMP, Date
+from sqlalchemy.types import TIMESTAMP, Date, String
 from typing import List, Optional
 
 load_dotenv()
@@ -69,8 +69,8 @@ class Role(Base):
 class WorkerShift(Base):
     __tablename__ = 'worker_shifts'
     shift_id = Column(Integer, primary_key=True, index=True)
-    start_time = Column(TIMESTAMP, nullable=False)
-    end_time = Column(TIMESTAMP, nullable=False)
+    start_time = Column(String, nullable=False)
+    end_time = Column(String, nullable=False)
     
     users = relationship("User", back_populates="shift")
 
@@ -118,9 +118,9 @@ class Request(Base):
     area_id = Column(Integer, ForeignKey('areas.area_id'), nullable=False)
     description = Column(String, nullable=False)
     status_id = Column(Integer, ForeignKey('statuses.status_id'), default=1, nullable=False)
-    created_at = Column(TIMESTAMP, nullable=False, default=datetime.utcnow)
-    updated_at = Column(TIMESTAMP)
-    deadline = Column(Date)
+    created_at = Column(String, nullable=False, default=datetime.utcnow().isoformat())
+    updated_at = Column(String)
+    deadline = Column(String)
     rejection_reason = Column(String)
 
     creator = relationship("User", foreign_keys=[created_by])
@@ -135,7 +135,7 @@ class RequestStatusLog(Base):
     request_id = Column(Integer, ForeignKey('requests.request_id'))
     old_status_id = Column(Integer, ForeignKey('statuses.status_id'))
     new_status_id = Column(Integer, ForeignKey('statuses.status_id'))
-    changed_at = Column(TIMESTAMP, nullable=False, default=datetime.utcnow)
+    changed_at = Column(String, nullable=False, default=datetime.utcnow().isoformat())
     changed_by = Column(Integer, ForeignKey('users.user_id'))
 
     request_rel = relationship("Request")
@@ -166,7 +166,7 @@ class RequestCreate(BaseModel):
 class ApproveRequest(BaseModel):
     user_id: int
     request_id: int
-    deadline: Optional[date] = None
+    deadline: Optional[str] = None 
 
 class RejectRequest(BaseModel):
     user_id: int
@@ -245,22 +245,19 @@ def create_request(request: RequestCreate, db: Session = Depends(get_db)):
 
 @app.post("/approve-request", response_model=dict)
 def approve_request(request: ApproveRequest, db: Session = Depends(get_db)):
-    # Retrieve the request to be approved
     existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
     if existing_request is None:
         raise HTTPException(status_code=404, detail="Request not found")
 
-    # Update request details
-    existing_request.updated_at = datetime.now()
+    existing_request.updated_at = datetime.utcnow().isoformat()
     if request.deadline is not None:
         existing_request.deadline = request.deadline
 
-    # Log status change in request_status_log
     log_entry = RequestStatusLog(
         request_id=existing_request.request_id,
         old_status_id=existing_request.status_id,
-        new_status_id=2,  # Status ID for 'approved'
-        changed_by=request.user_id  # Assuming the current user is making the change
+        new_status_id=2,
+        changed_by=request.user_id
     )
     db.add(log_entry)
 
@@ -272,31 +269,31 @@ def approve_request(request: ApproveRequest, db: Session = Depends(get_db)):
 
     return {"message": "Request approved successfully", "request_id": existing_request.request_id}
 
+
 @app.post("/reject-request", response_model=dict)
 def reject_request(request: RejectRequest, db: Session = Depends(get_db)):
-    # Retrieve the request to be rejected
     existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
     if existing_request is None:
         raise HTTPException(status_code=404, detail="Request not found")
 
-    # Log status change in request_status_log
     log_entry = RequestStatusLog(
         request_id=existing_request.request_id,
         old_status_id=existing_request.status_id,
-        new_status_id=3,  # Status ID for 'rejected'
-        changed_by=request.user_id  # Assuming the current user is making the change
+        new_status_id=3,
+        changed_by=request.user_id
     )
     db.add(log_entry)
 
     existing_request.status_id = 3
-    existing_request.rejection_reason = request.reason  # Store the rejection reason
-    existing_request.updated_at = datetime.now()
+    existing_request.rejection_reason = request.reason
+    existing_request.updated_at = datetime.utcnow().isoformat()
 
     db.commit()
     db.refresh(existing_request)
     db.refresh(log_entry)
 
     return {"message": "Request rejected successfully", "request_id": existing_request.request_id}
+
 
 @app.post("/take-on-work", response_model=dict)
 def complete_request(request: CompleteRequest, db: Session = Depends(get_db)):
@@ -326,47 +323,45 @@ def complete_request(request: CompleteRequest, db: Session = Depends(get_db)):
 
 @app.post("/complete-request", response_model=dict)
 def complete_request(request: CompleteRequest, db: Session = Depends(get_db)):
-    # Retrieve the request to be marked as completed
     existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
     if existing_request is None:
         raise HTTPException(status_code=404, detail="Request not found")
 
-    # Log status change in request_status_log
     log_entry = RequestStatusLog(
         request_id=existing_request.request_id,
         old_status_id=existing_request.status_id,
-        new_status_id=5,  # Status ID for 'completed'
-        changed_by=request.user_id  # Assuming the current user is making the change
+        new_status_id=4,
+        changed_by=request.user_id
     )
     db.add(log_entry)
 
-    existing_request.status_id = 5
-    existing_request.updated_at = datetime.now()
+    existing_request.assigned_to = request.user_id
+    existing_request.status_id = 4
+    existing_request.updated_at = datetime.utcnow().isoformat()
 
     db.commit()
     db.refresh(existing_request)
     db.refresh(log_entry)
 
-    return {"message": "Request marked as completed successfully", "request_id": existing_request.request_id}
+    return {"message": "Request accepted into work successfully", "request_id": existing_request.request_id}
+
 
 @app.post("/confirm-request", response_model=dict)
 def confirm_request(request: ConfirmRequest, db: Session = Depends(get_db)):
-    # Retrieve the request to be confirmed
     existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
     if existing_request is None:
         raise HTTPException(status_code=404, detail="Request not found")
 
-    # Log status change in request_status_log
     log_entry = RequestStatusLog(
         request_id=existing_request.request_id,
         old_status_id=existing_request.status_id,
-        new_status_id=6,  # Status ID for 'confirmed'
-        changed_by=request.user_id  # Assuming the current user is making the change
+        new_status_id=6,
+        changed_by=request.user_id
     )
     db.add(log_entry)
 
     existing_request.status_id = 6
-    existing_request.updated_at = datetime.now()
+    existing_request.updated_at = datetime.utcnow().isoformat()
 
     db.commit()
     db.refresh(existing_request)
@@ -374,20 +369,26 @@ def confirm_request(request: ConfirmRequest, db: Session = Depends(get_db)):
 
     return {"message": "Request confirmed successfully", "request_id": existing_request.request_id}
 
+
 @app.get("/requests")
 def get_requests(db: Session = Depends(get_db)):
     requests = db.query(Request).all()
-    return [{"request_id": request.request_id,
-             "request_type": request.request_type,
-             "created_by": request.created_by,
-             "assigned_to": request.assigned_to,
-             "area_id": request.area_id,
-             "description": request.description,
-             "status_id": request.status_id,
-             "created_at": request.created_at,
-             "updated_at": request.updated_at,
-             "deadline": request.deadline,
-             "rejection_reason": request.rejection_reason} for request in requests]
+    return [
+        {
+            "request_id": request.request_id,
+            "request_type": request.request_type,
+            "created_by": request.created_by,
+            "assigned_to": request.assigned_to,
+            "area_id": request.area_id,
+            "description": request.description,
+            "status_id": request.status_id,
+            "created_at": request.created_at,
+            "updated_at": request.updated_at,
+            "deadline": request.deadline,
+            "rejection_reason": request.rejection_reason
+        }
+        for request in requests
+    ]
 
 @app.get("/request-types", response_model=List[RequestTypeModel])
 def get_request_types(db: Session = Depends(get_db)):
