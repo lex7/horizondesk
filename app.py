@@ -33,6 +33,7 @@ app = FastAPI()
 def read_root():
     return {"message": "home page"}
 
+
 class User(Base):
     __tablename__ = 'users'
     user_id = Column(Integer, primary_key=True, index=True)
@@ -47,7 +48,6 @@ class User(Base):
 
     role = relationship("Role", back_populates="users")
     shift = relationship("WorkerShift", back_populates="users")
-    specialization_rel = relationship("Specialization", back_populates="users")
 
 class Role(Base):
     __tablename__ = 'roles'
