@@ -50,6 +50,15 @@ class User(Base):
     role = relationship("Role", back_populates="users")
     shift = relationship("WorkerShift", back_populates="users")
 
+class Specialization(Base):
+    __tablename__ = 'specializations'
+    spec_id = Column(Integer, primary_key=True, index=True)
+    spec_name = Column(String, unique=True, index=True, nullable=False)
+
+    users = relationship("User", back_populates="specialization")
+
+User.specialization = relationship("Specialization", back_populates="users")
+
 class Role(Base):
     __tablename__ = 'roles'
     role_id = Column(Integer, primary_key=True, index=True)
