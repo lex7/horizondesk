@@ -456,8 +456,8 @@ def get_denied_requests(user_id: int, db: Session = Depends(get_db)):
     requests = db.query(Request).filter(Request.status_id == 3, Request.created_by == user_id).all()
     return requests
 
-@app.get("/under-user-approval", response_model=List[RequestModel])
-def get_under_user_approval_requests(user_id: int, db: Session = Depends(get_db)):
+@app.get("/under-requestor-approval", response_model=List[RequestModel])
+def get_under_requestor_approval_requests(user_id: int, db: Session = Depends(get_db)):
     requests = db.query(Request).filter(Request.status_id == 5, Request.created_by == user_id).all()
     return requests
 
