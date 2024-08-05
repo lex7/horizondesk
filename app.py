@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, HTTPException, Depends
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, TIMESTAMP, Date
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from passlib.context import CryptContext
@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from dotenv import load_dotenv
 from datetime import datetime, date
+from sqlalchemy.types import TIMESTAMP, Date
 from typing import List, Optional
 
 load_dotenv()
@@ -41,7 +42,7 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     surname = Column(String)
     name = Column(String)
-    spec_id = Column(Integer, ForeignKey('specializations.spec_id'))
+    spec_id = Column(Integer, ForeignKey('specializations.spec_id'), nullable=True)
     fcm_token = Column(String, nullable=True)
     role_id = Column(Integer, ForeignKey('roles.role_id'))
     shift_id = Column(Integer, ForeignKey('worker_shifts.shift_id'))
@@ -69,7 +70,7 @@ class UserModel(BaseModel):
     username: str
     surname: Optional[str]
     name: Optional[str]
-    spec_id: Optional[str]
+    spec_id: Optional[int]
     fcm_token: Optional[str]
     role_id: int
     shift_id: Optional[int]
