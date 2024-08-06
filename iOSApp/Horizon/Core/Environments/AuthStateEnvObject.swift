@@ -8,7 +8,7 @@ import Combine
 
 final class AuthStateEnvObject: ObservableObject {
     
-    @Published var issueArray: [RequestIssueModel] = []
+    @Published var requestsForMaster: [RequestIssueModel] = []
     
     // new, approved, declined, inprogress, review, done
     
@@ -39,7 +39,7 @@ final class AuthStateEnvObject: ObservableObject {
     
     // SUPPORT SCREEN
     // TRANSACTION SCREEN
-    @Published var transactionSegment: TransactionSwitcher = .history
+    @Published var executorSegment: TransactionSwitcher = .unassignedTask
     // DEBT SCREEN
     @Published var issueDebtSegment: IssuesMontitorSwitcher = .inProgress
     // DOCUMENT SCREEN
@@ -62,7 +62,6 @@ final class AuthStateEnvObject: ObservableObject {
         
     }
     
-    
     func userLogin() {
         showProgress = true
         let token = credentialService.getFcm() ?? "EmptyFCM"
@@ -84,6 +83,8 @@ final class AuthStateEnvObject: ObservableObject {
                     self.credentialService.saveUserId(userModel.user_id)
                     self.credentialService.saveUserRole(userModel.role_id)
                     self.tabBarSelection = .createIssue
+                    debugPrint("USER ID: \(userModel.user_id) 🆔")
+                    debugPrint("ROLE ID: \(userModel.role_id) 🏌️‍♂️")
                     self.authState = .authorized
                 }
             }
@@ -106,12 +107,12 @@ final class AuthStateEnvObject: ObservableObject {
             authState = .unauthorized
         }
     }
+    
     ///
-        
     func getMyRequests() {
         networkManager.requestMoyaData(apis: .requests)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] completion in
+            .sink { completion in
                 switch completion {
                 case .finished:
                     debugPrint(String(describing: "[vm: ✅ getIssues successfully]"))
@@ -119,31 +120,55 @@ final class AuthStateEnvObject: ObservableObject {
                 case .failure(let error):
                     debugPrint(String(describing: "[vm: \(error) - ❌ getIssues]"))
                 }
-            } receiveValue: { [unowned self] data in
+            } receiveValue: { data in
 //                if let array = try? JSONDecoder().decode([RequestIssueModel].self, from: data) {
 //                    self.issueArray = array.reversed()
 //                    
 //                    self.issuesInWork = array.filter { $0.statusOfElement != .declined && $0.statusOfElement != .done }.reversed()
 //                    self.issuesDeclined = array.filter { $0.statusOfElement == .declined }.reversed()
 //                    self.issuesDone = array.filter { $0.statusOfElement == .done }.reversed()
-//                    self.issuesApproved = array.filter { $0.statusOfElement == .approved }.reversed()
-//                    self.issuesInProgress = array.filter { $0.statusOfElement == .inprogress }.reversed()
 //                }
             }
             .store(in: &cancellables)
     }
     
-    func acceptIssue(id: String, action: @escaping (()->Void)) {
-        let model = IssueAcceptModel(id: id, deadline: "")
-        networkManager.requestMoyaData(apis: .acceptIssue(issue: model))
+    /// Requests for Master
+    func getRequestsForMaster() {
+        let model = UserIdModel(user_id: credentialService.getUserId() ?? 777)
+        networkManager.requestMoyaData(apis: .underMasterApproval(model: model))
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] completion in
+            .sink { completion in
                 switch completion {
                 case .finished:
-                    debugPrint(String(describing: "[vm: ✅ acceptIssue successfully]"))
+                    debugPrint(String(describing: "[vm: ✅ inProgressIssue successfully]"))
                     break
                 case .failure(let error):
-                    debugPrint(String(describing: "[vm: \(error) - ❌ acceptIssue]"))
+                    debugPrint(String(describing: "[vm: \(error) - ❌ inProgressIssue]"))
+                }
+            } receiveValue: { [unowned self] data in
+                // self.issuesDone = array.filter { $0.statusOfElement == .done }.reversed()
+                // po String(decoding: data, as: UTF8.self)
+                do {
+                    self.requestsForMaster = try RequestIssueModel.decode(from: data)
+                    debugPrint(requestsForMaster.count)
+                } catch {
+                    print(error)
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    func masterAcceptRequest(_ request_id: Int, action: @escaping (()->Void)) {
+        let model = MasterApproveModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, deadline: "")
+        networkManager.requestMoyaData(apis: .masterApprove(model: model))
+            .receive(on: DispatchQueue.main)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    debugPrint(String(describing: "[vm: ✅ MasterApproveModel successfully]"))
+                    break
+                case .failure(let error):
+                    debugPrint(String(describing: "[vm: \(error) - ❌ MasterApproveModel]"))
                 }
             } receiveValue: { _ in
                 action()
@@ -151,17 +176,116 @@ final class AuthStateEnvObject: ObservableObject {
             .store(in: &cancellables)
     }
     
-    func declineIssue(id: String, action: @escaping (()->Void)) {
-        let model = IssueDeclineModel(id: id, completed: "")
-        networkManager.requestMoyaData(apis: .declineIssue(issue: model))
+    func masterDenyRequest(_ request_id: Int, action: @escaping (()->Void)) {
+        let model = MasterApproveModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, deadline: "")
+        networkManager.requestMoyaData(apis: .masterApprove(model: model))
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] completion in
+            .sink { completion in
                 switch completion {
                 case .finished:
-                    debugPrint(String(describing: "[vm: ✅ declineIssue successfully]"))
+                    debugPrint(String(describing: "[vm: ✅ masterDenyRequest successfully]"))
                     break
                 case .failure(let error):
-                    debugPrint(String(describing: "[vm: \(error) - ❌ declineIssue]"))
+                    debugPrint(String(describing: "[vm: \(error) - ❌ masterDenyRequest]"))
+                }
+            } receiveValue: { _ in
+                action()
+            }
+            .store(in: &cancellables)
+    }
+    
+    /// Executor Requests
+    func executorUnassignRequest() {
+        let model = UserIdModel(user_id: credentialService.getUserId() ?? 777)
+        networkManager.requestMoyaData(apis: .unassigned(model: model))
+            .receive(on: DispatchQueue.main)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    debugPrint(String(describing: "[vm: ✅ executorUnassignRequest successfully]"))
+                    break
+                case .failure(let error):
+                    debugPrint(String(describing: "[vm: \(error) - ❌ executorUnassignRequest]"))
+                }
+            } receiveValue: { [unowned self] data in
+                do {
+                    self.issuesApproved = try RequestIssueModel.decode(from: data)
+                } catch {
+                    print(error)
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    func executorMyTasksRequest() {
+        let model = UserIdModel(user_id: credentialService.getUserId() ?? 777)
+        networkManager.requestMoyaData(apis: .myTasks(model: model))
+            .receive(on: DispatchQueue.main)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    debugPrint(String(describing: "[vm: ✅ executorMyTasksRequest successfully]"))
+                    break
+                case .failure(let error):
+                    debugPrint(String(describing: "[vm: \(error) - ❌ executorMyTasksRequest]"))
+                }
+            } receiveValue: { [unowned self] data in
+                do {
+                    self.issuesInProgress = try RequestIssueModel.decode(from: data)
+                } catch {
+                    print(error)
+                }
+            }
+            .store(in: &cancellables)
+    }
+
+    func executerTakeOnWork(_ request_id: Int, action: @escaping ()->Void) {
+        let model = ExecutorActionModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id)
+        networkManager.requestMoyaData(apis: .takeOnWork(model: model))
+            .receive(on: DispatchQueue.main)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    debugPrint(String(describing: "[vm: ✅ executerAction successfully]"))
+                    break
+                case .failure(let error):
+                    debugPrint(String(describing: "[vm: \(error) - ❌ executerAction]"))
+                }
+            } receiveValue: { _ in
+                action()
+            }
+            .store(in: &cancellables)
+    }
+    
+    func executerCancel(_ request_id: Int, action: @escaping ()->Void) {
+        let model = ExecutorActionModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id)
+        networkManager.requestMoyaData(apis: .executerCancel(model: model))
+            .receive(on: DispatchQueue.main)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    debugPrint(String(describing: "[vm: ✅ executerAction successfully]"))
+                    break
+                case .failure(let error):
+                    debugPrint(String(describing: "[vm: \(error) - ❌ executerAction]"))
+                }
+            } receiveValue: { _ in
+                action()
+            }
+            .store(in: &cancellables)
+    }
+    
+    func executerCompleteSendReview(_ request_id: Int, action: @escaping ()->Void) {
+        let model = ExecutorActionModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id)
+        networkManager.requestMoyaData(apis: .executorComplete(model: model))
+            .receive(on: DispatchQueue.main)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    debugPrint(String(describing: "[vm: ✅ executerAction successfully]"))
+                    break
+                case .failure(let error):
+                    debugPrint(String(describing: "[vm: \(error) - ❌ executerAction]"))
                 }
             } receiveValue: { _ in
                 action()
@@ -170,12 +294,11 @@ final class AuthStateEnvObject: ObservableObject {
     }
     
     /// Creator of Requests:
-    
     func getInProgressIssue() {
         let model = UserIdModel(user_id: credentialService.getUserId() ?? 777)
         networkManager.requestMoyaData(apis: .inprogress(model: model))
             .receive(on: DispatchQueue.main)
-            .sink { [unowned self] completion in
+            .sink { completion in
                 switch completion {
                 case .finished:
                     debugPrint(String(describing: "[vm: ✅ inProgressIssue successfully]"))
@@ -200,7 +323,7 @@ final class AuthStateEnvObject: ObservableObject {
         let model = UserIdModel(user_id: credentialService.getUserId() ?? 777)
         networkManager.requestMoyaData(apis: .completed(model: model))
             .receive(on: DispatchQueue.main)
-            .sink { [unowned self] completion in
+            .sink { completion in
                 switch completion {
                 case .finished:
                     debugPrint(String(describing: "[vm: ✅ inProgressIssue successfully]"))
@@ -215,7 +338,7 @@ final class AuthStateEnvObject: ObservableObject {
                     self.issuesDone = try RequestIssueModel.decode(from: data)
                     debugPrint(issuesInWork.count)
                 } catch {
-                    print(error)
+                    debugPrint(error)
                 }
             }
             .store(in: &cancellables)
@@ -225,7 +348,7 @@ final class AuthStateEnvObject: ObservableObject {
         let model = UserIdModel(user_id: credentialService.getUserId() ?? 777)
         networkManager.requestMoyaData(apis: .denied(model: model))
             .receive(on: DispatchQueue.main)
-            .sink { [unowned self] completion in
+            .sink { completion in
                 switch completion {
                 case .finished:
                     debugPrint(String(describing: "[vm: ✅ inProgressIssue successfully]"))
@@ -245,25 +368,7 @@ final class AuthStateEnvObject: ObservableObject {
             }
             .store(in: &cancellables)
     }
-    
-    func toReviewIssue(id: String, action: @escaping (()->Void)) {
-        let model = IssueIdModel(id: id)
-        networkManager.requestMoyaData(apis: .review(model: model))
-            .receive(on: DispatchQueue.main)
-            .sink { completion in
-                switch completion {
-                case .finished:
-                    debugPrint(String(describing: "[vm: ✅ toReviewIssue successfully]"))
-                    break
-                case .failure(let error):
-                    debugPrint(String(describing: "[vm: \(error) - ❌ toReviewIssue]"))
-                }
-            } receiveValue: { _ in
-                action()
-            }
-            .store(in: &cancellables)
-    }
-    
+        
     func doneIssue(id: String, action: @escaping (()->Void)) {
         let model = IssueDoneModel(id: id, completed: makeDateStamp())
         networkManager.requestMoyaData(apis: .done(model: model))

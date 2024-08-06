@@ -74,6 +74,9 @@
 		05D7A6622C5F7A1000275E9D /* RoleEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D7A6612C5F7A1000275E9D /* RoleEnum.swift */; };
 		05D7A6642C5F892C00275E9D /* RequestTypeEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D7A6632C5F892C00275E9D /* RequestTypeEnum.swift */; };
 		05D7A6662C601E6300275E9D /* RegionIssue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D7A6652C601E6300275E9D /* RegionIssue.swift */; };
+		05D7A6682C61751500275E9D /* MasterApproveModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D7A6672C61751400275E9D /* MasterApproveModel.swift */; };
+		05D7A66A2C6175A400275E9D /* MasterDenyModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D7A6692C6175A400275E9D /* MasterDenyModel.swift */; };
+		05D7A66D2C618A6C00275E9D /* ExecutorActionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D7A66C2C618A6C00275E9D /* ExecutorActionModel.swift */; };
 		05E353BE2B8BD75800C418B1 /* UIApplication+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05E353BD2B8BD75800C418B1 /* UIApplication+Extension.swift */; };
 		05EC0C7D2B504C6500A5E5D8 /* PickerSegmentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05EC0C7C2B504C6500A5E5D8 /* PickerSegmentsView.swift */; };
 		05F2D9592B92517E00BDDD36 /* MonitorIssueScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F2D9582B92517E00BDDD36 /* MonitorIssueScreen.swift */; };
@@ -140,6 +143,9 @@
 		05D7A6612C5F7A1000275E9D /* RoleEnum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoleEnum.swift; sourceTree = "<group>"; };
 		05D7A6632C5F892C00275E9D /* RequestTypeEnum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestTypeEnum.swift; sourceTree = "<group>"; };
 		05D7A6652C601E6300275E9D /* RegionIssue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionIssue.swift; sourceTree = "<group>"; };
+		05D7A6672C61751400275E9D /* MasterApproveModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterApproveModel.swift; sourceTree = "<group>"; };
+		05D7A6692C6175A400275E9D /* MasterDenyModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterDenyModel.swift; sourceTree = "<group>"; };
+		05D7A66C2C618A6C00275E9D /* ExecutorActionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutorActionModel.swift; sourceTree = "<group>"; };
 		05E353BD2B8BD75800C418B1 /* UIApplication+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+Extension.swift"; sourceTree = "<group>"; };
 		05EC0C7C2B504C6500A5E5D8 /* PickerSegmentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerSegmentsView.swift; sourceTree = "<group>"; };
 		05F2D9582B92517E00BDDD36 /* MonitorIssueScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitorIssueScreen.swift; sourceTree = "<group>"; };
@@ -193,6 +199,8 @@
 			children = (
 				0509CBF62BFC939300FBCEF1 /* IssueModel.swift */,
 				051E62792BFD49E0001FBD74 /* IssueAcceptModel.swift */,
+				05D7A66E2C618A7600275E9D /* Executor */,
+				05D7A66B2C618A5100275E9D /* Master */,
 				0509CBF32BFC854C00FBCEF1 /* LoginModel.swift */,
 			);
 			path = HorizonModels;
@@ -558,8 +566,8 @@
 				05D65AEE2B6A1F06009CF788 /* CustomTabBar */,
 				05D759262B6309AD00578623 /* Environments */,
 				058F46722B54930400151850 /* ViewModifiers */,
-				05B686332B5548FE00440537 /* LoginScreen */,
 				05D7A6572C5EE47400275E9D /* StatisticScreen */,
+				05B686332B5548FE00440537 /* LoginScreen */,
 				054969C22B9F87B700A5B3F3 /* CreateIssueScreen */,
 				05F2D9522B92505B00BDDD36 /* MonitorIssueScreen */,
 				052A98E12B73A78C002249C5 /* ExecutorScreen */,
@@ -660,6 +668,23 @@
 				05D7A65F2C5EE8DA00275E9D /* RawDataStats.swift */,
 			);
 			path = RawDataStats;
+			sourceTree = "<group>";
+		};
+		05D7A66B2C618A5100275E9D /* Master */ = {
+			isa = PBXGroup;
+			children = (
+				05D7A6672C61751400275E9D /* MasterApproveModel.swift */,
+				05D7A6692C6175A400275E9D /* MasterDenyModel.swift */,
+			);
+			path = Master;
+			sourceTree = "<group>";
+		};
+		05D7A66E2C618A7600275E9D /* Executor */ = {
+			isa = PBXGroup;
+			children = (
+				05D7A66C2C618A6C00275E9D /* ExecutorActionModel.swift */,
+			);
+			path = Executor;
 			sourceTree = "<group>";
 		};
 		05F2D9522B92505B00BDDD36 /* MonitorIssueScreen */ = {
@@ -828,8 +853,10 @@
 				0509CBF22BFBDD8E00FBCEF1 /* GPToolView.swift in Sources */,
 				0517DCBF2B836A66009F6979 /* MyAccountScreen.swift in Sources */,
 				05D65AED2B698468009CF788 /* ErrorsModel.swift in Sources */,
+				05D7A6682C61751500275E9D /* MasterApproveModel.swift in Sources */,
 				05F591DC2BB1E85E005F5D6E /* SendMessageView.swift in Sources */,
 				053088512B6AC86100E6772D /* TabBarItemsPreferenceKey.swift in Sources */,
+				05D7A66D2C618A6C00275E9D /* ExecutorActionModel.swift in Sources */,
 				053088532B6ACC2400E6772D /* TabBarItem.swift in Sources */,
 				056E6B7F2B700CBA008C1E1F /* MasterScreen.swift in Sources */,
 				05E353BE2B8BD75800C418B1 /* UIApplication+Extension.swift in Sources */,
@@ -843,6 +870,7 @@
 				058F46742B54931900151850 /* TextModifier+Extension.swift in Sources */,
 				0517DCC42B8396CF009F6979 /* WorkerAccView.swift in Sources */,
 				05D7A6602C5EE8DA00275E9D /* RawDataStats.swift in Sources */,
+				05D7A66A2C6175A400275E9D /* MasterDenyModel.swift in Sources */,
 				058F30792BA87966006CBFB6 /* SplashScreen.swift in Sources */,
 				05B6867E2B58861200440537 /* TitleView.swift in Sources */,
 				0554D85D2BB180F5008E5563 /* EnvSupportObj.swift in Sources */,

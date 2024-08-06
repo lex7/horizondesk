@@ -48,18 +48,18 @@ struct IssueAcceptanceCheck: View {
                     .padding(.horizontal, 30)
                     .onTapGesture {
                         generator.impactOccurred()
-//                        authStateEnvObject.declineIssue(id: currentNode.id) {
-//                            presentationMode.wrappedValue.dismiss()
-//                        }
+                        authStateEnvObject.masterDenyRequest(currentNode.request_id) {
+                            presentationMode.wrappedValue.dismiss()
+                        }
                     }
                 Spacer()
                 makeMediumContrastView(text: "Подтвердить", image: "checkmark", imageFirst: false, color: .positivePrimary)
                     .padding(.horizontal, 30)
                     .onTapGesture {
                         generator.impactOccurred()
-//                        authStateEnvObject.acceptIssue(id: currentNode.id) {
-//                            presentationMode.wrappedValue.dismiss()
-//                        }
+                        authStateEnvObject.masterAcceptRequest(currentNode.request_id) {
+                            presentationMode.wrappedValue.dismiss()
+                        }
                     }
             }
             .padding(.bottom, screenHeight/20)

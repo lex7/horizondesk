@@ -2,15 +2,18 @@
 import Foundation
 
 enum NamingEnum: String {
-    case noTransactions
-    case noDebts
+    case noTasks
+    case noRequests
+    case noReview
     
     var name: String {
         switch self {
-        case .noTransactions:
+        case .noTasks:
             return "Список Пуст"
-        case .noDebts:
+        case .noRequests:
             return "Список Пуст"
+        case .noReview:
+            return "Запросов на рассмотрение нет."
         }
     }
 }
@@ -29,7 +32,7 @@ enum NamingTextEnum: String {
         case .emptyScreenDebtsNeedAction:
             return "Отклоненных заявок нет."
         case .emptyScreenDebts:
-            return "В работе заявок нет."
+            return "Мы пришлем уведомление."
         }
     }
 }

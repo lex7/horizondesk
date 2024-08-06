@@ -34,8 +34,8 @@ struct ExecutorScreen: View {
                     .background(Color.theme.background)
             }
             .frame(maxWidth: .infinity)
-            switch authStateEnvObject.transactionSegment {
-            case .history:
+            switch authStateEnvObject.executorSegment {
+            case .unassignedTask:
                 Group {
                     switch authStateEnvObject.issuesApproved.isEmpty {
                     case true:
@@ -50,7 +50,7 @@ struct ExecutorScreen: View {
                     }
                 } // History Tab
                 .background(Color.theme.background)
-            case .upcoming:
+            case .myTasks:
                 Group {
                     switch authStateEnvObject.issuesInProgress.isEmpty {
                     case true:
@@ -65,7 +65,11 @@ struct ExecutorScreen: View {
                     }
                 }
             } 
-        } 
+        } /// End of Vstack
+        .onAppear {
+            authStateEnvObject.executorUnassignRequest()
+            authStateEnvObject.executorMyTasksRequest()
+        }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden()
         .background(Color.theme.background)
@@ -84,13 +88,13 @@ private extension ExecutorScreen {
                 Menu {
                     Button("Взять в работу") {
                         generator.impactOccurred()
-//                        authStateEnvObject.inProgressIssue(id: issue.id) {
-//                            authStateEnvObject.getIssues()
-//                        }
+                        authStateEnvObject.executerTakeOnWork(issue.request_id) {
+                            authStateEnvObject.executorUnassignRequest()
+                        }
                     }
                     Button("Отмена") {
                         generator.impactOccurred()
-                        // authStateEnvObject.getIssues()
+                        authStateEnvObject.executorUnassignRequest()
                     }
                 } label: {
                     issueCellFor(issue)
@@ -106,13 +110,13 @@ private extension ExecutorScreen {
                 Menu {
                     Button("Отправить на проверку.") {
                         generator.impactOccurred()
-//                        authStateEnvObject.toReviewIssue(id: issue.id) {
-                            // authStateEnvObject.getIssues()
-//                        }
+                        authStateEnvObject.executerCompleteSendReview(issue.request_id) {
+                             authStateEnvObject.executorMyTasksRequest()
+                        }
                     }
                     Button("Отмена") {
                         generator.impactOccurred()
-                        // authStateEnvObject.getIssues()
+                        authStateEnvObject.executorMyTasksRequest()
                     }
                 } label: {
                     issueCellFor(issue)
@@ -176,10 +180,10 @@ private extension ExecutorScreen {
                 }
             }
             HStack {
-                switch authStateEnvObject.transactionSegment {
-                case .history:
+                switch authStateEnvObject.executorSegment {
+                case .unassignedTask:
                     titleHeader(RequestTypeEnum(rawValue: issue.request_type)?.name ?? "", color: .highContrast, uppercase: false)
-                case .upcoming:
+                case .myTasks:
                     titleHeader(RequestTypeEnum(rawValue: issue.request_type)?.name ?? "", color: .theme.negativePrimary, uppercase: false)
                 }
             }
@@ -211,8 +215,9 @@ private extension ExecutorScreen {
                 }
             }
         }
-        .onChange(of: authStateEnvObject.transactionSegment) { value in
-            // authStateEnvObject.getIssues()
+        .onChange(of: authStateEnvObject.executorSegment) { value in
+            authStateEnvObject.executorUnassignRequest()
+            authStateEnvObject.executorMyTasksRequest()
         }
         .padding(.vertical, 20)
         .padding(.horizontal, 20)
@@ -269,21 +274,21 @@ private extension ExecutorScreen {
 private extension ExecutorScreen {
     var pickerContainer: some View {
         HStack(alignment: .center, spacing: 4) {
-            ExecutorLeftSegmentView(sectionSelected: $authStateEnvObject.transactionSegment, label: "Не назначенные")
+            ExecutorLeftSegmentView(sectionSelected: $authStateEnvObject.executorSegment, label: "Не назначенные")
                 .onTapGesture {
-                    authStateEnvObject.transactionSegment.toggle()
+                    authStateEnvObject.executorSegment.toggle()
                     generator.prepare()
                     generator.impactOccurred()
                     
                 }
-                .allowsHitTesting(authStateEnvObject.transactionSegment != .history)
-            ExecutorRightSegmentView(sectionSelected: $authStateEnvObject.transactionSegment, label: "Мои Задания")
+                .allowsHitTesting(authStateEnvObject.executorSegment != .unassignedTask)
+            ExecutorRightSegmentView(sectionSelected: $authStateEnvObject.executorSegment, label: "Мои Задания")
                 .onTapGesture {
-                    authStateEnvObject.transactionSegment.toggle()
+                    authStateEnvObject.executorSegment.toggle()
                     generator.prepare()
                     generator.impactOccurred()
                 }
-                .allowsHitTesting(authStateEnvObject.transactionSegment != .upcoming)
+                .allowsHitTesting(authStateEnvObject.executorSegment != .myTasks)
         }
         .padding(8)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -299,7 +304,7 @@ private extension ExecutorScreen {
     @ViewBuilder
     private var messageForEmptyList: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text(NamingEnum.noTransactions.name)
+            Text(NamingEnum.noTasks.name)
                 .withDefaultTextModifier(font: "NexaRegular", size: 16, relativeTextStyle: .callout, color: Color.theme.lowContrast)
             Text(NamingTextEnum.emptyScreenTransaction.name)
                 .lineLimit(8)

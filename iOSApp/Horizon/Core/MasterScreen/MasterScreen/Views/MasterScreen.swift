@@ -9,7 +9,6 @@ struct MasterScreen: View {
 
     // MARK: - Private State Variables
     @State private var showIssueConfirm: Bool?
-//    @State private var currentNode: IssueModel = IssueModel(id: "", subject: "", message: "", region: "", status: "", created: "", deadline: "", completed: "", addedJustification: nil)
     
     @State private var currentNode: RequestIssueModel = RequestIssueModel(request_id: 1, request_type: 2, created_by: 99, assigned_to: nil, area_id: 3, description: nil, status_id: 99, created_at: nil, updated_at: nil, deadline: nil, rejection_reason: nil)
     
@@ -26,18 +25,22 @@ struct MasterScreen: View {
                 topLeftHeader(title: "На Рассмотрение")
                 Spacer()
             }
-            allIssues
+            if authStateEnvObject.requestsForMaster.isEmpty {
+                messageForEmptyList
+            } else {
+                allIssues
+            }
             Spacer()
         } 
         .sheet(item: $showIssueConfirm, onDismiss: {
-            // authStateEnvObject.getIssues()
+            authStateEnvObject.getRequestsForMaster()
         }, content: { _ in
             IssueAcceptanceCheck(currentNode: $currentNode)
         })
         .background(Color.theme.background)
         .onChange(of: tabSelection) { value in
             if tabSelection == .executeIssue {
-                //authStateEnvObject.getIssues()
+                authStateEnvObject.getRequestsForMaster()
             }
         }
     }
@@ -48,10 +51,9 @@ struct MasterScreen: View {
 }
 
 private extension MasterScreen {
-    
     var allIssues: some View {
         ScrollView {
-            ForEach(authStateEnvObject.issueArray, id: \.self) { issue in
+            ForEach(authStateEnvObject.requestsForMaster, id: \.self) { issue in
                 issueCellFor(issue)
                     .onTapGesture {
                         currentNode = issue
@@ -59,7 +61,7 @@ private extension MasterScreen {
                     }
             }
         }
-        .padding(.bottom, screenHeight/11)
+        .padding(.bottom, screenHeight/16)
     }
 }
 
@@ -201,5 +203,23 @@ private extension MasterScreen {
         } else {
             EmptyView()
         }
+    }
+}
+
+private extension MasterScreen {
+    @ViewBuilder
+    private var messageForEmptyList: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Spacer()
+            Text(NamingEnum.noReview.name)
+                .withDefaultTextModifier(font: "NexaRegular", size: 16, relativeTextStyle: .callout, color: Color.theme.lowContrast)
+            Text(NamingTextEnum.emptyScreenDebts.name)
+                .lineLimit(8)
+                .lineSpacing(5)
+                .multilineTextAlignment(.leading)
+                .withDefaultTextModifier(font: "NexaRegular", size: 13, relativeTextStyle: .footnote, color: Color.theme.lowContrast)
+            Spacer()
+        }
+        .padding(.horizontal, 24)
     }
 }

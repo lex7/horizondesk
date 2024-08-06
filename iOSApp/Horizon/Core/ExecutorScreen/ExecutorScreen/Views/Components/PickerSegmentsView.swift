@@ -2,15 +2,15 @@
 import SwiftUI
 
 enum TransactionSwitcher: String, CaseIterable, Identifiable  {
-    case history = "history"
-    case upcoming = "upcoming"
+    case unassignedTask = "unassigned"
+    case myTasks = "my tasks"
     
     mutating func toggle() {
         switch self {
-        case .history:
-            self = .upcoming
-        case .upcoming:
-            self = .history
+        case .unassignedTask:
+            self = .myTasks
+        case .myTasks:
+            self = .unassignedTask
         }
     }
     var id: Self { self }
@@ -34,12 +34,12 @@ struct ExecutorLeftSegmentView: View {
                         .weight(.bold)
                 )
                 .multilineTextAlignment(.trailing)
-                .foregroundColor(sectionSelected == .history ? Color.theme.selected : Color.theme.mediumContrast)
+                .foregroundColor(sectionSelected == .unassignedTask ? Color.theme.selected : Color.theme.mediumContrast)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 11)
         .frame(maxWidth: .infinity, alignment: .center)
-        .background(sectionSelected == .history ? AnyView(colorScheme == .dark ? Color.gradient.gradientLowDark : Color.gradient.gradientLowLight) : AnyView(Color.theme.surface))
+        .background(sectionSelected == .unassignedTask ? AnyView(colorScheme == .dark ? Color.gradient.gradientLowDark : Color.gradient.gradientLowLight) : AnyView(Color.theme.surface))
         .cornerRadius(24)
     }
 }
@@ -62,13 +62,13 @@ struct ExecutorRightSegmentView: View {
                         .weight(.bold)
                 )
                 .multilineTextAlignment(.trailing)
-                .foregroundColor(sectionSelected == .upcoming ? Color.theme.selected : Color.theme.mediumContrast)
+                .foregroundColor(sectionSelected == .myTasks ? Color.theme.selected : Color.theme.mediumContrast)
         }
-        .disabled(sectionSelected == .upcoming)
+        .disabled(sectionSelected == .myTasks)
         .padding(.horizontal, 12)
         .padding(.vertical, 11)
         .frame(maxWidth: .infinity, alignment: .center)
-        .background(sectionSelected == .upcoming ? AnyView(colorScheme == .dark ? Color.gradient.gradientLowDark : Color.gradient.gradientLowLight) : AnyView(Color.theme.surface))
+        .background(sectionSelected == .myTasks ? AnyView(colorScheme == .dark ? Color.gradient.gradientLowDark : Color.gradient.gradientLowLight) : AnyView(Color.theme.surface))
         .cornerRadius(24)
     }
 }

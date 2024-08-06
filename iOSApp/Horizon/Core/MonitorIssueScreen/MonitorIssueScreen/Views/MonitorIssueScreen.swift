@@ -18,14 +18,14 @@ struct MonitorIssueScreen: View {
     @State private var forwardToTransaction = false
     @State private var screenHeight = UIScreen.main.bounds.height
     @State private var screenWidth = UIScreen.main.bounds.width
-
+    
     // MARK: - Private Constants
     private var columns: [GridItem] = Array(repeating: .init(.flexible(), spacing: 16), count: 1)
     
     init(tabSelection: Binding<TabBarItem>) {
         self._tabSelection = tabSelection
     }
-
+    
     var body: some View {
         VStack {
             HStack {
@@ -100,7 +100,7 @@ struct MonitorIssueScreen: View {
                 authStateEnvObject.getDeniedIssue()
             }
             .padding(.horizontal, 12)
-        } 
+        }
         .mask(LinearGradient(gradient: Gradient(colors: [.black, .black, .black, .black, .black, .clear]), startPoint: .top, endPoint: .bottom).ignoresSafeArea(edges: .top))
         .background(Color.theme.background)
     }
@@ -115,13 +115,13 @@ private extension MonitorIssueScreen {
                     Menu {
                         Button("Подтвердить выполнение") {
                             generator.impactOccurred()
-//                            authStateEnvObject.doneIssue(id: issue.request_id) {
-//                                authStateEnvObject.getMyRequests()
-//                            }
+                            //                            authStateEnvObject.doneIssue(id: issue.request_id) {
+                            //                                authStateEnvObject.getMyRequests()
+                            //                            }
                         }
                         Button("Отмена") {
                             generator.impactOccurred()
-//                            authStateEnvObject.getMyRequests()
+                            //                            authStateEnvObject.getMyRequests()
                         }
                     } label: {
                         issueCellFor(issue)
@@ -161,29 +161,29 @@ private extension MonitorIssueScreen {
         relativeTextStyle: Font.TextStyle = .headline,
         uppercase: Bool = true,
         font: String = "NexaRegular") -> some View {
-        Group {
-            if uppercase {
-                Text(title)
-                    .textCase(.uppercase)
-                    .withMultiTextModifier(
-                        font: font,
-                        size: size,
-                        relativeTextStyle: relativeTextStyle,
-                        color: color,
-                        lines: lines
-                    )
-            } else {
-                Text(title)
-                    .withMultiTextModifier(
-                        font: font,
-                        size: size,
-                        relativeTextStyle: relativeTextStyle,
-                        color: color,
-                        lines: lines
-                    )
+            Group {
+                if uppercase {
+                    Text(title)
+                        .textCase(.uppercase)
+                        .withMultiTextModifier(
+                            font: font,
+                            size: size,
+                            relativeTextStyle: relativeTextStyle,
+                            color: color,
+                            lines: lines
+                        )
+                } else {
+                    Text(title)
+                        .withMultiTextModifier(
+                            font: font,
+                            size: size,
+                            relativeTextStyle: relativeTextStyle,
+                            color: color,
+                            lines: lines
+                        )
+                }
             }
         }
-    }
     
     @ViewBuilder
     func issueCellFor(_ issue: RequestIssueModel) -> some View {
@@ -256,35 +256,35 @@ private extension MonitorIssueScreen {
     private func createDateString(_ issue: RequestIssueModel) -> some View {
         if let status = issue.statusOfElement {
             EmptyView()
-//            switch status {
-//            case .new:
-//                HStack(spacing: 3) {
-//                    descriptionOfField("создано:", color: Color.theme.lowContrast)
-//                    descriptionOfField(issue.created_at.getTimeHorizon(), color: Color.theme.lowContrast)
-//                }
-//            case .approved:
-//                HStack(spacing: 3) {
-//                    descriptionOfField("до:", color: Color.theme.lowContrast)
-//                    descriptionOfField(issue.deadline.getDateHorizon(), color: Color.theme.lowContrast)
-//                }
-//            case .declined:
-//                HStack(spacing: 3) {
-//                    descriptionOfField(issue.completed.getTimeHorizon(), color: Color.theme.lowContrast)
-//                }
-//            case .inprogress:
-//                HStack(spacing: 3) {
-//                    descriptionOfField("до:", color: Color.theme.lowContrast)
-//                    descriptionOfField(issue.deadline.getDateHorizon(), color: Color.theme.lowContrast)
-//                }
-//            case .review:
-//                HStack {
-//                    descriptionOfField(issue.deadline.getDateHorizon(), color: Color.theme.lowContrast)
-//                }
-//            case .done:
-//                HStack {
-//                    descriptionOfField(issue.completed.getDateHorizon(), color: Color.theme.lowContrast)
-//                }
-//            }
+            //            switch status {
+            //            case .new:
+            //                HStack(spacing: 3) {
+            //                    descriptionOfField("создано:", color: Color.theme.lowContrast)
+            //                    descriptionOfField(issue.created_at.getTimeHorizon(), color: Color.theme.lowContrast)
+            //                }
+            //            case .approved:
+            //                HStack(spacing: 3) {
+            //                    descriptionOfField("до:", color: Color.theme.lowContrast)
+            //                    descriptionOfField(issue.deadline.getDateHorizon(), color: Color.theme.lowContrast)
+            //                }
+            //            case .declined:
+            //                HStack(spacing: 3) {
+            //                    descriptionOfField(issue.completed.getTimeHorizon(), color: Color.theme.lowContrast)
+            //                }
+            //            case .inprogress:
+            //                HStack(spacing: 3) {
+            //                    descriptionOfField("до:", color: Color.theme.lowContrast)
+            //                    descriptionOfField(issue.deadline.getDateHorizon(), color: Color.theme.lowContrast)
+            //                }
+            //            case .review:
+            //                HStack {
+            //                    descriptionOfField(issue.deadline.getDateHorizon(), color: Color.theme.lowContrast)
+            //                }
+            //            case .done:
+            //                HStack {
+            //                    descriptionOfField(issue.completed.getDateHorizon(), color: Color.theme.lowContrast)
+            //                }
+            //            }
         } else {
             EmptyView()
         }
@@ -330,7 +330,7 @@ private extension MonitorIssueScreen {
         switch authStateEnvObject.issueDebtSegment {
         case .inProgress:
             VStack(alignment: .leading, spacing: 20) {
-                Text(NamingEnum.noDebts.name)
+                Text(NamingEnum.noRequests.name)
                     .withDefaultTextModifier(font: "NexaRegular", size: 16, relativeTextStyle: .callout, color: Color.theme.lowContrast)
                 Text(NamingTextEnum.emptyScreenDebts.name)
                     .lineLimit(8)
@@ -341,7 +341,7 @@ private extension MonitorIssueScreen {
             .padding(.horizontal, 24)
         case .done:
             VStack(alignment: .leading, spacing: 20) {
-                Text(NamingEnum.noDebts.name)
+                Text(NamingEnum.noRequests.name)
                     .withDefaultTextModifier(font: "NexaRegular", size: 16, relativeTextStyle: .callout, color: Color.theme.lowContrast)
                 Text(NamingTextEnum.emptyScreenDebtsDone.name)
                     .lineLimit(8)
@@ -352,7 +352,7 @@ private extension MonitorIssueScreen {
             .padding(.horizontal, 24)
         case .declined:
             VStack(alignment: .leading, spacing: 20) {
-                Text(NamingEnum.noDebts.name)
+                Text(NamingEnum.noRequests.name)
                     .withDefaultTextModifier(font: "NexaRegular", size: 16, relativeTextStyle: .callout, color: Color.theme.lowContrast)
                 Text(NamingTextEnum.emptyScreenDebtsNeedAction.name)
                     .lineLimit(8)

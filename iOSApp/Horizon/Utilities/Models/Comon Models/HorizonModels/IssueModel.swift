@@ -44,7 +44,11 @@ struct RequestIssueModel: Hashable, Codable {
     
     var createdAtString: String {
         guard let created = created_at else { return "N/A" }
-        return DateFormatter.localizedString(from: created, dateStyle: .medium, timeStyle: .medium)
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = Locale(identifier: "ru_RU")
+        dateFormatter.dateStyle = .medium
+        dateFormatter.timeStyle = .short
+        return dateFormatter.string(from: created)
     }
     
     var updatedAtString: String {
@@ -77,7 +81,7 @@ struct RequestIssueModel: Hashable, Codable {
 extension RequestIssueModel {
     static func decode(from data: Data) throws -> [RequestIssueModel] {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .formatted(dateFormatter)
         return try decoder.decode([RequestIssueModel].self, from: data)
