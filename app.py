@@ -116,7 +116,7 @@ class RequestStatusLog(Base):
     request_id = Column(Integer, ForeignKey('requests.request_id'))
     old_status_id = Column(Integer, ForeignKey('statuses.status_id'))
     new_status_id = Column(Integer, ForeignKey('statuses.status_id'))
-    changed_at = Column(String, nullable=False, default=datetime.now(timezone.utc))
+    changed_at = Column(String, nullable=False)
     changed_by = Column(Integer, ForeignKey('users.user_id'))
     rejection_reason = Column(String)
 
@@ -253,6 +253,7 @@ def update_request(request_id: int, new_status: int, user_id: int, db: Session, 
         request_id=existing_request.request_id,
         old_status_id=existing_request.status_id,
         new_status_id=new_status,
+        changed_at=datetime.now(timezone.utc),
         changed_by=user_id,
         rejection_reason=kwargs.get('rejection_reason')
     )
