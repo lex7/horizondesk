@@ -568,8 +568,8 @@ def get_request_status_log(db: Session = Depends(get_db)):
 
 # Firebase push
 
-cred = credentials.Certificate("accKey.json")
-initialize_app(cred)
+# cred = credentials.Certificate("accKey.json")
+# initialize_app(cred)
 
 PROJECT_ID = 'horizons-champ'
 BASE_URL = 'https://fcm.googleapis.com'
