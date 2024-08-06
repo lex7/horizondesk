@@ -324,7 +324,8 @@ def approve_request(request: ApproveRequest, db: Session = Depends(get_db)):
             body=f"Your request (ID: {existing_request.request_id}) has been approved."
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Push notification failed: {str(e)}")
+        # raise HTTPException(status_code=500, detail=f"Push notification failed: {str(e)}")
+        pass
     return {"message": "Request approved successfully", "request_id": existing_request.request_id}
 
 
@@ -347,7 +348,8 @@ def deny_request(request: DenyRequest, db: Session = Depends(get_db)):
             body=f"Your request (ID: {existing_request.request_id}) has been denied."
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Push notification failed: {str(e)}")
+        # raise HTTPException(status_code=500, detail=f"Push notification failed: {str(e)}")
+        pass
     return {"message": "Request denied successfully", "request_id": existing_request.request_id}
 
 @app.post("/take-on-work", response_model=dict)
@@ -369,7 +371,8 @@ def take_request(request: UpdateRequest, db: Session = Depends(get_db)):
             body=f"Your request (ID: {existing_request.request_id}) has been taken to work."
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Push notification failed: {str(e)}")
+        # raise HTTPException(status_code=500, detail=f"Push notification failed: {str(e)}")
+        pass
     return {"message": "Request accepted into work successfully", "request_id": existing_request.request_id}
 
 @app.post("/executor-cancel", response_model=dict)
@@ -392,7 +395,8 @@ def cancel_request(request: DenyRequest, db: Session = Depends(get_db)):
             body=f"Your request (ID: {existing_request.request_id}) has been canceled by executor."
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Push notification failed: {str(e)}")
+        # raise HTTPException(status_code=500, detail=f"Push notification failed: {str(e)}")
+        pass
     return {"message": "Request canceled successfully", "request_id": existing_request.request_id}
 
 @app.post("/executor-complete", response_model=dict)
@@ -408,7 +412,8 @@ def complete_request(request: UpdateRequest, db: Session = Depends(get_db)):
             body=f"Your request (ID: {existing_request.request_id}) has been completed by executor."
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Push notification failed: {str(e)}")
+        # raise HTTPException(status_code=500, detail=f"Push notification failed: {str(e)}")
+        pass
     return {"message": "Request completed successfully", "request_id": request.request_id}
 
 @app.post("/requestor-confirm", response_model=dict)
@@ -424,7 +429,8 @@ def confirm_request(request: UpdateRequest, db: Session = Depends(get_db)):
             body=f"Your work (ID: {existing_request.request_id}) has been confirmed by requestor."
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Push notification failed: {str(e)}")
+        # raise HTTPException(status_code=500, detail=f"Push notification failed: {str(e)}")
+        pass
     return {"message": "Request confirmed successfully", "request_id": request.request_id}
 
 @app.post("/requestor-deny", response_model=dict)
@@ -446,7 +452,8 @@ def deny_request(request: DenyRequest, db: Session = Depends(get_db)):
             body=f"Your work (ID: {existing_request.request_id}) has been declined by requestor."
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Push notification failed: {str(e)}")
+        # raise HTTPException(status_code=500, detail=f"Push notification failed: {str(e)}")
+        pass
     return {"message": "Request denied successfully", "request_id": existing_request.request_id}
 
 @app.get("/requests", response_model=List[RequestModel])
