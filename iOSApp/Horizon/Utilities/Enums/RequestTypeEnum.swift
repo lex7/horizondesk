@@ -22,7 +22,7 @@ enum RequestTypeEnum: Int, CaseIterable {
         case .tools:
             return "Инструменты"
         case .sanpin:
-            return "Санитарно-Бытовые условия"
+            return "СанПиН условия"
         case .safety:
             return "Безопасность Труда"
         case .docs:

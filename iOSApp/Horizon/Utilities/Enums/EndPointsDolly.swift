@@ -20,7 +20,7 @@ enum EndPointsDolly {
     case unassigned(model: UserIdModel)
     case myTasks(model: UserIdModel)
     case takeOnWork(model: ExecutorActionModel)
-    case executerCancel(model: ExecutorActionModel)
+    case executerCancel(model: ExecutorCancelModel)
     case executorComplete(model: ExecutorActionModel)
     
     case completed(model: UserIdModel)

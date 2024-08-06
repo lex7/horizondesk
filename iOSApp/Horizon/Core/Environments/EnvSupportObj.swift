@@ -27,6 +27,9 @@ final class EnvSupportObj: ObservableObject {
     
     func createRequestIssue() {
         isIssueCreated = false
+        guard !issueMessage.isEmpty else { return }
+        guard areaOfIssueNumber != 999 else { return }
+        guard requestType != 0 else { return }
         let model = CreateRequestModelIssue(request_type: requestType,
                                       user_id: credentialService.getUserId() ?? 777,
                                       area_id: areaOfIssueNumber,

@@ -11,3 +11,9 @@ struct ExecutorActionModel: Encodable {
     let user_id: Int
     let request_id: Int
 }
+
+struct ExecutorCancelModel: Encodable {
+    let user_id: Int
+    let request_id: Int
+    let reason: String
+}

@@ -14,7 +14,14 @@ struct ExecutorScreen: View {
     
     // MARK: - Private Constants
     private let generator = UIImpactFeedbackGenerator(style: .light)
+    
+    // MARK: - Private State
     @State private var screenHeight = UIScreen.main.bounds.height
+    @State private var showDetailsUnassigned: Bool = false
+    @State private var showDetailsMyTasks: Bool = false
+    
+    @State private var currentNode: RequestIssueModel = RequestIssueModel(request_id: 1, request_type: 2, created_by: 99, assigned_to: nil, area_id: 3, description: nil, status_id: 99, created_at: nil, updated_at: nil, deadline: nil, rejection_reason: nil)
+    
     
     init() {
         navigationViewSetup()
@@ -45,7 +52,7 @@ struct ExecutorScreen: View {
                             Spacer()
                         }
                     case false:
-                        newIssues
+                        newUnassignedTasks
                         .mask(LinearGradient(gradient: Gradient(colors: [.black, .black, .black, .black, .black, .clear]), startPoint: .top, endPoint: .bottom))
                     }
                 } // History Tab
@@ -60,7 +67,7 @@ struct ExecutorScreen: View {
                             Spacer()
                         }
                     case false:
-                        inProgressIssues
+                        myTasksInProgress
                         .mask(LinearGradient(gradient: Gradient(colors: [.black, .black, .black, .black, .black, .clear]), startPoint: .top, endPoint: .bottom))
                     }
                 }
@@ -70,6 +77,15 @@ struct ExecutorScreen: View {
             authStateEnvObject.executorUnassignRequest()
             authStateEnvObject.executorMyTasksRequest()
         }
+        .onChange(of: authStateEnvObject.executorSegment) {
+            authStateEnvObject.executorUnassignRequest()
+            authStateEnvObject.executorMyTasksRequest()
+        }
+        .sheet(isPresented: $showDetailsUnassigned, onDismiss: {
+            authStateEnvObject.executorUnassignRequest()
+        }, content: {
+            ExecutorTaskDetails(currentNode: $currentNode)
+        })
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden()
         .background(Color.theme.background)
@@ -82,13 +98,25 @@ struct ExecutorScreen: View {
 
 
 private extension ExecutorScreen {
-    var newIssues: some View {
+    var newUnassignedTasks: some View {
         ScrollView {
             ForEach(authStateEnvObject.issuesApproved, id: \.self) { issue in
                 Menu {
                     Button("Взять в работу") {
                         generator.impactOccurred()
                         authStateEnvObject.executerTakeOnWork(issue.request_id) {
+                            Task {
+                                try await Task.sleep(nanoseconds: 500_000_000)
+                                authStateEnvObject.executorUnassignRequest()
+                            }
+                        }
+                    }
+                    Button("Детали") {
+                        generator.impactOccurred()
+                        currentNode = issue
+                        showDetailsUnassigned.toggle()
+                        Task {
+                            try await Task.sleep(nanoseconds: 500_000_000)
                             authStateEnvObject.executorUnassignRequest()
                         }
                     }
@@ -104,19 +132,35 @@ private extension ExecutorScreen {
         .padding(.bottom, screenHeight/11)
     }
     
-    var inProgressIssues: some View {
+    var myTasksInProgress: some View {
         ScrollView {
             ForEach(authStateEnvObject.issuesInProgress, id: \.self) { issue in
                 Menu {
                     Button("Отправить на проверку.") {
                         generator.impactOccurred()
                         authStateEnvObject.executerCompleteSendReview(issue.request_id) {
-                             authStateEnvObject.executorMyTasksRequest()
+                            Task {
+                                try await Task.sleep(nanoseconds: 200_000_000)
+                                authStateEnvObject.executorMyTasksRequest()
+                            }
+                        }
+                    }
+                    Button("Детали") {
+                        generator.impactOccurred()
+                        showDetailsUnassigned.toggle()
+                        Task {
+                            try await Task.sleep(nanoseconds: 500_000_000)
+                            authStateEnvObject.executorUnassignRequest()
                         }
                     }
                     Button("Отмена") {
                         generator.impactOccurred()
-                        authStateEnvObject.executorMyTasksRequest()
+                        authStateEnvObject.executerCancel(issue.request_id) {
+                            Task {
+                                try await Task.sleep(nanoseconds: 500_000_000)
+                                authStateEnvObject.executorMyTasksRequest()
+                            }
+                        }
                     }
                 } label: {
                     issueCellFor(issue)
@@ -169,7 +213,7 @@ private extension ExecutorScreen {
                 Spacer()
                 descriptionOfField(RegionIssue(rawValue: issue.area_id)?.name ?? "", color: Color.theme.secondary)
             }
-            HStack(spacing: 0) {
+            HStack {
                 GeometryReader { geometry in
                     HStack(spacing: 2) {
                         RoundedRectangle(cornerRadius: 2)
@@ -179,12 +223,13 @@ private extension ExecutorScreen {
                     }
                 }
             }
-            HStack {
+            .padding(.top, 10)
+            HStack(spacing: 0) {
                 switch authStateEnvObject.executorSegment {
                 case .unassignedTask:
-                    titleHeader(RequestTypeEnum(rawValue: issue.request_type)?.name ?? "", color: .highContrast, uppercase: false)
+                    titleHeader(issue.description ?? "без описания", color: .highContrast, uppercase: false)
                 case .myTasks:
-                    titleHeader(RequestTypeEnum(rawValue: issue.request_type)?.name ?? "", color: .theme.negativePrimary, uppercase: false)
+                    titleHeader(issue.description ?? "без описания", color: .theme.negativePrimary, uppercase: false)
                 }
             }
             .padding(.top, 10)
@@ -202,6 +247,7 @@ private extension ExecutorScreen {
                     descriptionOfField(issue.readableStatus, color: Color.theme.secondary)
                     Spacer()
                     // new, approved, declined, inprogress, review, done
+                    descriptionOfField(issue.createdAtString, color: Color.theme.lowContrast)
                     createDateString(issue)
                         .padding(.top, screenHeight/120)
                 }
@@ -242,17 +288,13 @@ private extension ExecutorScreen {
                 }
             case .approved:
                 HStack(spacing: 3) {
-                    descriptionOfField("до:", color: Color.theme.lowContrast)
-                    descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
-                }
-            case .declined:
-                HStack(spacing: 3) { // completed ??
-                    descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
+                    descriptionOfField("направлен:", color: Color.theme.lowContrast)
+                    descriptionOfField(issue.updatedAtString, color: Color.theme.lowContrast)
                 }
             case .inprogress:
                 HStack(spacing: 3) {
-                    descriptionOfField("до:", color: Color.theme.lowContrast)
-                    descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
+                    descriptionOfField("начат:", color: Color.theme.lowContrast)
+                    descriptionOfField(issue.updatedAtString, color: Color.theme.lowContrast)
                 }
             case .review:
                 HStack {
@@ -260,6 +302,11 @@ private extension ExecutorScreen {
                 }
             case .done:
                 HStack {
+                    descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
+                }
+            /// Decline should not display
+            case .declined:
+                HStack(spacing: 3) { // completed ??
                     descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
                 }
             }

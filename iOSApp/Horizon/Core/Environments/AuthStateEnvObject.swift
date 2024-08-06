@@ -149,8 +149,8 @@ final class AuthStateEnvObject: ObservableObject {
                 // self.issuesDone = array.filter { $0.statusOfElement == .done }.reversed()
                 // po String(decoding: data, as: UTF8.self)
                 do {
-                    self.requestsForMaster = try RequestIssueModel.decode(from: data)
-                    debugPrint(requestsForMaster.count)
+                    self.requestsForMaster = try RequestIssueModel.decode(from: data).sorted { ($0.created_at ?? Date()) > ($1.created_at ?? Date()) }
+//                    debugPrint(requestsForMaster.count)
                 } catch {
                     print(error)
                 }
@@ -177,8 +177,8 @@ final class AuthStateEnvObject: ObservableObject {
     }
     
     func masterDenyRequest(_ request_id: Int, action: @escaping (()->Void)) {
-        let model = MasterApproveModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, deadline: "")
-        networkManager.requestMoyaData(apis: .masterApprove(model: model))
+        let model = MasterDenyModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, reason: "")
+        networkManager.requestMoyaData(apis: .masterDeny(model: model))
             .receive(on: DispatchQueue.main)
             .sink { completion in
                 switch completion {
@@ -258,7 +258,7 @@ final class AuthStateEnvObject: ObservableObject {
     }
     
     func executerCancel(_ request_id: Int, action: @escaping ()->Void) {
-        let model = ExecutorActionModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id)
+        let model = ExecutorCancelModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, reason: "")
         networkManager.requestMoyaData(apis: .executerCancel(model: model))
             .receive(on: DispatchQueue.main)
             .sink { completion in

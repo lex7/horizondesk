@@ -77,6 +77,7 @@
 		05D7A6682C61751500275E9D /* MasterApproveModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D7A6672C61751400275E9D /* MasterApproveModel.swift */; };
 		05D7A66A2C6175A400275E9D /* MasterDenyModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D7A6692C6175A400275E9D /* MasterDenyModel.swift */; };
 		05D7A66D2C618A6C00275E9D /* ExecutorActionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D7A66C2C618A6C00275E9D /* ExecutorActionModel.swift */; };
+		05D7A6702C62BD8400275E9D /* ExecutorTaskDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D7A66F2C62BD8300275E9D /* ExecutorTaskDetails.swift */; };
 		05E353BE2B8BD75800C418B1 /* UIApplication+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05E353BD2B8BD75800C418B1 /* UIApplication+Extension.swift */; };
 		05EC0C7D2B504C6500A5E5D8 /* PickerSegmentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05EC0C7C2B504C6500A5E5D8 /* PickerSegmentsView.swift */; };
 		05F2D9592B92517E00BDDD36 /* MonitorIssueScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F2D9582B92517E00BDDD36 /* MonitorIssueScreen.swift */; };
@@ -146,6 +147,7 @@
 		05D7A6672C61751400275E9D /* MasterApproveModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterApproveModel.swift; sourceTree = "<group>"; };
 		05D7A6692C6175A400275E9D /* MasterDenyModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterDenyModel.swift; sourceTree = "<group>"; };
 		05D7A66C2C618A6C00275E9D /* ExecutorActionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutorActionModel.swift; sourceTree = "<group>"; };
+		05D7A66F2C62BD8300275E9D /* ExecutorTaskDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutorTaskDetails.swift; sourceTree = "<group>"; };
 		05E353BD2B8BD75800C418B1 /* UIApplication+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+Extension.swift"; sourceTree = "<group>"; };
 		05EC0C7C2B504C6500A5E5D8 /* PickerSegmentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerSegmentsView.swift; sourceTree = "<group>"; };
 		05F2D9582B92517E00BDDD36 /* MonitorIssueScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitorIssueScreen.swift; sourceTree = "<group>"; };
@@ -528,6 +530,7 @@
 			isa = PBXGroup;
 			children = (
 				05EC0C7C2B504C6500A5E5D8 /* PickerSegmentsView.swift */,
+				05D7A66F2C62BD8300275E9D /* ExecutorTaskDetails.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -896,6 +899,7 @@
 				053E61412B86406E00D37C81 /* View+ExtensionExtra.swift in Sources */,
 				05B7CEBB2B4F488400FD502A /* Color.swift in Sources */,
 				0509CBF42BFC854C00FBCEF1 /* LoginModel.swift in Sources */,
+				05D7A6702C62BD8400275E9D /* ExecutorTaskDetails.swift in Sources */,
 				05D7A6662C601E6300275E9D /* RegionIssue.swift in Sources */,
 				05D65AF62B6A5315009CF788 /* CustomTabBarContainer.swift in Sources */,
 				051E62762BFD255C001FBD74 /* IssueStatus.swift in Sources */,

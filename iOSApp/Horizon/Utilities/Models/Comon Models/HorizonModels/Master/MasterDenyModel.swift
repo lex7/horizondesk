@@ -10,5 +10,5 @@ import Foundation
 struct MasterDenyModel: Encodable {
     let user_id: Int
     let request_id: Int
-    let reason: String = ""
+    let reason: String
 }
