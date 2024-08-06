@@ -10,6 +10,11 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from datetime import datetime, timezone
 from typing import List, Optional
+from firebase_admin import credentials, initialize_app
+from google.oauth2 import service_account
+import google.auth.transport.requests
+import requests
+import json
 
 load_dotenv()
 
@@ -29,10 +34,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 app = FastAPI()
 
-@app.get("/")
-def read_root():
-    return {"message": "home page"}
-
+# Table models
 
 class User(Base):
     __tablename__ = 'users'
@@ -73,19 +75,6 @@ class WorkerShift(Base):
     
     users = relationship("User", back_populates="shift")
 
-class UserModel(BaseModel):
-    user_id: int
-    username: str
-    surname: Optional[str]
-    name: Optional[str]
-    spec_id: Optional[int]
-    fcm_token: Optional[str]
-    role_id: int
-    shift_id: Optional[int]
-
-    class Config:
-        orm_mode = True
-
 class RequestType(Base):
     __tablename__ = 'request_types'
     request_type = Column(Integer, primary_key=True, index=True)
@@ -100,13 +89,6 @@ class Status(Base):
     __tablename__ = 'statuses'
     status_id = Column(Integer, primary_key=True, index=True)
     status_name = Column(String, unique=True, index=True, nullable=False)
-
-class StatusModel(BaseModel):
-    status_id: int
-    status_name: str
-
-    class Config:
-        orm_mode = True
 
 class Request(Base):
     __tablename__ = 'requests'
@@ -140,6 +122,28 @@ class RequestStatusLog(Base):
     request_rel = relationship("Request")
 
 Base.metadata.create_all(bind=engine)
+
+# Models
+
+class UserModel(BaseModel):
+    user_id: int
+    username: str
+    surname: Optional[str]
+    name: Optional[str]
+    spec_id: Optional[int]
+    fcm_token: Optional[str]
+    role_id: int
+    shift_id: Optional[int]
+
+    class Config:
+        orm_mode = True
+
+class StatusModel(BaseModel):
+    status_id: int
+    status_name: str
+
+    class Config:
+        orm_mode = True
 
 class LoginRequest(BaseModel):
     username: str
@@ -223,6 +227,8 @@ class RequestStatusLogModel(BaseModel):
             datetime: lambda v: v.strftime("%Y-%m-%dT%H:%M:%S")
         }
 
+# Extra funcs
+
 def get_db():
     db = SessionLocal()
     try:
@@ -236,7 +242,7 @@ def verify_password(plain_password, hashed_password):
 def hash_password(password):
     return pwd_context.hash(password)
 
-def update_request_status(request_id: int, new_status: int, user_id: int, db: Session):
+def update_request(request_id: int, new_status: int, user_id: int, db: Session, **kwargs):
     existing_request = db.query(Request).filter(Request.request_id == request_id).first()
     if existing_request is None:
         raise HTTPException(status_code=404, detail="Request not found")
@@ -248,12 +254,23 @@ def update_request_status(request_id: int, new_status: int, user_id: int, db: Se
         changed_by=user_id
     )
     db.add(log_entry)
+
     existing_request.status_id = new_status
     existing_request.updated_at = datetime.now(timezone.utc)
+    
+    for key, value in kwargs.items():
+        setattr(existing_request, key, value)
+
     db.commit()
     db.refresh(existing_request)
     db.refresh(log_entry)
     return existing_request
+
+# Endpoints
+
+@app.get("/")
+def read_root():
+    return {"message": "home page"}
 
 @app.post("/register")
 def register(request: RegisterRequest, db: Session = Depends(get_db)):
@@ -291,114 +308,145 @@ def create_request(request: RequestCreate, db: Session = Depends(get_db)):
 
 @app.post("/master-approve", response_model=dict)
 def approve_request(request: ApproveRequest, db: Session = Depends(get_db)):
-    update_request_status(request.request_id, 2, request.user_id, db)
-    return {"message": "Request approved successfully", "request_id": request.request_id}
+    existing_request = update_request(
+        request.request_id,
+        new_status=2,
+        user_id=request.user_id,
+        db=db
+    )
+    creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
+    if creator_user is None or not creator_user.fcm_token:
+        raise HTTPException(status_code=404, detail="Users's FCM token not found")
+    try:
+        send_push(
+            token=creator_user.fcm_token,
+            title="Request Approved",
+            body=f"Your request (ID: {existing_request.request_id}) has been approved."
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Push notification failed: {str(e)}")
+    return {"message": "Request approved successfully", "request_id": existing_request.request_id}
+
 
 @app.post("/master-deny", response_model=dict)
 def deny_request(request: DenyRequest, db: Session = Depends(get_db)):
-    existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
-    if existing_request is None:
-        raise HTTPException(status_code=404, detail="Request not found")
-
-    log_entry = RequestStatusLog(
-        request_id=existing_request.request_id,
-        old_status_id=existing_request.status_id,
-        new_status_id=3,
-        changed_by=request.user_id
+    existing_request = update_request(
+        request.request_id,
+        new_status=3,
+        user_id=request.user_id,
+        db=db,
+        rejection_reason=request.reason
     )
-    db.add(log_entry)
-
-    existing_request.status_id = 3
-    existing_request.rejection_reason = request.reason
-    existing_request.updated_at = datetime.now(timezone.utc)
-
-    db.commit()
-    db.refresh(existing_request)
-    db.refresh(log_entry)
-
+    creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
+    if creator_user is None or not creator_user.fcm_token:
+        raise HTTPException(status_code=404, detail="Users's FCM token not found")
+    try:
+        send_push(
+            token=creator_user.fcm_token,
+            title="Request Denied",
+            body=f"Your request (ID: {existing_request.request_id}) has been denied."
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Push notification failed: {str(e)}")
     return {"message": "Request denied successfully", "request_id": existing_request.request_id}
-
 
 @app.post("/take-on-work", response_model=dict)
 def take_request(request: UpdateRequest, db: Session = Depends(get_db)):
-    existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
-    if existing_request is None:
-        raise HTTPException(status_code=404, detail="Request not found")
-    
-    log_entry = RequestStatusLog(
-        request_id=existing_request.request_id,
-        old_status_id=existing_request.status_id,
-        new_status_id=4,  
-        changed_by=request.user_id
+    existing_request = update_request(
+        request.request_id,
+        new_status=4,
+        user_id=request.user_id,
+        db=db,
+        assigned_to=request.user_id
     )
-    db.add(log_entry)
-
-    existing_request.assigned_to = request.user_id
-    existing_request.status_id = 4
-    existing_request.updated_at = datetime.now()
-
-    db.commit()
-    db.refresh(existing_request)
-    db.refresh(log_entry)
-
+    creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
+    if creator_user is None or not creator_user.fcm_token:
+        raise HTTPException(status_code=404, detail="Users's FCM token not found")
+    try:
+        send_push(
+            token=creator_user.fcm_token,
+            title="Request is in work",
+            body=f"Your request (ID: {existing_request.request_id}) has been taken to work."
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Push notification failed: {str(e)}")
     return {"message": "Request accepted into work successfully", "request_id": existing_request.request_id}
 
 @app.post("/executor-cancel", response_model=dict)
-def cancel_request(request: UpdateRequest, db: Session = Depends(get_db)):
-    existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
-    if existing_request is None:
-        raise HTTPException(status_code=404, detail="Request not found")
-    
-    log_entry = RequestStatusLog(
-        request_id=existing_request.request_id,
-        old_status_id=existing_request.status_id,
-        new_status_id=2,
-        changed_by=request.user_id
+def cancel_request(request: DenyRequest, db: Session = Depends(get_db)):
+    existing_request = update_request(
+        request.request_id,
+        new_status=2,
+        user_id=request.user_id,
+        db=db,
+        assigned_to=None,
+        rejection_reason=request.reason
     )
-    db.add(log_entry)
-
-    existing_request.status_id = 2
-    existing_request.assigned_to = None
-    existing_request.updated_at = datetime.now(timezone.utc)
-
-    db.commit()
-    db.refresh(existing_request)
-    db.refresh(log_entry)
-
+    creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
+    if creator_user is None or not creator_user.fcm_token:
+        raise HTTPException(status_code=404, detail="Users's FCM token not found")
+    try:
+        send_push(
+            token=creator_user.fcm_token,
+            title="Request has been canceled",
+            body=f"Your request (ID: {existing_request.request_id}) has been canceled by executor."
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Push notification failed: {str(e)}")
     return {"message": "Request canceled successfully", "request_id": existing_request.request_id}
 
 @app.post("/executor-complete", response_model=dict)
 def complete_request(request: UpdateRequest, db: Session = Depends(get_db)):
-    update_request_status(request.request_id, 5, request.user_id, db)
+    existing_request = update_request(request.request_id, 5, request.user_id, db)
+    creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
+    if creator_user is None or not creator_user.fcm_token:
+        raise HTTPException(status_code=404, detail="Users's FCM token not found")
+    try:
+        send_push(
+            token=creator_user.fcm_token,
+            title="Request has been completed",
+            body=f"Your request (ID: {existing_request.request_id}) has been completed by executor."
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Push notification failed: {str(e)}")
     return {"message": "Request completed successfully", "request_id": request.request_id}
 
 @app.post("/requestor-confirm", response_model=dict)
 def confirm_request(request: UpdateRequest, db: Session = Depends(get_db)):
-    update_request_status(request.request_id, 6, request.user_id, db)
+    existing_request = update_request(request.request_id, 6, request.user_id, db)
+    executor_user = db.query(User).filter(User.user_id == existing_request.assigned_to).first()
+    if executor_user is None or not executor_user.fcm_token:
+        raise HTTPException(status_code=404, detail="Users's FCM token not found")
+    try:
+        send_push(
+            token=executor_user.fcm_token,
+            title="Request has been confirmed",
+            body=f"Your work (ID: {existing_request.request_id}) has been confirmed by requestor."
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Push notification failed: {str(e)}")
     return {"message": "Request confirmed successfully", "request_id": request.request_id}
 
 @app.post("/requestor-deny", response_model=dict)
 def deny_request(request: DenyRequest, db: Session = Depends(get_db)):
-    existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
-    if existing_request is None:
-        raise HTTPException(status_code=404, detail="Request not found")
-
-    log_entry = RequestStatusLog(
-        request_id=existing_request.request_id,
-        old_status_id=existing_request.status_id,
-        new_status_id=4,
-        changed_by=request.user_id
+    existing_request = update_request(
+        request.request_id,
+        new_status=4,
+        user_id=request.user_id,
+        db=db,
+        rejection_reason=request.reason
     )
-    db.add(log_entry)
-
-    existing_request.status_id = 4
-    existing_request.rejection_reason = request.reason
-    existing_request.updated_at = datetime.now(timezone.utc)
-
-    db.commit()
-    db.refresh(existing_request)
-    db.refresh(log_entry)
-
+    executor_user = db.query(User).filter(User.user_id == existing_request.assigned_to).first()
+    if executor_user is None or not executor_user.fcm_token:
+        raise HTTPException(status_code=404, detail="Users's FCM token not found")
+    try:
+        send_push(
+            token=executor_user.fcm_token,
+            title="Request has been declined",
+            body=f"Your work (ID: {existing_request.request_id}) has been declined by requestor."
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Push notification failed: {str(e)}")
     return {"message": "Request denied successfully", "request_id": existing_request.request_id}
 
 @app.get("/requests", response_model=List[RequestModel])
@@ -441,6 +489,23 @@ def get_under_master_approval_requests(user_id: int, db: Session = Depends(get_d
         Request.request_type == spec_id
     ).all()
     
+    return requests
+
+@app.get("/under-master-monitor", response_model=List[RequestModel])
+def get_under_master_approval_requests(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    spec_id = user.spec_id
+    if spec_id is None:
+        raise HTTPException(status_code=400, detail="User does not have a spec_id")
+    
+    requests = db.query(Request).filter(
+        Request.status_id != 1,
+        Request.request_type == spec_id
+    ).all()
+
     return requests
 
 @app.get("/in-progress", response_model=List[RequestModel])
@@ -492,3 +557,41 @@ def get_unassigned(user_id: int, db: Session = Depends(get_db)):
 def get_request_status_log(db: Session = Depends(get_db)):
     logs = db.query(RequestStatusLog).all()
     return logs
+
+
+# Firebase push
+
+cred = credentials.Certificate("accKey.json")
+initialize_app(cred)
+
+PROJECT_ID = 'horizons-champ'
+BASE_URL = 'https://fcm.googleapis.com'
+FCM_ENDPOINT = 'v1/projects/' + PROJECT_ID + '/messages:send'
+FCM_URL = BASE_URL + '/' + FCM_ENDPOINT
+SCOPES = ['https://www.googleapis.com/auth/firebase.messaging']
+
+def send_push(fcmToken: str, title="title", body="body"):
+    credentials = service_account.Credentials.from_service_account_file(
+        'accKey.json', scopes=SCOPES)
+    request = google.auth.transport.requests.Request()
+    credentials.refresh(request)
+    googleToken = credentials.token
+    headers = {
+        'Authorization': 'Bearer ' + googleToken,
+        'Content-Type': 'application/json; UTF-8',
+    }
+    message = {
+        "message": {
+            "token": fcmToken,
+            "notification": {
+                "title": title,
+                "body": body
+            }
+        }
+    }
+    message_json = json.dumps(message)
+    resp = requests.post(FCM_URL, data=message_json, headers=headers)
+    if resp.status_code == 200:
+        return {'message': 'Message sent to Firebase for delivery', 'response': resp.text}
+    else:
+        raise HTTPException(status_code=resp.status_code, detail=resp.text)
