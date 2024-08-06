@@ -70,5 +70,6 @@ CREATE TABLE request_status_log (
     old_status_id INTEGER REFERENCES statuses(status_id),
     new_status_id INTEGER REFERENCES statuses(status_id),
     changed_at TIMESTAMP NOT NULL DEFAULT now(),
-    changed_by INTEGER REFERENCES users(user_id)
+    changed_by INTEGER REFERENCES users(user_id),
+    rejection_reason TEXT
 );
