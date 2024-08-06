@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, HTTPException, Depends
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, event, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.types import TIMESTAMP, String
@@ -99,8 +99,8 @@ class Request(Base):
     area_id = Column(Integer, ForeignKey('areas.area_id'), nullable=False)
     description = Column(String, nullable=False)
     status_id = Column(Integer, ForeignKey('statuses.status_id'), default=1, nullable=False)
-    created_at = Column(TIMESTAMP, nullable=False, default=datetime.now(timezone.utc))
-    updated_at = Column(TIMESTAMP)
+    created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
+    updated_at = Column(TIMESTAMP, onupdate=func.now())
     deadline = Column(TIMESTAMP)
     rejection_reason = Column(String)
 
@@ -109,6 +109,10 @@ class Request(Base):
     request_type_rel = relationship("RequestType")
     area_rel = relationship("Area")
     status_rel = relationship("Status")
+
+@event.listens_for(Request, 'before_update')
+def receive_before_update(mapper, connection, target):
+    target.updated_at = datetime.now(timezone.utc)
 
 class RequestStatusLog(Base):
     __tablename__ = 'request_status_log'
