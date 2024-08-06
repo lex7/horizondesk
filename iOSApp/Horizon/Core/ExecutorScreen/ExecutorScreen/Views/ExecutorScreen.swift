@@ -234,7 +234,7 @@ private extension ExecutorScreen {
             }
             .padding(.top, 10)
             switch authStateEnvObject.issueRequestSegment {
-            case .inProgress:
+            case .masterReview:
                 HStack {
                     descriptionOfField(issue.readableStatus, color: Color.theme.secondary)
                     Spacer()
@@ -261,10 +261,16 @@ private extension ExecutorScreen {
                 }
             }
         }
-        .onChange(of: authStateEnvObject.executorSegment) { value in
+        .onChange(of: authStateEnvObject.executorSegment) {
             authStateEnvObject.executorUnassignRequest()
             authStateEnvObject.executorMyTasksRequest()
         }
+        .onChange(of: authStateEnvObject.tabBarSelection, perform: { value in
+            if value == .executeIssue {
+                authStateEnvObject.executorUnassignRequest()
+                authStateEnvObject.executorMyTasksRequest()
+            }
+        })
         .padding(.vertical, 20)
         .padding(.horizontal, 20)
         .background(
@@ -302,7 +308,7 @@ private extension ExecutorScreen {
                 }
             case .done:
                 HStack {
-                    descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
+                    descriptionOfField(issue.updatedAtString, color: Color.theme.lowContrast)
                 }
             /// Decline should not display
             case .declined:

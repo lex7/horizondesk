@@ -26,8 +26,8 @@ struct CustomTabBarView_Previews: PreviewProvider {
     static let tabs: [TabBarItem] = [
         .createIssue,
         .monitorIssue,
-        .reviewIssue,
         .executeIssue,
+        .masterReviewIssue,
         .account
     ]
     

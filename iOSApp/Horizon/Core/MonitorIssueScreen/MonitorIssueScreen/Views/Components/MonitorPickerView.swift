@@ -3,7 +3,7 @@
 import SwiftUI
 
 enum IssuesMontitorSwitcher: String, CaseIterable, Identifiable, Equatable  {
-    case inProgress = "MonitorPickerView"
+    case masterReview = "MonitorPickerView"
     case done = "MonitorDonePickerView"
     case declined = "MonitorRejectedPickerView"
     var id: Self { self }
@@ -23,13 +23,13 @@ struct MonitorPickerView: View {
     var body: some View {
         VStack(alignment: .center, spacing: 4) {
             Text(label)
-                .withMultiTextModifier(font: "NexaBold", size: 13, relativeTextStyle: .footnote, color: sectionSelected == .inProgress ? Color.theme.selected : Color.theme.mediumContrast)
+                .withMultiTextModifier(font: "NexaBold", size: 13, relativeTextStyle: .footnote, color: sectionSelected == .masterReview ? Color.theme.selected : Color.theme.mediumContrast)
                 .multilineTextAlignment(.trailing)
         }
         .padding(.horizontal, 4)
         .padding(.vertical, 11)
         .frame(maxWidth: .infinity, alignment: .center)
-        .background(sectionSelected == .inProgress ? AnyView(colorScheme == .dark ? Color.gradient.gradientLowDark : Color.gradient.gradientLowLight) : AnyView(Color.theme.surface))
+        .background(sectionSelected == .masterReview ? AnyView(colorScheme == .dark ? Color.gradient.gradientLowDark : Color.gradient.gradientLowLight) : AnyView(Color.theme.surface))
         .cornerRadius(24)
     }
 }

@@ -40,8 +40,8 @@ final class AuthStateEnvObject: ObservableObject {
     // SUPPORT SCREEN
     // TRANSACTION SCREEN
     @Published var executorSegment: TransactionSwitcher = .unassignedTask
-    // DEBT SCREEN
-    @Published var issueRequestSegment: IssuesMontitorSwitcher = .inProgress
+    // MASTER SCREEN
+    @Published var issueRequestSegment: IssuesMontitorSwitcher = .masterReview
     // DOCUMENT SCREEN
     @Published var documentSegment: MasterSwitcher = .reviewTab
     // Application Version
@@ -185,7 +185,7 @@ final class AuthStateEnvObject: ObservableObject {
                 }
             } receiveValue: { [unowned self] data in
                 do {
-                    self.issuesApproved = try RequestIssueModel.decode(from: data)
+                    self.issuesApproved = try RequestIssueModel.decode(from: data).sorted { ($0.updated_at ?? Date()) > ($1.updated_at ?? Date()) }
                 } catch {
                     print(error)
                 }
@@ -207,7 +207,7 @@ final class AuthStateEnvObject: ObservableObject {
                 }
             } receiveValue: { [unowned self] data in
                 do {
-                    self.issuesInProgress = try RequestIssueModel.decode(from: data)
+                    self.issuesInProgress = try RequestIssueModel.decode(from: data).sorted { ($0.updated_at ?? Date()) > ($1.updated_at ?? Date()) }
                 } catch {
                     print(error)
                 }
@@ -311,7 +311,7 @@ final class AuthStateEnvObject: ObservableObject {
                 // self.issuesDone = array.filter { $0.statusOfElement == .done }.reversed()
                 // po String(decoding: data, as: UTF8.self)
                 do {
-                    self.issuesDone = try RequestIssueModel.decode(from: data)
+                    self.issuesDone = try RequestIssueModel.decode(from: data).sorted { ($0.updated_at ?? Date()) > ($1.updated_at ?? Date()) }
                     debugPrint(issuesInWork.count)
                 } catch {
                     debugPrint(error)
@@ -333,10 +333,9 @@ final class AuthStateEnvObject: ObservableObject {
                     debugPrint(String(describing: "[vm: \(error) - ❌ getDeniedIssue]"))
                 }
             } receiveValue: { [unowned self] data in
-                // self.issuesInWork = array.filter { $0.statusOfElement != .declined && $0.statusOfElement != .done }.reversed()
                 // po String(decoding: data, as: UTF8.self)
                 do {
-                    self.issuesDeclined = try RequestIssueModel.decode(from: data)
+                    self.issuesDeclined = try RequestIssueModel.decode(from: data).sorted { ($0.updated_at ?? Date()) > ($1.updated_at ?? Date()) }
                     debugPrint(issuesInWork.count)
                 } catch {
                     print(error)

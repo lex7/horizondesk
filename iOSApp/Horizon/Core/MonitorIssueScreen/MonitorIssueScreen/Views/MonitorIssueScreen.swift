@@ -40,7 +40,7 @@ struct MonitorIssueScreen: View {
             }
             Group {
                 switch authStateEnvObject.issueRequestSegment {
-                case .inProgress:
+                case .masterReview:
                     switch authStateEnvObject.issuesInWork.isEmpty {
                     case true:
                         ScrollView(.vertical, showsIndicators: false) {
@@ -230,7 +230,7 @@ private extension MonitorIssueScreen {
             }
             HStack {
                 switch authStateEnvObject.issueRequestSegment {
-                case .inProgress:
+                case .masterReview:
                     titleHeader(issue.description ?? "", color: .highContrast, uppercase: false)
                 case .done:
                     titleHeader(issue.description ?? "", color: .theme.positivePrimary, uppercase: false)
@@ -239,7 +239,7 @@ private extension MonitorIssueScreen {
                 }
             }
             switch authStateEnvObject.issueRequestSegment {
-            case .inProgress:
+            case .masterReview:
                 HStack {
                     descriptionOfField(issue.readableStatus, color: Color.theme.secondary)
                     Spacer()
@@ -322,10 +322,10 @@ private extension MonitorIssueScreen {
             MonitorPickerView(sectionSelected: $authStateEnvObject.issueRequestSegment, label: "В работе")
                 .frame(maxWidth: (screenWidth/4), alignment: .leading)
                 .onTapGesture {
-                    authStateEnvObject.issueRequestSegment = .inProgress
+                    authStateEnvObject.issueRequestSegment = .masterReview
                     authStateEnvObject.getInProgressIssue()
                 }
-                .allowsHitTesting(authStateEnvObject.issueRequestSegment != .inProgress)
+                .allowsHitTesting(authStateEnvObject.issueRequestSegment != .masterReview)
             MonitorDonePickerView(sectionSelected: $authStateEnvObject.issueRequestSegment, label: "Исполнены")
                 .onTapGesture {
                     authStateEnvObject.issueRequestSegment = .done
@@ -353,7 +353,7 @@ private extension MonitorIssueScreen {
     @ViewBuilder
     private var messageForEmptyList: some View {
         switch authStateEnvObject.issueRequestSegment {
-        case .inProgress:
+        case .masterReview:
             VStack(alignment: .leading, spacing: 20) {
                 Text(NamingEnum.noRequests.name)
                     .withDefaultTextModifier(font: "NexaRegular", size: 16, relativeTextStyle: .callout, color: Color.theme.lowContrast)

@@ -23,10 +23,10 @@ struct AppTabBarView: View {
             MonitorIssueScreen(tabSelection: $authStateEnvObject.tabBarSelection)
                 .tabBarItem(tab: .monitorIssue, selection: $authStateEnvObject.tabBarSelection)
             ExecutorScreen()
-                .tabBarItem(tab: .reviewIssue, selection: $authStateEnvObject.tabBarSelection)
+                .tabBarItem(tab: .executeIssue, selection: $authStateEnvObject.tabBarSelection)
             if masterIsVisible {
                 MasterScreen(tabSelection: $authStateEnvObject.tabBarSelection)
-                    .tabBarItem(tab: .executeIssue, selection: $authStateEnvObject.tabBarSelection)
+                    .tabBarItem(tab: .masterReviewIssue, selection: $authStateEnvObject.tabBarSelection)
                 
             }
             MyAccountScreen(tabSelection: $authStateEnvObject.tabBarSelection)

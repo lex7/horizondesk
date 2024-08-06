@@ -3,22 +3,22 @@ import Foundation
 import SwiftUI
 
 enum TabBarItem: Hashable {
-    case createIssue, monitorIssue, reviewIssue, executeIssue, account
+    case createIssue, monitorIssue, executeIssue, masterReviewIssue, account
     var iconName: String {
         if #available(iOS 16, *) {
             switch self {
             case .createIssue: return "paperplane.circle"
             case .monitorIssue: return "folder.circle"
-            case .executeIssue: return "doc.text"
-            case .reviewIssue: return "arrow.up.arrow.down"
+            case .executeIssue: return "arrow.up.arrow.down"
+            case .masterReviewIssue: return "doc.text"
             case .account: return "person.text.rectangle"
             }
         } else {
             switch self {
             case .createIssue: return "chart.pie"
             case .monitorIssue: return "dollarsign.circle"
-            case .reviewIssue: return "arrow.up.arrow.down"
-            case .executeIssue: return "doc.text"
+            case .executeIssue: return "arrow.up.arrow.down"
+            case .masterReviewIssue: return "doc.text"
             case .account: return "person.text.rectangle"
             }
         }
@@ -28,8 +28,8 @@ enum TabBarItem: Hashable {
         switch self {
         case .createIssue: return Color.green
         case .monitorIssue: return Color.red
-        case .reviewIssue: return Color.blue
-        case .executeIssue: return Color.positivePrimary
+        case .executeIssue: return Color.blue
+        case .masterReviewIssue: return Color.positivePrimary
         case .account: return Color.orange
         }
     }

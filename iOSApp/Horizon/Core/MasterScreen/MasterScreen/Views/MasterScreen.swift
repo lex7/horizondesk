@@ -39,7 +39,7 @@ struct MasterScreen: View {
         })
         .background(Color.theme.background)
         .onChange(of: tabSelection) { value in
-            if tabSelection == .executeIssue {
+            if tabSelection == .masterReviewIssue {
                 authStateEnvObject.getRequestsForMaster()
             }
         }
@@ -47,7 +47,7 @@ struct MasterScreen: View {
 }
 
 #Preview {
-    MasterScreen(tabSelection: .constant(.executeIssue))
+    MasterScreen(tabSelection: .constant(.masterReviewIssue))
 }
 
 private extension MasterScreen {
@@ -121,17 +121,17 @@ private extension MasterScreen {
             }
             HStack {
                 switch authStateEnvObject.issueRequestSegment {
-                case .inProgress:
-                    titleHeader(issue.description ?? "", color: .highContrast, uppercase: false)
+                case .masterReview:
+                    titleHeader(issue.description ?? "", color: .vibrant, uppercase: false)
                 case .done:
-                    titleHeader(issue.description ?? "", color: .theme.positivePrimary, uppercase: false)
+                    titleHeader(issue.description ?? "", color: .theme.muted, uppercase: false)
                 case .declined:
                     titleHeader(issue.description ?? "", color: .theme.negativePrimary, uppercase: false)
                 }
             }
             .padding(.top, 10)
             switch authStateEnvObject.issueRequestSegment {
-            case .inProgress:
+            case .masterReview:
                 HStack {
                     descriptionOfField(issue.readableStatus, color: Color.theme.secondary)
                     Spacer()
