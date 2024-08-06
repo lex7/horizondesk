@@ -34,7 +34,7 @@ enum IssueStatus: Int, CaseIterable {
     var colorIssuer: Color {
         switch self {
         case .new:
-            return .theme.primary
+            return .theme.vibrant
         case .approved:
             return .theme.primary
         case .declined:

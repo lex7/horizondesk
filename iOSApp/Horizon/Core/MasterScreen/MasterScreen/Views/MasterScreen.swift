@@ -120,7 +120,7 @@ private extension MasterScreen {
                 }
             }
             HStack {
-                switch authStateEnvObject.issueDebtSegment {
+                switch authStateEnvObject.issueRequestSegment {
                 case .inProgress:
                     titleHeader(issue.description ?? "", color: .highContrast, uppercase: false)
                 case .done:
@@ -130,7 +130,7 @@ private extension MasterScreen {
                 }
             }
             .padding(.top, 10)
-            switch authStateEnvObject.issueDebtSegment {
+            switch authStateEnvObject.issueRequestSegment {
             case .inProgress:
                 HStack {
                     descriptionOfField(issue.readableStatus, color: Color.theme.secondary)

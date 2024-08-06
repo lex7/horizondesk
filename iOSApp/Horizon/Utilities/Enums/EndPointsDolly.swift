@@ -12,6 +12,10 @@ enum EndPointsDolly {
     /// Creator
     case inprogress(model: UserIdModel)
     case denied(model: UserIdModel)
+    case completed(model: UserIdModel)
+    case requestorConfirm(model: RequestDoneModel)
+    case requesterDeniedCompletion(model: RequesterDeniedModel)
+    case requesterDeleteTask(model: RequestDeleteModel)
     /// Master
     case underMasterApproval(model: UserIdModel)
     case masterApprove(model: MasterApproveModel)
@@ -23,8 +27,7 @@ enum EndPointsDolly {
     case executerCancel(model: ExecutorCancelModel)
     case executorComplete(model: ExecutorActionModel)
     
-    case completed(model: UserIdModel)
-    case done(model: IssueDoneModel)
+    
     
     var baseStrUrl: String {
         switch self {
@@ -52,8 +55,8 @@ extension EndPointsDolly: Moya.TargetType {
     
     var method: Moya.Method {
         switch self {
-        case .login, .createRequest, .done, .masterDeny,
-                .masterApprove, .takeOnWork, .executerCancel, .executorComplete:
+        case .login, .createRequest, .requestorConfirm, .requesterDeniedCompletion, .masterDeny,
+                .masterApprove, .takeOnWork, .executerCancel, .executorComplete, .requesterDeleteTask:
             return .post
         case .requests, .inprogress, .completed, .denied, .underMasterApproval, .unassigned, .myTasks:
             return .get
@@ -82,7 +85,11 @@ extension EndPointsDolly: Moya.TargetType {
             return .requestJSONEncodable(model)
         case .executerCancel(let model):
             return .requestJSONEncodable(model)
-        case .done(let model):
+        case .requestorConfirm(let model):
+            return .requestJSONEncodable(model)
+        case .requesterDeniedCompletion(let model):
+            return .requestJSONEncodable(model) // requesterDeleteTask
+        case .requesterDeleteTask(let model):
             return .requestJSONEncodable(model)
         }
     }
@@ -125,8 +132,12 @@ extension EndPointsDolly: Moya.TargetType {
             return "executor-cancel"
         case .executorComplete:
             return "executor-complete"
-        case .done:
-            return "done"
+        case .requestorConfirm:
+            return "requestor-confirm"
+        case .requesterDeniedCompletion:
+            return "requestor-deny"
+        case .requesterDeleteTask:
+            return "requestor-delete"
         }
     }
     

@@ -35,9 +35,9 @@ struct CreateIssueScreen: View {
             } // End of VStack
             .mask(LinearGradient(gradient: Gradient(colors: [.black, .black, .black, .black, .black, .clear]), startPoint: .top, endPoint: .bottom).ignoresSafeArea(edges: .top))
             .background(Color.theme.background.ignoresSafeArea(edges: .bottom))
-            .onChange(of: tabSelection) { value in
+            .onChange(of: tabSelection) {
                 if tabSelection == .createIssue {
-//                    authStateEnvObject.getMyRequests()
+                    authStateEnvObject.getInProgressIssue()
                 }
             }
         }

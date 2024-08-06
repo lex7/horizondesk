@@ -41,7 +41,7 @@ final class AuthStateEnvObject: ObservableObject {
     // TRANSACTION SCREEN
     @Published var executorSegment: TransactionSwitcher = .unassignedTask
     // DEBT SCREEN
-    @Published var issueDebtSegment: IssuesMontitorSwitcher = .inProgress
+    @Published var issueRequestSegment: IssuesMontitorSwitcher = .inProgress
     // DOCUMENT SCREEN
     @Published var documentSegment: MasterSwitcher = .reviewTab
     // Application Version
@@ -107,32 +107,8 @@ final class AuthStateEnvObject: ObservableObject {
             authState = .unauthorized
         }
     }
-    
-    ///
-    func getMyRequests() {
-        networkManager.requestMoyaData(apis: .requests)
-            .receive(on: DispatchQueue.main)
-            .sink { completion in
-                switch completion {
-                case .finished:
-                    debugPrint(String(describing: "[vm: ✅ getIssues successfully]"))
-                    break
-                case .failure(let error):
-                    debugPrint(String(describing: "[vm: \(error) - ❌ getIssues]"))
-                }
-            } receiveValue: { data in
-//                if let array = try? JSONDecoder().decode([RequestIssueModel].self, from: data) {
-//                    self.issueArray = array.reversed()
-//                    
-//                    self.issuesInWork = array.filter { $0.statusOfElement != .declined && $0.statusOfElement != .done }.reversed()
-//                    self.issuesDeclined = array.filter { $0.statusOfElement == .declined }.reversed()
-//                    self.issuesDone = array.filter { $0.statusOfElement == .done }.reversed()
-//                }
-            }
-            .store(in: &cancellables)
-    }
-    
-    /// Requests for Master
+        
+    // MARK: - Requests for Master
     func getRequestsForMaster() {
         let model = UserIdModel(user_id: credentialService.getUserId() ?? 777)
         networkManager.requestMoyaData(apis: .underMasterApproval(model: model))
@@ -194,7 +170,7 @@ final class AuthStateEnvObject: ObservableObject {
             .store(in: &cancellables)
     }
     
-    /// Executor Requests
+    // MARK: - Executor Requests
     func executorUnassignRequest() {
         let model = UserIdModel(user_id: credentialService.getUserId() ?? 777)
         networkManager.requestMoyaData(apis: .unassigned(model: model))
@@ -246,10 +222,10 @@ final class AuthStateEnvObject: ObservableObject {
             .sink { completion in
                 switch completion {
                 case .finished:
-                    debugPrint(String(describing: "[vm: ✅ executerAction successfully]"))
+                    debugPrint(String(describing: "[vm: ✅ executerTakeOnWork successfully]"))
                     break
                 case .failure(let error):
-                    debugPrint(String(describing: "[vm: \(error) - ❌ executerAction]"))
+                    debugPrint(String(describing: "[vm: \(error) - ❌ executerTakeOnWork]"))
                 }
             } receiveValue: { _ in
                 action()
@@ -264,10 +240,10 @@ final class AuthStateEnvObject: ObservableObject {
             .sink { completion in
                 switch completion {
                 case .finished:
-                    debugPrint(String(describing: "[vm: ✅ executerAction successfully]"))
+                    debugPrint(String(describing: "[vm: ✅ executerCancel successfully]"))
                     break
                 case .failure(let error):
-                    debugPrint(String(describing: "[vm: \(error) - ❌ executerAction]"))
+                    debugPrint(String(describing: "[vm: \(error) - ❌ executerCancel]"))
                 }
             } receiveValue: { _ in
                 action()
@@ -282,10 +258,10 @@ final class AuthStateEnvObject: ObservableObject {
             .sink { completion in
                 switch completion {
                 case .finished:
-                    debugPrint(String(describing: "[vm: ✅ executerAction successfully]"))
+                    debugPrint(String(describing: "[vm: ✅ executerCompleteSendReview successfully]"))
                     break
                 case .failure(let error):
-                    debugPrint(String(describing: "[vm: \(error) - ❌ executerAction]"))
+                    debugPrint(String(describing: "[vm: \(error) - ❌ executerCompleteSendReview]"))
                 }
             } receiveValue: { _ in
                 action()
@@ -293,7 +269,7 @@ final class AuthStateEnvObject: ObservableObject {
             .store(in: &cancellables)
     }
     
-    /// Creator of Requests:
+    // MARK: - Creator of Requests:
     func getInProgressIssue() {
         let model = UserIdModel(user_id: credentialService.getUserId() ?? 777)
         networkManager.requestMoyaData(apis: .inprogress(model: model))
@@ -307,10 +283,10 @@ final class AuthStateEnvObject: ObservableObject {
                     debugPrint(String(describing: "[vm: \(error) - ❌ inProgressIssue]"))
                 }
             } receiveValue: { [unowned self] data in
-                // self.issuesInWork = array.filter { $0.statusOfElement != .declined && $0.statusOfElement != .done }.reversed()
-                // po String(decoding: data, as: UTF8.self)
                 do {
-                    self.issuesInWork = try RequestIssueModel.decode(from: data)
+                    let arrayReview = try RequestIssueModel.decode(from: data).filter { $0.status_id == 5 }.sorted { ($0.updated_at ?? Date()) > ($1.updated_at ?? Date()) }
+                    let restOfTasks = try RequestIssueModel.decode(from: data).filter { $0.status_id != 5 }.sorted { ($0.created_at ?? Date()) > ($1.created_at ?? Date()) }
+                    self.issuesInWork = arrayReview + restOfTasks
                     debugPrint(issuesInWork.count)
                 } catch {
                     print(error)
@@ -326,10 +302,10 @@ final class AuthStateEnvObject: ObservableObject {
             .sink { completion in
                 switch completion {
                 case .finished:
-                    debugPrint(String(describing: "[vm: ✅ inProgressIssue successfully]"))
+                    debugPrint(String(describing: "[vm: ✅ getCompletedIssue successfully]"))
                     break
                 case .failure(let error):
-                    debugPrint(String(describing: "[vm: \(error) - ❌ inProgressIssue]"))
+                    debugPrint(String(describing: "[vm: \(error) - ❌ getCompletedIssue]"))
                 }
             } receiveValue: { [unowned self] data in
                 // self.issuesDone = array.filter { $0.statusOfElement == .done }.reversed()
@@ -351,10 +327,10 @@ final class AuthStateEnvObject: ObservableObject {
             .sink { completion in
                 switch completion {
                 case .finished:
-                    debugPrint(String(describing: "[vm: ✅ inProgressIssue successfully]"))
+                    debugPrint(String(describing: "[vm: ✅ getDeniedIssue successfully]"))
                     break
                 case .failure(let error):
-                    debugPrint(String(describing: "[vm: \(error) - ❌ inProgressIssue]"))
+                    debugPrint(String(describing: "[vm: \(error) - ❌ getDeniedIssue]"))
                 }
             } receiveValue: { [unowned self] data in
                 // self.issuesInWork = array.filter { $0.statusOfElement != .declined && $0.statusOfElement != .done }.reversed()
@@ -369,23 +345,61 @@ final class AuthStateEnvObject: ObservableObject {
             .store(in: &cancellables)
     }
         
-    func doneIssue(id: String, action: @escaping (()->Void)) {
-        let model = IssueDoneModel(id: id, completed: makeDateStamp())
-        networkManager.requestMoyaData(apis: .done(model: model))
+    func requestDone(request_id: Int, action: @escaping (()->Void)) {
+        let model = RequestDoneModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id)
+        networkManager.requestMoyaData(apis: .requestorConfirm(model: model))
             .receive(on: DispatchQueue.main)
             .sink { completion in
                 switch completion {
                 case .finished:
-                    debugPrint(String(describing: "[vm: ✅ doneIssue successfully]"))
+                    debugPrint(String(describing: "[vm: ✅ requestDone successfully]"))
                     break
                 case .failure(let error):
-                    debugPrint(String(describing: "[vm: \(error) - ❌ doneIssue]"))
+                    debugPrint(String(describing: "[vm: \(error) - ❌ requestDone]"))
                 }
             } receiveValue: { _ in
                 action()
             }
             .store(in: &cancellables)
     }
+    
+    func requesterDeniedCompletion(request_id: Int, action: @escaping (()->Void)) {
+        let model = RequestDoneModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id)
+        networkManager.requestMoyaData(apis: .requestorConfirm(model: model))
+            .receive(on: DispatchQueue.main)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    debugPrint(String(describing: "[vm: ✅ requesterDeniedCompletion successfully]"))
+                    break
+                case .failure(let error):
+                    debugPrint(String(describing: "[vm: \(error) - ❌ requesterDeniedCompletion]"))
+                }
+            } receiveValue: { _ in
+                action()
+            }
+            .store(in: &cancellables)
+    }
+    
+    func requesterDeleteTask(request_id: Int, action: @escaping (()->Void)) {
+        let model = RequestDeleteModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id)
+        networkManager.requestMoyaData(apis: .requesterDeleteTask(model: model))
+            .receive(on: DispatchQueue.main)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    debugPrint(String(describing: "[vm: ✅ requesterDeleteTask successfully]"))
+                    break
+                case .failure(let error):
+                    debugPrint(String(describing: "[vm: \(error) - ❌ requesterDeleteTask]"))
+                }
+            } receiveValue: { _ in
+                action()
+            }
+            .store(in: &cancellables)
+    }
+    
+    // MARK: - Other Methods
     
     private func makeDateStamp() -> String {
         let outputFormatter = DateFormatter()

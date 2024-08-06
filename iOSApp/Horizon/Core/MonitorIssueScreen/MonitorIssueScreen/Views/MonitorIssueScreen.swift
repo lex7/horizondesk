@@ -39,7 +39,7 @@ struct MonitorIssueScreen: View {
                     .background(Color.theme.background)
             }
             Group {
-                switch authStateEnvObject.issueDebtSegment {
+                switch authStateEnvObject.issueRequestSegment {
                 case .inProgress:
                     switch authStateEnvObject.issuesInWork.isEmpty {
                     case true:
@@ -79,24 +79,24 @@ struct MonitorIssueScreen: View {
                     }
                 }
             }
-            .animation(.easeInOut, value: authStateEnvObject.issueDebtSegment)
+            .animation(.easeInOut, value: authStateEnvObject.issueRequestSegment)
             .padding(.top, 5)
             .padding(.top, 2)
             .onAppear {
                 authStateEnvObject.getInProgressIssue()
-                authStateEnvObject.getInProgressIssue()
+                authStateEnvObject.getCompletedIssue()
                 authStateEnvObject.getDeniedIssue()
             }
-            .onChange(of: tabSelection) { value in
+            .onChange(of: tabSelection) {
                 if tabSelection == .monitorIssue {
                     authStateEnvObject.getInProgressIssue()
-                    authStateEnvObject.getInProgressIssue()
+                    authStateEnvObject.getCompletedIssue()
                     authStateEnvObject.getDeniedIssue()
                 }
             }
-            .onChange(of: authStateEnvObject.issueDebtSegment) { value in
+            .onChange(of: authStateEnvObject.issueRequestSegment) {
                 authStateEnvObject.getInProgressIssue()
-                authStateEnvObject.getInProgressIssue()
+                authStateEnvObject.getCompletedIssue()
                 authStateEnvObject.getDeniedIssue()
             }
             .padding(.horizontal, 12)
@@ -113,15 +113,40 @@ private extension MonitorIssueScreen {
                 switch issue.statusOfElement {
                 case .review:
                     Menu {
-                        Button("Подтвердить выполнение") {
+                        Button("Выполнено ✅") {
                             generator.impactOccurred()
-                            //                            authStateEnvObject.doneIssue(id: issue.request_id) {
-                            //                                authStateEnvObject.getMyRequests()
-                            //                            }
+                            authStateEnvObject.requestDone(request_id: issue.request_id) {
+                                Task {
+                                    try await Task.sleep(nanoseconds: 500_000_000)
+                                    authStateEnvObject.getInProgressIssue()
+                                    authStateEnvObject.getCompletedIssue()
+                                }
+                            }
                         }
-                        Button("Отмена") {
+                        Button("Не выполнено 👎") {
                             generator.impactOccurred()
-                            //                            authStateEnvObject.getMyRequests()
+                            authStateEnvObject.requesterDeniedCompletion(request_id: issue.request_id) {
+                                Task {
+                                    try await Task.sleep(nanoseconds: 500_000_000)
+                                    authStateEnvObject.getInProgressIssue()
+                                    authStateEnvObject.getCompletedIssue()
+                                }
+                            }
+                        }
+                    } label: {
+                        issueCellFor(issue)
+                    }
+                case .new:
+                    Menu {
+                        Button("Удалить ❌") {
+                            generator.impactOccurred()
+                            authStateEnvObject.requesterDeleteTask(request_id: issue.request_id) {
+                                Task {
+                                    try await Task.sleep(nanoseconds: 500_000_000)
+                                    authStateEnvObject.getInProgressIssue()
+                                    authStateEnvObject.getCompletedIssue()
+                                }
+                            }
                         }
                     } label: {
                         issueCellFor(issue)
@@ -204,7 +229,7 @@ private extension MonitorIssueScreen {
                 }
             }
             HStack {
-                switch authStateEnvObject.issueDebtSegment {
+                switch authStateEnvObject.issueRequestSegment {
                 case .inProgress:
                     titleHeader(issue.description ?? "", color: .highContrast, uppercase: false)
                 case .done:
@@ -213,7 +238,7 @@ private extension MonitorIssueScreen {
                     titleHeader(issue.description ?? "", color: .theme.negativePrimary, uppercase: false)
                 }
             }
-            switch authStateEnvObject.issueDebtSegment {
+            switch authStateEnvObject.issueRequestSegment {
             case .inProgress:
                 HStack {
                     descriptionOfField(issue.readableStatus, color: Color.theme.secondary)
@@ -255,36 +280,36 @@ private extension MonitorIssueScreen {
     @ViewBuilder
     private func createDateString(_ issue: RequestIssueModel) -> some View {
         if let status = issue.statusOfElement {
-            EmptyView()
-            //            switch status {
-            //            case .new:
-            //                HStack(spacing: 3) {
-            //                    descriptionOfField("создано:", color: Color.theme.lowContrast)
-            //                    descriptionOfField(issue.created_at.getTimeHorizon(), color: Color.theme.lowContrast)
-            //                }
-            //            case .approved:
-            //                HStack(spacing: 3) {
-            //                    descriptionOfField("до:", color: Color.theme.lowContrast)
-            //                    descriptionOfField(issue.deadline.getDateHorizon(), color: Color.theme.lowContrast)
-            //                }
-            //            case .declined:
-            //                HStack(spacing: 3) {
-            //                    descriptionOfField(issue.completed.getTimeHorizon(), color: Color.theme.lowContrast)
-            //                }
-            //            case .inprogress:
-            //                HStack(spacing: 3) {
-            //                    descriptionOfField("до:", color: Color.theme.lowContrast)
-            //                    descriptionOfField(issue.deadline.getDateHorizon(), color: Color.theme.lowContrast)
-            //                }
-            //            case .review:
-            //                HStack {
-            //                    descriptionOfField(issue.deadline.getDateHorizon(), color: Color.theme.lowContrast)
-            //                }
-            //            case .done:
-            //                HStack {
-            //                    descriptionOfField(issue.completed.getDateHorizon(), color: Color.theme.lowContrast)
-            //                }
-            //            }
+            switch status {
+            case .new:
+                HStack(spacing: 3) {
+                    descriptionOfField("создано:", color: Color.theme.lowContrast)
+                    descriptionOfField(issue.createdAtString, color: Color.theme.lowContrast)
+                }
+            case .approved:
+                HStack(spacing: 3) {
+                    descriptionOfField("направлен:", color: Color.theme.lowContrast)
+                    descriptionOfField(issue.updatedAtString, color: Color.theme.lowContrast)
+                }
+            case .inprogress:
+                HStack(spacing: 3) {
+                    descriptionOfField("начат:", color: Color.theme.lowContrast)
+                    descriptionOfField(issue.updatedAtString, color: Color.theme.lowContrast)
+                }
+            case .review:
+                HStack {
+                    descriptionOfField(issue.updatedAtString, color: Color.theme.lowContrast)
+                }
+            case .done:
+                HStack {
+                    descriptionOfField(issue.updatedAtString, color: Color.theme.lowContrast)
+                }
+            /// Decline should not display
+            case .declined:
+                HStack(spacing: 3) { // completed ??
+                    descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
+                }
+            }
         } else {
             EmptyView()
         }
@@ -294,23 +319,23 @@ private extension MonitorIssueScreen {
 private extension MonitorIssueScreen {
     var pickerContainer: some View {
         HStack(alignment: .center, spacing: 4) {
-            MonitorPickerView(sectionSelected: $authStateEnvObject.issueDebtSegment, label: "В работе")
+            MonitorPickerView(sectionSelected: $authStateEnvObject.issueRequestSegment, label: "В работе")
                 .frame(maxWidth: (screenWidth/4), alignment: .leading)
                 .onTapGesture {
-                    authStateEnvObject.issueDebtSegment = .inProgress
+                    authStateEnvObject.issueRequestSegment = .inProgress
                     authStateEnvObject.getInProgressIssue()
                 }
-                .allowsHitTesting(authStateEnvObject.issueDebtSegment != .inProgress)
-            MonitorDonePickerView(sectionSelected: $authStateEnvObject.issueDebtSegment, label: "Исполнены")
+                .allowsHitTesting(authStateEnvObject.issueRequestSegment != .inProgress)
+            MonitorDonePickerView(sectionSelected: $authStateEnvObject.issueRequestSegment, label: "Исполнены")
                 .onTapGesture {
-                    authStateEnvObject.issueDebtSegment = .done
+                    authStateEnvObject.issueRequestSegment = .done
                 }
-                .allowsHitTesting(authStateEnvObject.issueDebtSegment != .done)
-            MonitorRejectedPickerView(sectionSelected: $authStateEnvObject.issueDebtSegment, label: "Отклонены")
+                .allowsHitTesting(authStateEnvObject.issueRequestSegment != .done)
+            MonitorRejectedPickerView(sectionSelected: $authStateEnvObject.issueRequestSegment, label: "Отклонены")
                 .onTapGesture {
-                    authStateEnvObject.issueDebtSegment = .declined
+                    authStateEnvObject.issueRequestSegment = .declined
                 }
-                .allowsHitTesting(authStateEnvObject.issueDebtSegment != .declined)
+                .allowsHitTesting(authStateEnvObject.issueRequestSegment != .declined)
         }
         .padding(8)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -327,7 +352,7 @@ private extension MonitorIssueScreen {
 private extension MonitorIssueScreen {
     @ViewBuilder
     private var messageForEmptyList: some View {
-        switch authStateEnvObject.issueDebtSegment {
+        switch authStateEnvObject.issueRequestSegment {
         case .inProgress:
             VStack(alignment: .leading, spacing: 20) {
                 Text(NamingEnum.noRequests.name)

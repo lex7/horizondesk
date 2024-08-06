@@ -233,7 +233,7 @@ private extension ExecutorScreen {
                 }
             }
             .padding(.top, 10)
-            switch authStateEnvObject.issueDebtSegment {
+            switch authStateEnvObject.issueRequestSegment {
             case .inProgress:
                 HStack {
                     descriptionOfField(issue.readableStatus, color: Color.theme.secondary)
