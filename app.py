@@ -228,6 +228,13 @@ class RequestTypeModel(BaseModel):
     class Config:
         orm_mode = True
 
+class SpecializationModel(BaseModel):
+    spec_id: int
+    spec_name: str
+
+    class Config:
+        orm_mode = True
+
 class RoleModel(BaseModel):
     role_id: int
     role_name: str
@@ -316,7 +323,7 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
     db.add(user)
     db.commit()
     db.refresh(user)
-    return {"user_id": user.user_id}
+    return {"User successfully registered"}
 
 @app.post("/login", response_model=LoginResponse)
 def login(request: LoginRequest, db: Session = Depends(get_db)):
@@ -514,6 +521,11 @@ def get_requests(db: Session = Depends(get_db)):
 def get_request_types(db: Session = Depends(get_db)):
     request_types = db.query(RequestType).all()
     return request_types
+
+@app.get("/specializations", response_model=List[SpecializationModel])
+def get_specializations(db: Session = Depends(get_db)):
+    specializations = db.query(Specialization).all()
+    return specializations
 
 @app.get("/roles", response_model=List[RoleModel])
 def get_roles(db: Session = Depends(get_db)):
