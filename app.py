@@ -464,6 +464,18 @@ def deny_request(request: DenyRequest, db: Session = Depends(get_db)):
     #     pass
     return {"message": "Request denied successfully", "request_id": existing_request.request_id}
 
+@app.post("/requestor-delete", response_model=dict)
+def soft_delete_request(request_id: int, user_id: int, db: Session = Depends(get_db)):
+    existing_request = db.query(Request).filter(Request.request_id == request_id, Request.created_by == user_id).first()
+
+    if existing_request is None:
+        raise HTTPException(status_code=404, detail="Request not found")
+
+    update_request(request_id, new_status=7, user_id=user_id, db=db)
+
+    return {"message": "Request marked as deleted successfully"}
+
+
 @app.get("/requests", response_model=List[RequestModel])
 def get_requests(db: Session = Depends(get_db)):
     requests = db.query(Request).all()

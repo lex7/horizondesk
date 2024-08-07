@@ -35,7 +35,8 @@ VALUES ('На рассмотрении'),
        ('Отклонена'),
        ('В работе'),
        ('Требует подтверждения'),
-       ('Завершена');
+       ('Завершена'),
+       ('Удалена');
 
 INSERT INTO users (username, password_hash, surname, name, spec_id, fcm_token, role_id, shift_id)
 VALUES 
