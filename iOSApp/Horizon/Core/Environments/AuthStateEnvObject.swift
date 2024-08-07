@@ -363,8 +363,8 @@ final class AuthStateEnvObject: ObservableObject {
     }
     
     func requesterDeniedCompletion(request_id: Int, action: @escaping (()->Void)) {
-        let model = RequestDoneModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id)
-        networkManager.requestMoyaData(apis: .requestorConfirm(model: model))
+        let model = RequesterDeniedModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, reason: "")
+        networkManager.requestMoyaData(apis: .requesterDeniedCompletion(model: model))
             .receive(on: DispatchQueue.main)
             .sink { completion in
                 switch completion {

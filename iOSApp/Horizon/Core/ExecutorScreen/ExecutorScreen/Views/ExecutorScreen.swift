@@ -304,7 +304,7 @@ private extension ExecutorScreen {
                 }
             case .review:
                 HStack {
-                    descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
+                    descriptionOfField(issue.updatedAtString, color: Color.theme.lowContrast)
                 }
             case .done:
                 HStack {
