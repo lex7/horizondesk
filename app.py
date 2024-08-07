@@ -616,12 +616,12 @@ def get_completed_requests(user_id: int, db: Session = Depends(get_db)):
     requests = db.query(Request).filter(Request.status_id == 6, Request.created_by == user_id).all()
     return requests
 
-@app.get("/my-tasks", response_model=List[RequestModel])
+@app.get("/executor-assigned", response_model=List[RequestModel])
 def get_my_tasks(user_id: int, db: Session = Depends(get_db)):
     tasks = db.query(Request).filter(Request.assigned_to == user_id).all()
     return tasks
 
-@app.get("/unassigned", response_model=List[RequestModel])
+@app.get("/executor-unassigned", response_model=List[RequestModel])
 def get_unassigned(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.user_id == user_id).first()
     if user is None:
