@@ -304,10 +304,9 @@ private extension MonitorIssueScreen {
                 HStack {
                     descriptionOfField(issue.updatedAtString, color: Color.theme.lowContrast)
                 }
-            /// Decline should not display
             case .declined:
                 HStack(spacing: 3) { // completed ??
-                    descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
+                    descriptionOfField(issue.updatedAtString, color: Color.theme.lowContrast)
                 }
             }
         } else {
