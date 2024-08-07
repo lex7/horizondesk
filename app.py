@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 from typing import List, Optional
 # from firebase_admin import credentials, initialize_app
 # from google.oauth2 import service_account
@@ -175,9 +175,9 @@ class RegisterRequest(BaseModel):
     surname: Optional[str] = None
     name: Optional[str] = None
     middle_name: Optional[str] = None
-    hire_date: Optional[datetime] = None
+    hire_date: Optional[date] = None
     phone_number: Optional[str] = None
-    birth_date: Optional[datetime] = None
+    birth_date: Optional[date] = None
     email: Optional[str] = None
     role_id: int
     spec_id: Optional[int] = None
