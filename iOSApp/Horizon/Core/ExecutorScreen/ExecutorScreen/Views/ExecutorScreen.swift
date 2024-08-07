@@ -86,6 +86,11 @@ struct ExecutorScreen: View {
         }, content: {
             ExecutorTaskDetails(currentNode: $currentNode)
         })
+        .sheet(isPresented: $showDetailsMyTasks, onDismiss: {
+            authStateEnvObject.executorMyTasksRequest()
+        }, content: {
+            ExecutorMyTaskDetails(currentNode: $currentNode)
+        })
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden()
         .background(Color.theme.background)
@@ -112,8 +117,8 @@ private extension ExecutorScreen {
                         }
                     }
                     Button("Детали") {
-                        generator.impactOccurred()
                         currentNode = issue
+                        generator.impactOccurred()
                         showDetailsUnassigned.toggle()
                         Task {
                             try await Task.sleep(nanoseconds: 500_000_000)
@@ -136,26 +141,37 @@ private extension ExecutorScreen {
         ScrollView {
             ForEach(authStateEnvObject.issuesInProgress, id: \.self) { issue in
                 Menu {
-                    Button("Отправить на проверку.") {
-                        generator.impactOccurred()
-                        authStateEnvObject.executerCompleteSendReview(issue.request_id) {
-                            Task {
-                                try await Task.sleep(nanoseconds: 200_000_000)
-                                authStateEnvObject.executorMyTasksRequest()
+                    if IssueStatus(rawValue: issue.status_id) == .inprogress {
+                        Button("Отправить на проверку.") {
+                            generator.impactOccurred()
+                            authStateEnvObject.executerCompleteSendReview(issue.request_id) {
+                                Task {
+                                    try await Task.sleep(nanoseconds: 200_000_000)
+                                    authStateEnvObject.executorMyTasksRequest()
+                                }
                             }
                         }
                     }
                     Button("Детали") {
+                        currentNode = issue
                         generator.impactOccurred()
-                        showDetailsUnassigned.toggle()
+                        showDetailsMyTasks.toggle()
                         Task {
                             try await Task.sleep(nanoseconds: 500_000_000)
-                            authStateEnvObject.executorUnassignRequest()
+                            authStateEnvObject.executorMyTasksRequest()
                         }
                     }
                     Button("Отмена") {
                         generator.impactOccurred()
-                        authStateEnvObject.executerCancel(issue.request_id) {
+                        switch IssueStatus(rawValue: issue.status_id) {
+                        case .inprogress, .review:
+                            authStateEnvObject.executerCancel(issue.request_id) {
+                                Task {
+                                    try await Task.sleep(nanoseconds: 500_000_000)
+                                    authStateEnvObject.executorMyTasksRequest()
+                                }
+                            }
+                        default:
                             Task {
                                 try await Task.sleep(nanoseconds: 500_000_000)
                                 authStateEnvObject.executorMyTasksRequest()
@@ -238,7 +254,6 @@ private extension ExecutorScreen {
                 HStack {
                     descriptionOfField(issue.readableStatus, color: Color.theme.secondary)
                     Spacer()
-                    // new, approved, declined, inprogress, review, done
                     createDateString(issue)
                         .padding(.top, screenHeight/120)
                 }
@@ -246,7 +261,6 @@ private extension ExecutorScreen {
                 HStack {
                     descriptionOfField(issue.readableStatus, color: Color.theme.secondary)
                     Spacer()
-                    // new, approved, declined, inprogress, review, done
                     descriptionOfField(issue.createdAtString, color: Color.theme.lowContrast)
                     createDateString(issue)
                         .padding(.top, screenHeight/120)
@@ -255,7 +269,6 @@ private extension ExecutorScreen {
                 HStack {
                     descriptionOfField(issue.readableStatus, color: Color.theme.secondary)
                     Spacer()
-                    // new, approved, declined, inprogress, review, done
                     createDateString(issue)
                         .padding(.top, screenHeight/120)
                 }

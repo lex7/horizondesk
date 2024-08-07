@@ -78,6 +78,7 @@
 		05D7A66A2C6175A400275E9D /* MasterDenyModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D7A6692C6175A400275E9D /* MasterDenyModel.swift */; };
 		05D7A66D2C618A6C00275E9D /* ExecutorActionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D7A66C2C618A6C00275E9D /* ExecutorActionModel.swift */; };
 		05D7A6702C62BD8400275E9D /* ExecutorTaskDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D7A66F2C62BD8300275E9D /* ExecutorTaskDetails.swift */; };
+		05D7A6722C6345DE00275E9D /* ExecutorMyTaskDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D7A6712C6345DE00275E9D /* ExecutorMyTaskDetails.swift */; };
 		05E353BE2B8BD75800C418B1 /* UIApplication+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05E353BD2B8BD75800C418B1 /* UIApplication+Extension.swift */; };
 		05EC0C7D2B504C6500A5E5D8 /* PickerSegmentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05EC0C7C2B504C6500A5E5D8 /* PickerSegmentsView.swift */; };
 		05F2D9592B92517E00BDDD36 /* MonitorIssueScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F2D9582B92517E00BDDD36 /* MonitorIssueScreen.swift */; };
@@ -148,6 +149,7 @@
 		05D7A6692C6175A400275E9D /* MasterDenyModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterDenyModel.swift; sourceTree = "<group>"; };
 		05D7A66C2C618A6C00275E9D /* ExecutorActionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutorActionModel.swift; sourceTree = "<group>"; };
 		05D7A66F2C62BD8300275E9D /* ExecutorTaskDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutorTaskDetails.swift; sourceTree = "<group>"; };
+		05D7A6712C6345DE00275E9D /* ExecutorMyTaskDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutorMyTaskDetails.swift; sourceTree = "<group>"; };
 		05E353BD2B8BD75800C418B1 /* UIApplication+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+Extension.swift"; sourceTree = "<group>"; };
 		05EC0C7C2B504C6500A5E5D8 /* PickerSegmentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerSegmentsView.swift; sourceTree = "<group>"; };
 		05F2D9582B92517E00BDDD36 /* MonitorIssueScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitorIssueScreen.swift; sourceTree = "<group>"; };
@@ -531,6 +533,7 @@
 			children = (
 				05EC0C7C2B504C6500A5E5D8 /* PickerSegmentsView.swift */,
 				05D7A66F2C62BD8300275E9D /* ExecutorTaskDetails.swift */,
+				05D7A6712C6345DE00275E9D /* ExecutorMyTaskDetails.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -850,6 +853,7 @@
 				05D7A6622C5F7A1000275E9D /* RoleEnum.swift in Sources */,
 				055045FD2B8D29220046543F /* ForgotPasswordScreen.swift in Sources */,
 				0591187F2B4DAE68006073C3 /* ExecutorScreen.swift in Sources */,
+				05D7A6722C6345DE00275E9D /* ExecutorMyTaskDetails.swift in Sources */,
 				05096EC32B84E9BF003FDB52 /* AuthState.swift in Sources */,
 				056E6B812B701F44008C1E1F /* MasterSegmentView.swift in Sources */,
 				0574698D2B7B3A5700AA0F71 /* NamingEnum.swift in Sources */,
