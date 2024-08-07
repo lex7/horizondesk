@@ -43,6 +43,11 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     surname = Column(String)
     name = Column(String)
+    middle_name = Column(String)
+    hire_date = Column(TIMESTAMP)
+    phone_number = Column(String)
+    birth_date = Column(TIMESTAMP)
+    email = Column(String, unique=True)
     spec_id = Column(Integer, ForeignKey('specializations.spec_id'), nullable=True)
     fcm_token = Column(String, nullable=True)
     role_id = Column(Integer, ForeignKey('roles.role_id'))
@@ -135,6 +140,11 @@ class UserModel(BaseModel):
     username: str
     surname: Optional[str]
     name: Optional[str]
+    middle_name: Optional[str]
+    hire_date: Optional[datetime]
+    phone_number: Optional[str]
+    birth_date: Optional[datetime]
+    email: Optional[str]
     spec_id: Optional[int]
     fcm_token: Optional[str]
     role_id: int
@@ -162,6 +172,13 @@ class LoginResponse(BaseModel):
 class RegisterRequest(BaseModel):
     username: str
     password: str
+    surname: Optional[str] = None
+    name: Optional[str] = None
+    middle_name: Optional[str] = None
+    hire_date: Optional[datetime] = None
+    phone_number: Optional[str] = None
+    birth_date: Optional[datetime] = None
+    email: Optional[str] = None
     role_id: int
     spec_id: Optional[int] = None
 
@@ -283,7 +300,19 @@ def read_root():
 @app.post("/register")
 def register(request: RegisterRequest, db: Session = Depends(get_db)):
     hashed_password = hash_password(request.password)
-    user = User(username=request.username, password_hash=hashed_password, role_id=request.role_id, spec_id=request.spec_id)
+    user = User(
+        username=request.username,
+        password_hash=hashed_password,
+        surname=request.surname,
+        name=request.name,
+        middle_name=request.middle_name,
+        hire_date=request.hire_date,
+        phone_number=request.phone_number,
+        birth_date=request.birth_date,
+        email=request.email,
+        role_id=request.role_id,
+        spec_id=request.spec_id
+    )
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -593,6 +622,12 @@ def get_request_history(request_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="No history found for the specified request_id")
     return history
 
+@app.get("/my-data", response_model=UserModel)
+def get_user_data(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
 
 # Firebase push
 
