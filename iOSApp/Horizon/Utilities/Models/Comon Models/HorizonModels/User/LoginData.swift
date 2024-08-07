@@ -1,15 +1,11 @@
 //
-// MobileDesk
+//  LoginData.swift
 //  DeskHorizon
 //
-//  Created by Timofey Privalov MobileDesk
-import Foundation
+//  Created by Timofey Privalov on 08.08.2024.
+//
 
-struct LoginModel: Encodable {
-    let username: String
-    let password: String
-    let fcm_token: String
-}
+import Foundation
 
 struct LoginData: Decodable {
     let user_id: Int

@@ -2,25 +2,15 @@
 import Foundation
 import SwiftUI
 
-enum TabBarItem: Hashable {
+enum TabBarItem: Hashable, Equatable {
     case createIssue, monitorIssue, executeIssue, masterReviewIssue, account
     var iconName: String {
-        if #available(iOS 16, *) {
-            switch self {
-            case .createIssue: return "paperplane.circle"
-            case .monitorIssue: return "folder.circle"
-            case .executeIssue: return "arrow.up.arrow.down"
-            case .masterReviewIssue: return "doc.text"
-            case .account: return "person.text.rectangle"
-            }
-        } else {
-            switch self {
-            case .createIssue: return "chart.pie"
-            case .monitorIssue: return "dollarsign.circle"
-            case .executeIssue: return "arrow.up.arrow.down"
-            case .masterReviewIssue: return "doc.text"
-            case .account: return "person.text.rectangle"
-            }
+        switch self {
+        case .createIssue: return "paperplane.circle"
+        case .monitorIssue: return "folder.circle"
+        case .executeIssue: return "arrow.up.arrow.down"
+        case .masterReviewIssue: return "doc.text"
+        case .account: return "person.text.rectangle"
         }
     }
     

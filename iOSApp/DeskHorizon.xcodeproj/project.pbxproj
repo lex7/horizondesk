@@ -23,7 +23,6 @@
 		0509CBE82BFBB86F00FBCEF1 /* JWTDecode in Frameworks */ = {isa = PBXBuildFile; productRef = 0509CBE72BFBB86F00FBCEF1 /* JWTDecode */; };
 		0509CBEB2BFBB88400FBCEF1 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 0509CBEA2BFBB88400FBCEF1 /* KeychainAccess */; };
 		0509CBEE2BFBB8AD00FBCEF1 /* SwiftfulRouting in Frameworks */ = {isa = PBXBuildFile; productRef = 0509CBED2BFBB8AD00FBCEF1 /* SwiftfulRouting */; };
-		0509CBF02BFBB90D00FBCEF1 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0509CBEF2BFBB90D00FBCEF1 /* GoogleService-Info.plist */; };
 		0509CBF22BFBDD8E00FBCEF1 /* GPToolView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0509CBF12BFBDD8E00FBCEF1 /* GPToolView.swift */; };
 		0509CBF42BFC854C00FBCEF1 /* LoginModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0509CBF32BFC854C00FBCEF1 /* LoginModel.swift */; };
 		0509CBF72BFC939300FBCEF1 /* IssueModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0509CBF62BFC939300FBCEF1 /* IssueModel.swift */; };
@@ -44,6 +43,10 @@
 		055045EC2B8CC0500046543F /* ChangePasswordViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 055045EB2B8CC0500046543F /* ChangePasswordViewModel.swift */; };
 		055045FD2B8D29220046543F /* ForgotPasswordScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 055045FC2B8D29220046543F /* ForgotPasswordScreen.swift */; };
 		0554D85D2BB180F5008E5563 /* EnvSupportObj.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0554D85C2BB180F5008E5563 /* EnvSupportObj.swift */; };
+		05597B562C640BFC007B96A0 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 05597B552C640BFC007B96A0 /* GoogleService-Info.plist */; };
+		05597B592C641D36007B96A0 /* LoginData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B582C641D36007B96A0 /* LoginData.swift */; };
+		05597B5B2C641D4F007B96A0 /* UserInfoModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B5A2C641D4F007B96A0 /* UserInfoModel.swift */; };
+		05597B5D2C641D78007B96A0 /* RefreshUserFcmModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B5C2C641D78007B96A0 /* RefreshUserFcmModel.swift */; };
 		056E6B7F2B700CBA008C1E1F /* MasterScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 056E6B7E2B700CBA008C1E1F /* MasterScreen.swift */; };
 		056E6B812B701F44008C1E1F /* MasterSegmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 056E6B802B701F44008C1E1F /* MasterSegmentView.swift */; };
 		0574698D2B7B3A5700AA0F71 /* NamingEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0574698C2B7B3A5700AA0F71 /* NamingEnum.swift */; };
@@ -91,7 +94,6 @@
 		05096EC02B84E98C003FDB52 /* AuthStateEnvObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthStateEnvObject.swift; sourceTree = "<group>"; };
 		05096EC22B84E9BF003FDB52 /* AuthState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthState.swift; sourceTree = "<group>"; };
 		05096EC42B84FA28003FDB52 /* LoginScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginScreen.swift; sourceTree = "<group>"; };
-		0509CBEF2BFBB90D00FBCEF1 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		0509CBF12BFBDD8E00FBCEF1 /* GPToolView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPToolView.swift; sourceTree = "<group>"; };
 		0509CBF32BFC854C00FBCEF1 /* LoginModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginModel.swift; sourceTree = "<group>"; };
 		0509CBF62BFC939300FBCEF1 /* IssueModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueModel.swift; sourceTree = "<group>"; };
@@ -113,6 +115,10 @@
 		055045EB2B8CC0500046543F /* ChangePasswordViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangePasswordViewModel.swift; sourceTree = "<group>"; };
 		055045FC2B8D29220046543F /* ForgotPasswordScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotPasswordScreen.swift; sourceTree = "<group>"; };
 		0554D85C2BB180F5008E5563 /* EnvSupportObj.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvSupportObj.swift; sourceTree = "<group>"; };
+		05597B552C640BFC007B96A0 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		05597B582C641D36007B96A0 /* LoginData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginData.swift; sourceTree = "<group>"; };
+		05597B5A2C641D4F007B96A0 /* UserInfoModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInfoModel.swift; sourceTree = "<group>"; };
+		05597B5C2C641D78007B96A0 /* RefreshUserFcmModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefreshUserFcmModel.swift; sourceTree = "<group>"; };
 		056E6B7E2B700CBA008C1E1F /* MasterScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterScreen.swift; sourceTree = "<group>"; };
 		056E6B802B701F44008C1E1F /* MasterSegmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterSegmentView.swift; sourceTree = "<group>"; };
 		0574698C2B7B3A5700AA0F71 /* NamingEnum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NamingEnum.swift; sourceTree = "<group>"; };
@@ -205,7 +211,7 @@
 				051E62792BFD49E0001FBD74 /* IssueAcceptModel.swift */,
 				05D7A66E2C618A7600275E9D /* Executor */,
 				05D7A66B2C618A5100275E9D /* Master */,
-				0509CBF32BFC854C00FBCEF1 /* LoginModel.swift */,
+				05597B572C641D1E007B96A0 /* User */,
 			);
 			path = HorizonModels;
 			sourceTree = "<group>";
@@ -287,7 +293,7 @@
 		054870B42BBAA037002A8406 /* SysFiles */ = {
 			isa = PBXGroup;
 			children = (
-				0509CBEF2BFBB90D00FBCEF1 /* GoogleService-Info.plist */,
+				05597B552C640BFC007B96A0 /* GoogleService-Info.plist */,
 			);
 			path = SysFiles;
 			sourceTree = "<group>";
@@ -372,6 +378,17 @@
 				055045FC2B8D29220046543F /* ForgotPasswordScreen.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		05597B572C641D1E007B96A0 /* User */ = {
+			isa = PBXGroup;
+			children = (
+				0509CBF32BFC854C00FBCEF1 /* LoginModel.swift */,
+				05597B582C641D36007B96A0 /* LoginData.swift */,
+				05597B5A2C641D4F007B96A0 /* UserInfoModel.swift */,
+				05597B5C2C641D78007B96A0 /* RefreshUserFcmModel.swift */,
+			);
+			path = User;
 			sourceTree = "<group>";
 		};
 		056E6B792B700BE0008C1E1F /* MasterScreen */ = {
@@ -813,7 +830,7 @@
 				059118812B4DAE6B006073C3 /* Assets.xcassets in Resources */,
 				05ACCD402B54A03D003AC0A2 /* Nexa.otf in Resources */,
 				05ACCD412B54A03D003AC0A2 /* Nexa Bold.otf in Resources */,
-				0509CBF02BFBB90D00FBCEF1 /* GoogleService-Info.plist in Resources */,
+				05597B562C640BFC007B96A0 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -863,6 +880,7 @@
 				05D7A6682C61751500275E9D /* MasterApproveModel.swift in Sources */,
 				05F591DC2BB1E85E005F5D6E /* SendMessageView.swift in Sources */,
 				053088512B6AC86100E6772D /* TabBarItemsPreferenceKey.swift in Sources */,
+				05597B592C641D36007B96A0 /* LoginData.swift in Sources */,
 				05D7A66D2C618A6C00275E9D /* ExecutorActionModel.swift in Sources */,
 				053088532B6ACC2400E6772D /* TabBarItem.swift in Sources */,
 				056E6B7F2B700CBA008C1E1F /* MasterScreen.swift in Sources */,
@@ -871,6 +889,7 @@
 				055045EC2B8CC0500046543F /* ChangePasswordViewModel.swift in Sources */,
 				051E62782BFD44BF001FBD74 /* IssueAcceptanceCheck.swift in Sources */,
 				05B2304C2B764C4100A5B02A /* EndPointsDolly.swift in Sources */,
+				05597B5B2C641D4F007B96A0 /* UserInfoModel.swift in Sources */,
 				05096EC12B84E98C003FDB52 /* AuthStateEnvObject.swift in Sources */,
 				05B6866B2B587D3700440537 /* CredentialService.swift in Sources */,
 				05096EBF2B84E96B003FDB52 /* RootContentView.swift in Sources */,
@@ -892,6 +911,7 @@
 				05B686372B56D69D00440537 /* NetworkingManager.swift in Sources */,
 				05D7A6642C5F892C00275E9D /* RequestTypeEnum.swift in Sources */,
 				051E627A2BFD49E0001FBD74 /* IssueAcceptModel.swift in Sources */,
+				05597B5D2C641D78007B96A0 /* RefreshUserFcmModel.swift in Sources */,
 				0591187D2B4DAE68006073C3 /* DeskHorizonApp.swift in Sources */,
 				052A98DD2B72D8F6002249C5 /* NetworkEnums.swift in Sources */,
 				0517DCC22B837E4D009F6979 /* MyAccountPickerView.swift in Sources */,
@@ -1042,7 +1062,7 @@
 				CURRENT_PROJECT_VERSION = 16;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"Horizon/Preview Content\"";
-				DEVELOPMENT_TEAM = 8723YN376G;
+				DEVELOPMENT_TEAM = NG3VSRQN62;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Horizon/Info.plist;
@@ -1059,7 +1079,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = horizon.analytics.testonly;
+				PRODUCT_BUNDLE_IDENTIFIER = forth.analytics.testonly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -1079,7 +1099,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 16;
 				DEVELOPMENT_ASSET_PATHS = "\"Horizon/Preview Content\"";
-				DEVELOPMENT_TEAM = 8723YN376G;
+				DEVELOPMENT_TEAM = NG3VSRQN62;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Horizon/Info.plist;
@@ -1096,7 +1116,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = horizon.analytics.testonly;
+				PRODUCT_BUNDLE_IDENTIFIER = forth.analytics.testonly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;

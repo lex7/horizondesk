@@ -77,10 +77,6 @@ struct ExecutorScreen: View {
             authStateEnvObject.executorUnassignRequest()
             authStateEnvObject.executorMyTasksRequest()
         }
-        .onChange(of: authStateEnvObject.executorSegment) {
-            authStateEnvObject.executorUnassignRequest()
-            authStateEnvObject.executorMyTasksRequest()
-        }
         .sheet(isPresented: $showDetailsUnassigned, onDismiss: {
             authStateEnvObject.executorUnassignRequest()
         }, content: {
@@ -278,12 +274,6 @@ private extension ExecutorScreen {
             authStateEnvObject.executorUnassignRequest()
             authStateEnvObject.executorMyTasksRequest()
         }
-        .onChange(of: authStateEnvObject.tabBarSelection, perform: { value in
-            if value == .executeIssue {
-                authStateEnvObject.executorUnassignRequest()
-                authStateEnvObject.executorMyTasksRequest()
-            }
-        })
         .padding(.vertical, 20)
         .padding(.horizontal, 20)
         .background(

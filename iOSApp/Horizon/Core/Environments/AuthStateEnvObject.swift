@@ -173,7 +173,7 @@ final class AuthStateEnvObject: ObservableObject {
     // MARK: - Executor Requests
     func executorUnassignRequest() {
         let model = UserIdModel(user_id: credentialService.getUserId() ?? 777)
-        networkManager.requestMoyaData(apis: .unassigned(model: model))
+        networkManager.requestMoyaData(apis: .executorUnassigned(model: model))
             .receive(on: DispatchQueue.main)
             .sink { completion in
                 switch completion {
@@ -195,7 +195,7 @@ final class AuthStateEnvObject: ObservableObject {
     
     func executorMyTasksRequest() {
         let model = UserIdModel(user_id: credentialService.getUserId() ?? 777)
-        networkManager.requestMoyaData(apis: .myTasks(model: model))
+        networkManager.requestMoyaData(apis: .executorAssigned(model: model))
             .receive(on: DispatchQueue.main)
             .sink { completion in
                 switch completion {

@@ -60,7 +60,7 @@ func applicationWillResignActive(_ application: UIApplication) { }
 extension AppDelegate: MessagingDelegate {
     @objc func messaging(_: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         if let token = fcmToken {
-            debugPrint("Firebase token FCM☀️🏁: \(String(describing: fcmToken))")
+            debugPrint("Firebase token FCM☀️🏁: \(String(describing: token))")
             credentialService.saveFcm(token)
         }
     }
