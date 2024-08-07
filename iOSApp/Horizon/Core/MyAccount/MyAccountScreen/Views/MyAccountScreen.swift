@@ -28,7 +28,7 @@ struct MyAccountScreen: View {
     // MARK: - Private Constants
     private let generator = UIImpactFeedbackGenerator(style: .light)
     @State private var screenHeight = UIScreen.main.bounds.height
-var body: some View {
+    var body: some View {
         NavigationView {
             VStack {
                 // Header
@@ -97,7 +97,7 @@ var body: some View {
                                             .padding(.top, 20)
                                             .padding(.bottom, 20)
                                     }
-                                } 
+                                }
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 Divider()
                                 Group {
@@ -107,7 +107,7 @@ var body: some View {
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             }
-                        } 
+                        }
                         .mask(LinearGradient(gradient: Gradient(colors: [.black, .black, .black, .black, .black, .clear]), startPoint: .top, endPoint: .bottom))
                     case .setup:
                         Group {
@@ -140,27 +140,27 @@ var body: some View {
                                     
                                     Spacer()
                                 }
-                            } 
-                        } 
-                    } 
-                } 
+                            }
+                        }
+                    }
+                }
                 .padding(.horizontal, 28)
-            } 
+            }
             .background(Color.theme.background)
-
+            
             .alert("Alert", isPresented: $triggerToDisableMfa) {
                 Button("Ok", role: .cancel) { }
             } message: {
                 Text("Please disable 2FA to change your phone number")
             }
             .task {
-
+                
             }
             .onChange(of: tabSelection) { value in
                 
             }
             .navigationBarHidden(true)
-        } 
+        }
     }
 }
 
@@ -183,7 +183,7 @@ private extension MyAccountScreen {
         switch selectedSegment {
         case .information:
             return "Setup account segment. Double tap to select segment."
-       case .setup:
+        case .setup:
             return "Setup account segment. Segment selected."
         }
     }
@@ -196,16 +196,16 @@ private extension MyAccountScreen {
                     debugPrint(selectedSegment)
                 }
                 .allowsHitTesting(selectedSegment != .information)
-                
-                
+            
+            
             MyAccountRightPickerView(sectionSelected: $selectedSegment, label: "Награды")
                 .onTapGesture {
                     selectedSegment.toggle()
                     debugPrint(selectedSegment)
                 }
                 .allowsHitTesting(selectedSegment != .setup)
-                
-                
+            
+            
         }
         .padding(8)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -231,24 +231,4 @@ private extension MyAccountScreen {
         UINavigationBar.appearance().compactAppearance = navBarAppearance
         UINavigationBar.appearance().scrollEdgeAppearance = navBarAppearance
     }
-}
-
-
-private extension MyAccountScreen {
-    /*
-     Please verify your phone number ok button
-     +111 1111 111 phone number is not verified, verify button double to...
-     Enter your phone number
-     Phone number field double tap to edit
-     A message with a confirmation code will be sent..
-     Confirm button...
-     Enter confirmation code
-     Code field double tap to edit
-     A message with a confirmation code will be sent is a SMS ,,,,,. If you didn't receive the code, click 'Resend' in 30 seconds
-     Resend button
-     Confirm button
-     SMS code is incorrect ok button
-     Phone number is verified
-     */
-    
 }

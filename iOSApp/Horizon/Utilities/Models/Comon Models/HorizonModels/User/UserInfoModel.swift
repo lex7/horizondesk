@@ -11,3 +11,4 @@ import Foundation
 struct UserInfoModel: Encodable {
     let user_id: String
 }
+

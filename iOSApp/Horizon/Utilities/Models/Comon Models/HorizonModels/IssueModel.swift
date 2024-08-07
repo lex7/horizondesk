@@ -13,22 +13,6 @@ struct CreateRequestModelIssue: Codable, Hashable {
     let description: String
 }
 
-/*
- {
-   "request_id": 8,
-   "request_type": 2,
-   "created_by": 11,
-   "assigned_to": null,
-   "area_id": 2,
-   "description": "Hello World",
-   "status_id": 1,
-   "created_at": "2024-08-04T10:33:56.388073",
-   "updated_at": null,
-   "deadline": null,
-   "rejection_reason": null
- }
- */
-
 struct RequestIssueModel: Hashable, Codable {
     let request_id: Int
     let request_type: Int

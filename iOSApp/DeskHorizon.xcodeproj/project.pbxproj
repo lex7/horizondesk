@@ -47,6 +47,7 @@
 		05597B592C641D36007B96A0 /* LoginData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B582C641D36007B96A0 /* LoginData.swift */; };
 		05597B5B2C641D4F007B96A0 /* UserInfoModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B5A2C641D4F007B96A0 /* UserInfoModel.swift */; };
 		05597B5D2C641D78007B96A0 /* RefreshUserFcmModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B5C2C641D78007B96A0 /* RefreshUserFcmModel.swift */; };
+		05597B5F2C641EA3007B96A0 /* UserInfoDataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B5E2C641EA3007B96A0 /* UserInfoDataModel.swift */; };
 		056E6B7F2B700CBA008C1E1F /* MasterScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 056E6B7E2B700CBA008C1E1F /* MasterScreen.swift */; };
 		056E6B812B701F44008C1E1F /* MasterSegmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 056E6B802B701F44008C1E1F /* MasterSegmentView.swift */; };
 		0574698D2B7B3A5700AA0F71 /* NamingEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0574698C2B7B3A5700AA0F71 /* NamingEnum.swift */; };
@@ -119,6 +120,7 @@
 		05597B582C641D36007B96A0 /* LoginData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginData.swift; sourceTree = "<group>"; };
 		05597B5A2C641D4F007B96A0 /* UserInfoModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInfoModel.swift; sourceTree = "<group>"; };
 		05597B5C2C641D78007B96A0 /* RefreshUserFcmModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefreshUserFcmModel.swift; sourceTree = "<group>"; };
+		05597B5E2C641EA3007B96A0 /* UserInfoDataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInfoDataModel.swift; sourceTree = "<group>"; };
 		056E6B7E2B700CBA008C1E1F /* MasterScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterScreen.swift; sourceTree = "<group>"; };
 		056E6B802B701F44008C1E1F /* MasterSegmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterSegmentView.swift; sourceTree = "<group>"; };
 		0574698C2B7B3A5700AA0F71 /* NamingEnum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NamingEnum.swift; sourceTree = "<group>"; };
@@ -385,6 +387,7 @@
 			children = (
 				0509CBF32BFC854C00FBCEF1 /* LoginModel.swift */,
 				05597B582C641D36007B96A0 /* LoginData.swift */,
+				05597B5E2C641EA3007B96A0 /* UserInfoDataModel.swift */,
 				05597B5A2C641D4F007B96A0 /* UserInfoModel.swift */,
 				05597B5C2C641D78007B96A0 /* RefreshUserFcmModel.swift */,
 			);
@@ -887,6 +890,7 @@
 				05E353BE2B8BD75800C418B1 /* UIApplication+Extension.swift in Sources */,
 				0588CE392BBC1D2C00E501B1 /* FCMTokenManager.swift in Sources */,
 				055045EC2B8CC0500046543F /* ChangePasswordViewModel.swift in Sources */,
+				05597B5F2C641EA3007B96A0 /* UserInfoDataModel.swift in Sources */,
 				051E62782BFD44BF001FBD74 /* IssueAcceptanceCheck.swift in Sources */,
 				05B2304C2B764C4100A5B02A /* EndPointsDolly.swift in Sources */,
 				05597B5B2C641D4F007B96A0 /* UserInfoModel.swift in Sources */,
