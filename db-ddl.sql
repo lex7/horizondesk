@@ -32,7 +32,11 @@ CREATE TABLE users (
     spec_id INTEGER NOT NULL REFERENCES specializations(spec_id),
     fcm_token VARCHAR(255),
     role_id INTEGER NOT NULL REFERENCES roles(role_id),
-    shift_id INTEGER REFERENCES worker_shifts(shift_id)
+    shift_id INTEGER REFERENCES worker_shifts(shift_id),
+    tokens INTEGER DEFAULT 0,
+    num_created INTEGER DEFAULT 0,
+    num_completed INTEGER DEFAULT 0,
+    last_completed DATE
 );
 
 -- Table: request_types

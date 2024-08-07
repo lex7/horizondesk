@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, event, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
-from sqlalchemy.types import TIMESTAMP, String
+from sqlalchemy.types import TIMESTAMP, String, DATE
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from pydantic import BaseModel
@@ -44,14 +44,18 @@ class User(Base):
     surname = Column(String)
     name = Column(String)
     middle_name = Column(String)
-    hire_date = Column(TIMESTAMP)
+    hire_date = Column(DATE)
     phone_number = Column(String)
-    birth_date = Column(TIMESTAMP)
+    birth_date = Column(DATE)
     email = Column(String, unique=True)
     spec_id = Column(Integer, ForeignKey('specializations.spec_id'), nullable=True)
     fcm_token = Column(String, nullable=True)
     role_id = Column(Integer, ForeignKey('roles.role_id'))
     shift_id = Column(Integer, ForeignKey('worker_shifts.shift_id'))
+    tokens = Column(Integer, default=0)
+    num_created = Column(Integer, default=0)
+    num_completed = Column(Integer, default=0)
+    last_completed = Column(DATE)
 
     role = relationship("Role", back_populates="users")
     shift = relationship("WorkerShift", back_populates="users")
@@ -141,9 +145,9 @@ class UserModel(BaseModel):
     surname: Optional[str]
     name: Optional[str]
     middle_name: Optional[str]
-    hire_date: Optional[datetime]
+    hire_date: Optional[date]
     phone_number: Optional[str]
-    birth_date: Optional[datetime]
+    birth_date: Optional[date]
     email: Optional[str]
     spec_id: Optional[int]
     fcm_token: Optional[str]
@@ -256,6 +260,15 @@ class RequestStatusLogModel(BaseModel):
         json_encoders = {
             datetime: lambda v: v.strftime("%Y-%m-%dT%H:%M:%S")
         }
+
+class RewardsResponse(BaseModel):
+    tokens: int
+    num_created: int
+    num_completed: int
+    last_completed: Optional[date]
+
+    class Config:
+        orm_mode = True
 
 # Extra funcs
 
@@ -640,6 +653,24 @@ def get_user_data(user_id: int, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
+
+@app.get("/rewards", response_model=RewardsResponse)
+def get_rewards(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    rewards_data = RewardsResponse(
+        tokens=user.tokens,
+        num_created=user.num_created,
+        num_completed=user.num_completed,
+        last_completed=user.last_completed
+    )
+
+    return rewards_data
+
+
+
 
 # Firebase push
 
