@@ -10,11 +10,6 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from datetime import datetime, timezone, date
 from typing import List, Optional
-# from firebase_admin import credentials, initialize_app
-# from google.oauth2 import service_account
-# import google.auth.transport.requests
-# import requests
-# import json
 
 load_dotenv()
 
@@ -361,7 +356,15 @@ def create_request(request: RequestCreate, db: Session = Depends(get_db)):
     db.add(new_request)
     db.commit()
     db.refresh(new_request)
+
+    creator = db.query(User).filter(User.user_id == request.user_id).first()
+    if creator:
+        creator.num_created += 1
+        db.commit()
+
     return {"message": "Request created successfully", "request_id": new_request.request_id}
+
+
 
 @app.post("/master-approve", response_model=dict)
 def approve_request(request: ApproveRequest, db: Session = Depends(get_db)):
@@ -473,21 +476,22 @@ def complete_request(request: UpdateRequest, db: Session = Depends(get_db)):
     #     pass
     return {"message": "Request completed successfully", "request_id": request.request_id}
 
+
 @app.post("/requestor-confirm", response_model=dict)
 def confirm_request(request: UpdateRequest, db: Session = Depends(get_db)):
     existing_request = update_request(request.request_id, 6, request.user_id, db)
-    # executor_user = db.query(User).filter(User.user_id == existing_request.assigned_to).first()
-    # if executor_user is None or not executor_user.fcm_token:
-    #     raise HTTPException(status_code=404, detail="Users's FCM token not found")
-    # try:
-    #     send_push(
-    #         token=executor_user.fcm_token,
-    #         title="Request has been confirmed",
-    #         body=f"Your work (ID: {existing_request.request_id}) has been confirmed by requestor."
-    #     )
-    # except Exception as e:
-    #     # raise HTTPException(status_code=500, detail=f"Push notification failed: {str(e)}")
-    #     pass
+    creator = db.query(User).filter(User.user_id == request.user_id).first()
+    executor = db.query(User).filter(User.user_id == existing_request.assigned_to).first()
+    
+    if executor:
+        executor.num_completed += 1
+        executor.tokens += 200
+        executor.last_completed = datetime.now().date()
+
+    if creator:
+        creator.tokens += 100
+
+    db.commit()
     return {"message": "Request confirmed successfully", "request_id": request.request_id}
 
 @app.post("/requestor-deny", response_model=dict)
@@ -673,6 +677,12 @@ def get_rewards(user_id: int, db: Session = Depends(get_db)):
 
 
 # Firebase push
+
+# from firebase_admin import credentials, initialize_app
+# from google.oauth2 import service_account
+# import google.auth.transport.requests
+# import requests
+# import json
 
 # cred = credentials.Certificate("accKey.json")
 # initialize_app(cred)
