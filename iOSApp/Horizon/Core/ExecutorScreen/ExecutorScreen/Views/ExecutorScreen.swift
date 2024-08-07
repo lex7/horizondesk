@@ -10,7 +10,8 @@ struct ExecutorScreen: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var authStateEnvObject: AuthStateEnvObject
     
-    // MARK: - View Model
+    // MARK: - State variables
+    @State private var executorSegment: ExecutorSwitcher = .unassignedTask
     
     // MARK: - Private Constants
     private let generator = UIImpactFeedbackGenerator(style: .light)
@@ -41,7 +42,7 @@ struct ExecutorScreen: View {
                     .background(Color.theme.background)
             }
             .frame(maxWidth: .infinity)
-            switch authStateEnvObject.executorSegment {
+            switch executorSegment {
             case .unassignedTask:
                 Group {
                     switch authStateEnvObject.issuesApproved.isEmpty {
@@ -74,6 +75,10 @@ struct ExecutorScreen: View {
             } 
         } /// End of Vstack
         .onAppear {
+            authStateEnvObject.executorUnassignRequest()
+            authStateEnvObject.executorMyTasksRequest()
+        }
+        .onChange(of: executorSegment) {
             authStateEnvObject.executorUnassignRequest()
             authStateEnvObject.executorMyTasksRequest()
         }
@@ -237,7 +242,7 @@ private extension ExecutorScreen {
             }
             .padding(.top, 10)
             HStack(spacing: 0) {
-                switch authStateEnvObject.executorSegment {
+                switch executorSegment {
                 case .unassignedTask:
                     titleHeader(issue.description ?? "без описания", color: .highContrast, uppercase: false)
                 case .myTasks:
@@ -269,10 +274,6 @@ private extension ExecutorScreen {
                         .padding(.top, screenHeight/120)
                 }
             }
-        }
-        .onChange(of: authStateEnvObject.executorSegment) {
-            authStateEnvObject.executorUnassignRequest()
-            authStateEnvObject.executorMyTasksRequest()
         }
         .padding(.vertical, 20)
         .padding(.horizontal, 20)
@@ -330,21 +331,20 @@ private extension ExecutorScreen {
 private extension ExecutorScreen {
     var pickerContainer: some View {
         HStack(alignment: .center, spacing: 4) {
-            ExecutorLeftSegmentView(sectionSelected: $authStateEnvObject.executorSegment, label: "Не назначенные")
+            ExecutorLeftSegmentView(sectionSelected: $executorSegment, label: "Не назначенные")
                 .onTapGesture {
-                    authStateEnvObject.executorSegment.toggle()
-                    generator.prepare()
-                    generator.impactOccurred()
-                    
-                }
-                .allowsHitTesting(authStateEnvObject.executorSegment != .unassignedTask)
-            ExecutorRightSegmentView(sectionSelected: $authStateEnvObject.executorSegment, label: "Мои Задания")
-                .onTapGesture {
-                    authStateEnvObject.executorSegment.toggle()
+                    executorSegment.toggle()
                     generator.prepare()
                     generator.impactOccurred()
                 }
-                .allowsHitTesting(authStateEnvObject.executorSegment != .myTasks)
+                .allowsHitTesting(executorSegment != .unassignedTask)
+            ExecutorRightSegmentView(sectionSelected: $executorSegment, label: "Мои Задания")
+                .onTapGesture {
+                    executorSegment.toggle()
+                    generator.prepare()
+                    generator.impactOccurred()
+                }
+                .allowsHitTesting(executorSegment != .myTasks)
         }
         .padding(8)
         .frame(maxWidth: .infinity, alignment: .leading)

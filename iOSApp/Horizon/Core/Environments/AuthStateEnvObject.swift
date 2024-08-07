@@ -8,10 +8,9 @@ import Combine
 
 final class AuthStateEnvObject: ObservableObject {
     
+    @Published var userDataModel: UserInfoDataModel?
+    @Published var userRewardsDataModel: UserRewardsModel?
     @Published var requestsForMaster: [RequestIssueModel] = []
-    
-    // new, approved, declined, inprogress, review, done
-    
     @Published var issuesInWork: [RequestIssueModel] = []
     @Published var issuesDone: [RequestIssueModel] = []
     @Published var issuesDeclined: [RequestIssueModel] = []
@@ -34,15 +33,16 @@ final class AuthStateEnvObject: ObservableObject {
     @Published var errorToGetPermission: Bool = false
     @Published private(set) var errorDescription = ""
     
+    
+    
     // TABBAR MENU
     @Published var tabBarSelection: TabBarItem = .createIssue
     
     // SUPPORT SCREEN
-    // TRANSACTION SCREEN
-    @Published var executorSegment: TransactionSwitcher = .unassignedTask
+    
     // MASTER SCREEN
     @Published var issueRequestSegment: IssuesMontitorSwitcher = .masterReview
-    // DOCUMENT SCREEN
+    // MASTER SCREEN
     @Published var documentSegment: MasterSwitcher = .reviewTab
     // Application Version
     @Published var updateNeeded: Bool = false
@@ -398,6 +398,52 @@ final class AuthStateEnvObject: ObservableObject {
             .store(in: &cancellables)
     }
     
+    // MARK: - User data method
+    func getUserInfoData() {
+        let model = UserInfoModel(user_id: (credentialService.getUserId() ?? 777))
+        networkManager.requestMoyaData(apis: .userData(model: model))
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] completion in
+                switch completion {
+                case .finished:
+                    debugPrint(String(describing: "[vm: ✅ getUserInfoData successfully]"))
+                    break
+                case .failure(let error):
+                    debugPrint(String(describing: "[vm: \(error) - ❌ getUserInfoData]"))
+                }
+                self.getUserRewardsData()
+            } receiveValue: { [unowned self] data in
+                do {
+                    self.userDataModel = try UserInfoDataModel(data: data)
+                } catch (let error) {
+                    debugPrint(error)
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func getUserRewardsData() {
+        let model = UserInfoModel(user_id: (credentialService.getUserId() ?? 777))
+        networkManager.requestMoyaData(apis: .rewards(model: model))
+            .receive(on: DispatchQueue.main)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    debugPrint(String(describing: "[vm: ✅ getUserRewardsData successfully]"))
+                    break
+                case .failure(let error):
+                    debugPrint(String(describing: "[vm: \(error) - ❌ getUserRewardsData]"))
+                }
+            } receiveValue: { [unowned self] data in
+                do {
+                    self.userRewardsDataModel = try UserRewardsModel(data: data)
+                } catch (let error) {
+                    debugPrint(error)
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
     // MARK: - Other Methods
     
     private func makeDateStamp() -> String {
@@ -459,8 +505,3 @@ position_id:
 3 - начальник
 4 - босс
 */
-
-
-extension AuthStateEnvObject {
-    
-}

@@ -9,6 +9,6 @@ import Foundation
 
 
 struct UserInfoModel: Encodable {
-    let user_id: String
+    let user_id: Int
 }
 

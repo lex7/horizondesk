@@ -48,6 +48,7 @@
 		05597B5B2C641D4F007B96A0 /* UserInfoModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B5A2C641D4F007B96A0 /* UserInfoModel.swift */; };
 		05597B5D2C641D78007B96A0 /* RefreshUserFcmModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B5C2C641D78007B96A0 /* RefreshUserFcmModel.swift */; };
 		05597B5F2C641EA3007B96A0 /* UserInfoDataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B5E2C641EA3007B96A0 /* UserInfoDataModel.swift */; };
+		05597B612C642A0C007B96A0 /* UserRewardsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B602C642A0C007B96A0 /* UserRewardsModel.swift */; };
 		056E6B7F2B700CBA008C1E1F /* MasterScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 056E6B7E2B700CBA008C1E1F /* MasterScreen.swift */; };
 		056E6B812B701F44008C1E1F /* MasterSegmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 056E6B802B701F44008C1E1F /* MasterSegmentView.swift */; };
 		0574698D2B7B3A5700AA0F71 /* NamingEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0574698C2B7B3A5700AA0F71 /* NamingEnum.swift */; };
@@ -121,6 +122,7 @@
 		05597B5A2C641D4F007B96A0 /* UserInfoModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInfoModel.swift; sourceTree = "<group>"; };
 		05597B5C2C641D78007B96A0 /* RefreshUserFcmModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefreshUserFcmModel.swift; sourceTree = "<group>"; };
 		05597B5E2C641EA3007B96A0 /* UserInfoDataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInfoDataModel.swift; sourceTree = "<group>"; };
+		05597B602C642A0C007B96A0 /* UserRewardsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRewardsModel.swift; sourceTree = "<group>"; };
 		056E6B7E2B700CBA008C1E1F /* MasterScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterScreen.swift; sourceTree = "<group>"; };
 		056E6B802B701F44008C1E1F /* MasterSegmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterSegmentView.swift; sourceTree = "<group>"; };
 		0574698C2B7B3A5700AA0F71 /* NamingEnum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NamingEnum.swift; sourceTree = "<group>"; };
@@ -390,6 +392,7 @@
 				05597B5E2C641EA3007B96A0 /* UserInfoDataModel.swift */,
 				05597B5A2C641D4F007B96A0 /* UserInfoModel.swift */,
 				05597B5C2C641D78007B96A0 /* RefreshUserFcmModel.swift */,
+				05597B602C642A0C007B96A0 /* UserRewardsModel.swift */,
 			);
 			path = User;
 			sourceTree = "<group>";
@@ -881,6 +884,7 @@
 				0517DCBF2B836A66009F6979 /* MyAccountScreen.swift in Sources */,
 				05D65AED2B698468009CF788 /* ErrorsModel.swift in Sources */,
 				05D7A6682C61751500275E9D /* MasterApproveModel.swift in Sources */,
+				05597B612C642A0C007B96A0 /* UserRewardsModel.swift in Sources */,
 				05F591DC2BB1E85E005F5D6E /* SendMessageView.swift in Sources */,
 				053088512B6AC86100E6772D /* TabBarItemsPreferenceKey.swift in Sources */,
 				05597B592C641D36007B96A0 /* LoginData.swift in Sources */,

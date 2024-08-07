@@ -1,7 +1,7 @@
 //  Created by Timofey Privalov MobileDesk
 import SwiftUI
 
-enum TransactionSwitcher: String, CaseIterable, Identifiable  {
+enum ExecutorSwitcher: String, CaseIterable, Identifiable  {
     case unassignedTask = "unassigned"
     case myTasks = "my tasks"
     
@@ -18,10 +18,10 @@ enum TransactionSwitcher: String, CaseIterable, Identifiable  {
 
 struct ExecutorLeftSegmentView: View {
     @Environment(\.colorScheme) var colorScheme
-    @Binding var sectionSelected: TransactionSwitcher
+    @Binding var sectionSelected: ExecutorSwitcher
     var label: String
     
-    init(sectionSelected: Binding<TransactionSwitcher>, label: String) {
+    init(sectionSelected: Binding<ExecutorSwitcher>, label: String) {
         self._sectionSelected = sectionSelected
         self.label = label
     }
@@ -46,10 +46,10 @@ struct ExecutorLeftSegmentView: View {
 
 struct ExecutorRightSegmentView: View {
     @Environment(\.colorScheme) var colorScheme
-    @Binding var sectionSelected: TransactionSwitcher
+    @Binding var sectionSelected: ExecutorSwitcher
     var label: String
     
-    init(sectionSelected: Binding<TransactionSwitcher>, label: String) {
+    init(sectionSelected: Binding<ExecutorSwitcher>, label: String) {
         self._sectionSelected = sectionSelected
         self.label = label
     }

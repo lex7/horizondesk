@@ -94,6 +94,8 @@ extension CustomTabBarView {
                         case .executeIssue:
                             authStateEnvObject.executorUnassignRequest()
                             authStateEnvObject.executorMyTasksRequest()
+                        case .account:
+                            authStateEnvObject.getUserInfoData()
                         default:
                             debugPrint()
                         }

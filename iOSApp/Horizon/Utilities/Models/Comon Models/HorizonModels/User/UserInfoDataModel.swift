@@ -9,11 +9,11 @@ import Foundation
 
 struct UserInfoDataModel: Decodable {
     let user_id: Int
-    let username: String?
+    var username: String?
     let surname: String?
     let name: String?
     let middle_name: String?
-    let hire_date: String?
+    var hire_date: String?
     let phone_number: String?
     let birth_date: String?
     let email: String?

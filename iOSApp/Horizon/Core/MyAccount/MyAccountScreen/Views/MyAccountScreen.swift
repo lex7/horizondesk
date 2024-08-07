@@ -15,8 +15,8 @@ struct MyAccountScreen: View {
     // MARK: - Private State Variables
     @State private var selectedSegment: MyAccountSwitcher = .information
     
-    @State private var workerLoginAccountNumber: String = "TMK-328654"
-    @State private var dateCreated: String =  "2015-04-02"
+    // @State private var workerLoginAccountNumber: String = "TMK-328654"
+    // @State private var dateCreated: String =  "2015-04-02"
     
     @State private var alwaysFalse: Bool = false
     @State private var alwaysTrue: Bool = true
@@ -64,33 +64,55 @@ struct MyAccountScreen: View {
                                 //                            ProgressView()
                                 //                                .padding(.top, screenHeight/4)
                             } else {
-                                WorkerAccView(DeskAccountNumber: $workerLoginAccountNumber, dateCreated: $dateCreated)
+                                if let userDataModel = authStateEnvObject.userDataModel {
+                                    WorkerAccView(
+                                                    DeskAccountNumber: Binding(
+                                                        get: { userDataModel.username ?? "" },
+                                                        set: { authStateEnvObject.userDataModel?.username = $0 }
+                                                    ),
+                                                    dateCreated: Binding(
+                                                        get: { userDataModel.hire_date ?? "" },
+                                                        set: { authStateEnvObject.userDataModel?.hire_date = $0 }
+                                                    )
+                                                )
                                     .padding(.top, 28)
                                     .padding(.bottom, 20)
+                                }
                                 Divider()
                                 Group {
-                                    
                                     Text("Персональные данные")
                                         .withDefaultTextModifier(font: "NexaBold", size: 15, relativeTextStyle: .subheadline, color: Color.theme.lowContrast)
                                         .padding(.top, 20)
                                     
                                     Group {
-                                        let personName = "Алексеев Виктор Петрович"
-                                        titleAndValue(title: "ФИО", value: personName, ifPadding: false)
+                                        if let name = authStateEnvObject.userDataModel?.name,
+                                           let middle_name = authStateEnvObject.userDataModel?.middle_name,
+                                           let surname = authStateEnvObject.userDataModel?.surname {
+                                            titleAndValue(title: "ФИО", value: "\(name) \(middle_name) \(surname)", ifPadding: false)
+                                                .padding(.top, 20)
+                                        }
+                                    }
+                                    Group {
+                                        if let phone = authStateEnvObject.userDataModel?.phone_number {
+                                            titleAndValueMultiLines(title: "Контактный телефон", value: phone)
+                                                .padding(.top, 20)
+                                        }
+                                    }
+                                    if let dob = authStateEnvObject.userDataModel?.birth_date {
+                                        dateTitleAndValue(title: "Дата Рождения", value: dob, ifPadding: false)
                                             .padding(.top, 20)
                                     }
                                     Group {
-                                        titleAndValueMultiLines(title: "Контактный телефон", value: "+ 7 985 422 5541")
-                                            .padding(.top, 20)
+                                        if let email = authStateEnvObject.userDataModel?.email {
+                                            titleAndValue(title: "Почта", value: email, ifPadding: false)
+                                                .padding(.top, 20)
+                                        }
                                     }
-                                    
-                                    dateTitleAndValue(title: "Дата Рождения", value: "12-03-1967", ifPadding: false)
-                                        .padding(.top, 20)
-                                    
                                     Group {
-                                        let email = "alexeev.a@tmk.ru"
-                                        titleAndValue(title: "Почта", value: email, ifPadding: false)
-                                            .padding(.top, 20)
+                                        if let spec_id = authStateEnvObject.userDataModel?.spec_id {
+                                            titleAndValueMultiLines(title: "Специализация", value: RequestTypeEnum(rawValue: spec_id)?.name ?? "")
+                                                .padding(.top, 20)
+                                        }
                                     }
                                     Group {
                                         titleAndValueMultiLines(title: "Должность", value: "Сварщик")
@@ -122,20 +144,20 @@ struct MyAccountScreen: View {
                                     .padding(.top, 20)
                                     
                                     Group {
-                                        let personName = "3600"
-                                        titleAndValue(title: "Заработанные токены", value: personName, ifPadding: false)
+                                        let token = authStateEnvObject.userRewardsDataModel?.tokens ?? 0
+                                        titleAndValue(title: "Заработанные токены", value: "\(token)", ifPadding: false)
                                             .padding(.top, 20)
                                     }
                                     Group {
-                                        titleAndValueMultiLines(title: "Кол-во заведенных заявок", value: "150")
+                                        titleAndValueMultiLines(title: "Кол-во заведенных заявок", value: "\(authStateEnvObject.userRewardsDataModel?.num_created ?? 0)")
                                             .padding(.top, 20)
                                     }
                                     Group {
-                                        titleAndValueMultiLines(title: "Кол-во исполненных заявок", value: "160")
+                                        titleAndValueMultiLines(title: "Кол-во исполненных заявок", value: "\(authStateEnvObject.userRewardsDataModel?.num_completed ?? 0)")
                                             .padding(.top, 20)
                                     }
                                     
-                                    dateTitleAndValue(title: "Дата последней исполненной заявки", value: "22-05-2024", ifPadding: false)
+                                    dateTitleAndValue(title: "Дата последней исполненной заявки", value: "\(authStateEnvObject.userRewardsDataModel?.last_completed ?? "неизвестно")", ifPadding: false)
                                         .padding(.top, 20)
                                     
                                     Spacer()
@@ -147,18 +169,6 @@ struct MyAccountScreen: View {
                 .padding(.horizontal, 28)
             }
             .background(Color.theme.background)
-            
-            .alert("Alert", isPresented: $triggerToDisableMfa) {
-                Button("Ok", role: .cancel) { }
-            } message: {
-                Text("Please disable 2FA to change your phone number")
-            }
-            .task {
-                
-            }
-            .onChange(of: tabSelection) { value in
-                
-            }
             .navigationBarHidden(true)
         }
     }

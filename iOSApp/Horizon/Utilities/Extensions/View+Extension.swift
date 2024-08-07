@@ -263,7 +263,7 @@ extension View {
         ifPadding: Bool = true
     ) -> some View {
         let inputFormatter = DateFormatter()
-        inputFormatter.dateFormat = "dd-MM-yyyy"
+        inputFormatter.dateFormat = "YYYY-dd-MM"
         let dateObj = inputFormatter.date(from: value) ?? Date()
         let outputFormatter = DateFormatter()
         outputFormatter.dateFormat = "dd/MM/yyyy"
