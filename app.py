@@ -44,6 +44,7 @@ class User(Base):
     birth_date = Column(DATE)
     email = Column(String, unique=True)
     spec_id = Column(Integer, ForeignKey('specializations.spec_id'), nullable=True)
+    spec_name = Column(String, nullable=True)
     fcm_token = Column(String, nullable=True)
     role_id = Column(Integer, ForeignKey('roles.role_id'))
     shift_id = Column(Integer, ForeignKey('worker_shifts.shift_id'))
@@ -145,6 +146,7 @@ class UserModel(BaseModel):
     birth_date: Optional[date]
     email: Optional[str]
     spec_id: Optional[int]
+    spec_name: Optional[str]
     fcm_token: Optional[str]
     role_id: int
     shift_id: Optional[int]
@@ -331,7 +333,15 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
     db.add(user)
     db.commit()
     db.refresh(user)
-    return {"User successfully registered"}
+
+    if user.spec_id:
+        specialization = db.query(Specialization).filter(Specialization.spec_id == user.spec_id).first()
+        if specialization:
+            user.spec_name = specialization.spec_name
+            db.commit()
+            db.refresh(user)
+
+    return {"message": "User successfully registered", "user_id": user.user_id}
 
 @app.post("/login", response_model=LoginResponse)
 def login(request: LoginRequest, db: Session = Depends(get_db)):
