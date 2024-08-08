@@ -308,6 +308,7 @@ def update_request(request_id: int, new_status: int, user_id: int, db: Session, 
     db.refresh(log_entry)
     return existing_request
 
+
 def add_fcm_token(user: User, new_fcm: str, db: Session):
     if user.fcm_token is None:
         user.fcm_token = []
@@ -328,13 +329,15 @@ def add_fcm_token(user: User, new_fcm: str, db: Session):
 
 def remove_fcm_token(user: User, old_fcm: str, db: Session):
     if user.fcm_token and old_fcm in user.fcm_token:
-        user.fcm_token.remove(old_fcm)
+        user.fcm_token = [token for token in user.fcm_token if token != old_fcm]
         db.commit()
         db.refresh(user)
 
 
+
 def extract_uniq_device_id(fcm_token: str) -> str:
     return fcm_token.split(":")[0] if ":" in fcm_token else fcm_token
+
 
 
 # Endpoints
@@ -419,7 +422,6 @@ def create_request(request: RequestCreate, db: Session = Depends(get_db)):
         db.commit()
 
     return {"message": "Request created successfully", "request_id": new_request.request_id}
-
 
 
 @app.post("/master-approve", response_model=dict)
