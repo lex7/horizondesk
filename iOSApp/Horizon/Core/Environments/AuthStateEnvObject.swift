@@ -484,9 +484,8 @@ private extension AuthStateEnvObject {
     private func resetFirebaseFCMToken(completion: @escaping () -> Void) {
         completion()
         if let senderId = fcmTokenManager.getSenderId() {
-            Messaging.messaging().deleteFCMToken(forSenderID: senderId, completion: { [weak self] result in
+            Messaging.messaging().deleteFCMToken(forSenderID: senderId, completion: { _ in
                 Messaging.messaging().retrieveFCMToken(forSenderID: senderId, completion: { (token,error) in
-                    self?.fcmTokenManager.tokenSendToBackend = false
                     if let error = error {
                         debugPrint(error)
                     }

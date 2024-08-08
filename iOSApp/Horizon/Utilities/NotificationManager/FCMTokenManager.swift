@@ -4,8 +4,6 @@ import Combine
 
 final class FCMTokenManager: ObservableObject {
     
-    @Published var tokenSendToBackend: Bool = false
-    
     // MARK: - Static
     static let shared = FCMTokenManager()
     
