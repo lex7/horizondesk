@@ -5,6 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.types import TIMESTAMP, String, DATE
 from sqlalchemy.orm import Session
+from sqlalchemy.dialects.postgresql import ARRAY
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -45,7 +46,7 @@ class User(Base):
     email = Column(String, unique=True)
     spec_id = Column(Integer, ForeignKey('specializations.spec_id'), nullable=True)
     spec_name = Column(String, nullable=True)
-    fcm_token = Column(String, nullable=True)
+    fcm_token = Column(ARRAY(String), nullable=True)
     role_id = Column(Integer, ForeignKey('roles.role_id'))
     shift_id = Column(Integer, ForeignKey('worker_shifts.shift_id'))
     tokens = Column(Integer, default=0)
@@ -55,6 +56,7 @@ class User(Base):
 
     role = relationship("Role", back_populates="users")
     shift = relationship("WorkerShift", back_populates="users")
+    specialization = relationship("Specialization", back_populates="users")
 
 class Specialization(Base):
     __tablename__ = 'specializations'
@@ -62,8 +64,6 @@ class Specialization(Base):
     spec_name = Column(String, unique=True, index=True, nullable=False)
 
     users = relationship("User", back_populates="specialization")
-
-User.specialization = relationship("Specialization", back_populates="users")
 
 class Role(Base):
     __tablename__ = 'roles'
@@ -308,6 +308,35 @@ def update_request(request_id: int, new_status: int, user_id: int, db: Session, 
     db.refresh(log_entry)
     return existing_request
 
+def add_fcm_token(user: User, new_fcm: str, db: Session):
+    if user.fcm_token is None:
+        user.fcm_token = []
+
+    uniq_device_id = extract_uniq_device_id(new_fcm)
+
+    # Remove any tokens with the same uniqDeviceId
+    user.fcm_token = [
+        token for token in user.fcm_token 
+        if extract_uniq_device_id(token) != uniq_device_id
+    ]
+
+    # Add the new token
+    user.fcm_token.append(new_fcm)
+    db.commit()
+    db.refresh(user)
+
+
+def remove_fcm_token(user: User, old_fcm: str, db: Session):
+    if user.fcm_token and old_fcm in user.fcm_token:
+        user.fcm_token.remove(old_fcm)
+        db.commit()
+        db.refresh(user)
+
+
+def extract_uniq_device_id(fcm_token: str) -> str:
+    return fcm_token.split(":")[0] if ":" in fcm_token else fcm_token
+
+
 # Endpoints
 
 @app.get("/")
@@ -350,10 +379,27 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Invalid username or password")
     
     if request.fcm_token:
-        user.fcm_token = request.fcm_token
-        db.commit()
+        add_fcm_token(user, request.fcm_token, db)
     
     return LoginResponse(user_id=user.user_id, role_id=user.role_id)
+
+@app.post("/refresh-user-token")
+def refresh_user_token(user_id: int, new_fcm: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    add_fcm_token(user, new_fcm, db)
+    return {"message": "FCM token refreshed successfully"}
+
+@app.post("/logout")
+def logout(user_id: int, old_fcm: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    remove_fcm_token(user, old_fcm, db)
+    return {"message": "FCM token removed successfully"}
 
 @app.post("/create-request", response_model=dict)
 def create_request(request: RequestCreate, db: Session = Depends(get_db)):

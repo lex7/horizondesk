@@ -31,7 +31,7 @@ CREATE TABLE users (
     email VARCHAR(100) UNIQUE,
     spec_id INTEGER NOT NULL REFERENCES specializations(spec_id),
     spec_name VARCHAR(50) REFERENCES specializations(spec_name),
-    fcm_token VARCHAR(255),
+    fcm_token VARCHAR(255)[],
     role_id INTEGER NOT NULL REFERENCES roles(role_id),
     shift_id INTEGER REFERENCES worker_shifts(shift_id),
     tokens INTEGER DEFAULT 0,
