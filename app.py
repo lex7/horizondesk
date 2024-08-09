@@ -490,14 +490,24 @@ def get_my_tasks(user_id: int, db: Session = Depends(get_db)):
 
 @app.get("/executor-unassigned", response_model=List[RequestModel])
 def get_unassigned(user_id: int, db: Session = Depends(get_db)):
+    # Find the user
     user = db.query(User).filter(User.user_id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     
-    spec_id = user.spec_id
-    if spec_id is None:
-        raise HTTPException(status_code=400, detail="User does not have a spec_id")
+    spec_name = user.spec_name
+    if spec_name is None:
+        raise HTTPException(status_code=400, detail="User does not have a spec_name")
+
+    # Get the spec_id for the given spec_name
+    specialization = db.query(Specialization).filter(Specialization.spec_name == spec_name).first()
     
+    if not specialization:
+        raise HTTPException(status_code=400, detail="Specialization not found")
+
+    spec_id = specialization.spec_id
+
+    # Query for requests
     tasks = db.query(Request).filter(
         Request.assigned_to.is_(None),
         Request.request_type == spec_id,
