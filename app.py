@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, HTTPException, Depends
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, event, func
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, event, func, or_
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.types import TIMESTAMP, String, DATE
@@ -147,7 +147,7 @@ class UserModel(BaseModel):
     email: Optional[str]
     spec_id: Optional[int]
     spec_name: Optional[str]
-    fcm_token: Optional[str]
+    fcm_token: Optional[List[str]]
     role_id: int
     shift_id: Optional[int]
 
@@ -339,6 +339,31 @@ def extract_uniq_device_id(fcm_token: str) -> str:
     return fcm_token.split(":")[0] if ":" in fcm_token else fcm_token
 
 
+def get_password_hash(password):
+    return pwd_context.hash(password)
+
+
+def get_user_by_username(db: Session, username: str):
+    return db.query(User).filter(User.username == username).first()
+
+def get_user_by_device_id(db: Session, device_id: str):
+    return db.query(User).filter(
+        User.fcm_token.contains([device_id])
+    ).first()
+
+def remove_device_from_other_users(db: Session, device_id: str, current_user_id: int):
+    other_users = db.query(User).filter(
+        User.user_id != current_user_id,
+        or_(User.fcm_token.contains([device_id]))
+    ).all()
+    
+    for user in other_users:
+        if user.fcm_token:
+            user.fcm_token = [token for token in user.fcm_token if not token.startswith(device_id)]
+            db.add(user)
+    
+    db.commit()
+
 
 # Endpoints
 
@@ -376,14 +401,28 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
     return {"message": "User successfully registered", "user_id": user.user_id}
 
 @app.post("/login", response_model=LoginResponse)
-def login(request: LoginRequest, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == request.username).first()
-    if user is None or not verify_password(request.password, user.password_hash):
-        raise HTTPException(status_code=400, detail="Invalid username or password")
+def login_user(login_request: LoginRequest, db: Session = Depends(SessionLocal)):
+    user = get_user_by_username(db, login_request.username)
     
-    if request.fcm_token:
-        add_fcm_token(user, request.fcm_token, db)
+    if not user or not verify_password(login_request.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
     
+    if login_request.fcm_token:
+        device_id = login_request.fcm_token.split(":")[0]
+        existing_user = get_user_by_device_id(db, device_id)
+
+        if existing_user and existing_user.user_id != user.user_id:
+            remove_device_from_other_users(db, device_id, user.user_id)
+        
+        if user.fcm_token:
+            if login_request.fcm_token not in user.fcm_token:
+                user.fcm_token.append(login_request.fcm_token)
+        else:
+            user.fcm_token = [login_request.fcm_token]
+        
+        db.add(user)
+        db.commit()
+
     return LoginResponse(user_id=user.user_id, role_id=user.role_id)
 
 @app.post("/refresh-user-token")
