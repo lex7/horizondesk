@@ -154,14 +154,14 @@ class UserModel(BaseModel):
     shift_id: Optional[int]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class StatusModel(BaseModel):
     status_id: int
     status_name: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class LoginRequest(BaseModel):
     username: str
@@ -198,7 +198,7 @@ class RequestModel(BaseModel):
     reason: Optional[str]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
         json_encoders = {
             datetime: lambda v: v.strftime("%Y-%m-%dT%H:%M:%S")
         }
@@ -219,21 +219,21 @@ class RequestTypeModel(BaseModel):
     type_name: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class SpecializationModel(BaseModel):
     spec_id: int
     spec_name: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class RoleModel(BaseModel):
     role_id: int
     role_name: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class RequestStatusLogModel(BaseModel):
     log_id: int
@@ -245,7 +245,7 @@ class RequestStatusLogModel(BaseModel):
     reason: Optional[str]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
         json_encoders = {
             datetime: lambda v: v.strftime("%Y-%m-%dT%H:%M:%S")
         }
@@ -257,7 +257,7 @@ class RewardsResponse(BaseModel):
     last_completed: Optional[date]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class RefreshTokenRequest(BaseModel):
     user_id: int
@@ -408,13 +408,15 @@ def get_under_master_approval_requests(user_id: int, db: Session = Depends(get_d
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     
-    spec_id = user.spec_id
-    if spec_id is None:
-        raise HTTPException(status_code=400, detail="User does not have a spec_id")
+    # Use spec_name instead of spec_id, assuming that's your intended design
+    spec_name = user.spec_name
+    if spec_name is None:
+        raise HTTPException(status_code=400, detail="User does not have a spec_name")
     
-    requests = db.query(Request).filter(
+    # Assuming request_type is related to specialization name, adjust accordingly
+    requests = db.query(Request).join(Specialization).filter(
         Request.status_id == 1,
-        Request.request_type == spec_id
+        Specialization.spec_name == spec_name
     ).all()
     
     return requests
