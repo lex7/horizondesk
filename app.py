@@ -45,10 +45,10 @@ class User(Base):
     phone_number = Column(String, nullable=True)
     birth_date = Column(DATE, nullable=True)
     email = Column(String, nullable=True)
-    spec_name = Column(String, nullable=True)
+    spec_name = Column(String, nullable=True)  # Assumes spec_name is a String type
     role_id = Column(Integer, ForeignKey('roles.role_id'), nullable=False)
     fcm_token = Column(String, nullable=True)
-    shift_id = Column(Integer, nullable=True)  # Removed ForeignKey constraint here
+    shift_id = Column(Integer, nullable=True)
     tokens = Column(Integer, default=0)
     num_created = Column(Integer, default=0)
     num_completed = Column(Integer, default=0)
@@ -56,15 +56,18 @@ class User(Base):
 
     role = relationship("Role", back_populates="users")
     shift = relationship("WorkerShift", back_populates="users",
-                         primaryjoin="foreign(User.shift_id) == WorkerShift.shift_id")  # Add foreign() annotation
-    specialization = relationship("Specialization", back_populates="users")
+                         primaryjoin="foreign(User.shift_id) == WorkerShift.shift_id")
+    specialization = relationship("Specialization", back_populates="users",
+                                  primaryjoin="foreign(User.spec_name) == Specialization.spec_name")
 
 class Specialization(Base):
     __tablename__ = 'specializations'
-    spec_id = Column(Integer, primary_key=True, index=True)
-    spec_name = Column(String, unique=True, index=True, nullable=False)
 
-    users = relationship("User", back_populates="specialization")
+    specialization_id = Column(Integer, primary_key=True, index=True)
+    spec_name = Column(String, nullable=False, unique=True)
+
+    users = relationship("User", back_populates="specialization",
+                         primaryjoin="foreign(User.spec_name) == Specialization.spec_name")
 
 class Role(Base):
     __tablename__ = 'roles'
