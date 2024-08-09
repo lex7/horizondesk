@@ -312,9 +312,7 @@ def update_request(request_id: int, new_status: int, user_id: int, db: Session, 
 
 def add_fcm_token(user: User, fcm_token: str, db: Session):
     device_id = extract_unique_device_id(fcm_token)
-    # Remove any existing token with the same device ID
     user.fcm_token = [token for token in user.fcm_token if not token.startswith(device_id)]
-    # Append the new token
     user.fcm_token.append(fcm_token)
     db.commit()
 
@@ -338,15 +336,14 @@ def get_user_by_username(db: Session, username: str):
     return db.query(User).filter(User.username == username).first()
 
 def get_user_by_device_id(db: Session, device_id: str):
+    pattern = f"{device_id}:%"
     return db.query(User).filter(
-        User.fcm_token.any(f"{device_id}:%")
+        func.array_to_string(User.fcm_token, ',').contains(pattern)
     ).first()
 
 def remove_device_from_other_users(db: Session, device_id: str, user_id: int):
-    # Get users with the device ID except the current user
     users = db.query(User).filter(User.user_id != user_id).all()
     for user in users:
-        # Filter out any tokens with the matching device ID
         user.fcm_token = [token for token in user.fcm_token if not token.startswith(device_id)]
     db.commit()
     
