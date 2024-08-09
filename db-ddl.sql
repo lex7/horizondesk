@@ -68,7 +68,6 @@ CREATE TABLE requests (
     status_id INTEGER NOT NULL REFERENCES statuses(status_id),
     created_at TIMESTAMP NOT NULL DEFAULT now(),
     updated_at TIMESTAMP,
-    deadline TIMESTAMP,
     reason TEXT
 );
 

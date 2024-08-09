@@ -110,7 +110,6 @@ class Request(Base):
     status_id = Column(Integer, ForeignKey('statuses.status_id'), default=1, nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP, onupdate=func.now())
-    deadline = Column(TIMESTAMP)
     reason = Column(String)
 
     creator = relationship("User", foreign_keys=[created_by])
@@ -196,7 +195,6 @@ class RequestModel(BaseModel):
     status_id: int
     created_at: datetime
     updated_at: Optional[datetime]
-    deadline: Optional[datetime]
     reason: Optional[str]
 
     class Config:
@@ -211,19 +209,10 @@ class RequestCreate(BaseModel):
     area_id: int
     description: str
 
-class ApproveRequest(BaseModel):
-    user_id: int
-    request_id: int
-    deadline: Optional[str] = None 
-
-class DenyRequest(BaseModel):
-    user_id: int
-    request_id: int
-    reason: str
-
 class UpdateRequest(BaseModel):
     user_id: int
     request_id: int
+    reason: Optional[str]
 
 class RequestTypeModel(BaseModel):
     request_type: int
@@ -269,6 +258,14 @@ class RewardsResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+class RefreshTokenRequest(BaseModel):
+    user_id: int
+    new_fcm: str
+
+class LogoutRequest(BaseModel):
+    user_id: int
+    old_fcm: str
 
 # Extra funcs
 
@@ -572,21 +569,21 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
 
 
 @app.post("/refresh-user-token")
-def refresh_user_token(user_id: int, new_fcm: str, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.user_id == user_id).first()
+def refresh_user_token(request: RefreshTokenRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.user_id == request.user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    add_fcm_token(user, new_fcm, db)
+    add_fcm_token(user, request.new_fcm, db)
     return {"message": "FCM token refreshed successfully"}
 
 @app.post("/logout")
-def logout(user_id: int, old_fcm: str, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.user_id == user_id).first()
+def logout(request: LogoutRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.user_id == request.user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    remove_fcm_token(user, old_fcm, db)
+    remove_fcm_token(user, request.old_fcm, db)
     return {"message": "FCM token removed successfully"}
 
 @app.post("/create-request", response_model=dict)
@@ -610,12 +607,13 @@ def create_request(request: RequestCreate, db: Session = Depends(get_db)):
 
 
 @app.post("/master-approve", response_model=dict)
-def approve_request(request: ApproveRequest, db: Session = Depends(get_db)):
+def approve_request(request: UpdateRequest, db: Session = Depends(get_db)):
     existing_request = update_request(
         request.request_id,
         new_status=2,
         user_id=request.user_id,
-        db=db
+        db=db,
+        reason=request.reason
     )
     # creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
     # if creator_user is None or not creator_user.fcm_token:
@@ -633,7 +631,7 @@ def approve_request(request: ApproveRequest, db: Session = Depends(get_db)):
 
 
 @app.post("/master-deny", response_model=dict)
-def deny_request(request: DenyRequest, db: Session = Depends(get_db)):
+def deny_request(request: UpdateRequest, db: Session = Depends(get_db)):
     existing_request = update_request(
         request.request_id,
         new_status=3,
@@ -679,7 +677,7 @@ def take_request(request: UpdateRequest, db: Session = Depends(get_db)):
     return {"message": "Request accepted into work successfully", "request_id": existing_request.request_id}
 
 @app.post("/executor-cancel", response_model=dict)
-def cancel_request(request: DenyRequest, db: Session = Depends(get_db)):
+def cancel_request(request: UpdateRequest, db: Session = Depends(get_db)):
     existing_request = update_request(
         request.request_id,
         new_status=2,
@@ -704,7 +702,7 @@ def cancel_request(request: DenyRequest, db: Session = Depends(get_db)):
 
 @app.post("/executor-complete", response_model=dict)
 def complete_request(request: UpdateRequest, db: Session = Depends(get_db)):
-    existing_request = update_request(request.request_id, 5, request.user_id, db)
+    existing_request = update_request(request.request_id, 5, request.user_id, db, reason=request.reason)
     # creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
     # if creator_user is None or not creator_user.fcm_token:
     #     raise HTTPException(status_code=404, detail="Users's FCM token not found")
@@ -722,7 +720,7 @@ def complete_request(request: UpdateRequest, db: Session = Depends(get_db)):
 
 @app.post("/requestor-confirm", response_model=dict)
 def confirm_request(request: UpdateRequest, db: Session = Depends(get_db)):
-    existing_request = update_request(request.request_id, 6, request.user_id, db)
+    existing_request = update_request(request.request_id, 6, request.user_id, db, reason=request.reason)
     creator = db.query(User).filter(User.user_id == request.user_id).first()
     executor = db.query(User).filter(User.user_id == existing_request.assigned_to).first()
     
@@ -738,7 +736,7 @@ def confirm_request(request: UpdateRequest, db: Session = Depends(get_db)):
     return {"message": "Request confirmed successfully", "request_id": request.request_id}
 
 @app.post("/requestor-deny", response_model=dict)
-def deny_request(request: DenyRequest, db: Session = Depends(get_db)):
+def deny_request(request: UpdateRequest, db: Session = Depends(get_db)):
     existing_request = update_request(
         request.request_id,
         new_status=4,
