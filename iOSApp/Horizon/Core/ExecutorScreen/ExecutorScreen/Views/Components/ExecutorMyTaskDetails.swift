@@ -100,7 +100,7 @@ private extension ExecutorMyTaskDetails {
     var bottomButtons: some View {
         Group {
             HStack {
-                if IssueStatus(rawValue: currentNode.status_id) != .done &&
+                if IssueStatus(rawValue: currentNode.status_id) == .done &&
                     IssueStatus(rawValue: currentNode.status_id) != .review &&
                     IssueStatus(rawValue: currentNode.status_id) != .inprogress {
                     makeMediumContrastView(text: "Назад", image: "xmark", imageFirst: true)

@@ -263,7 +263,6 @@ private extension ExecutorScreen {
                 HStack {
                     descriptionOfField(issue.readableStatus, color: Color.theme.secondary)
                     Spacer()
-                    descriptionOfField(issue.createdAtString, color: Color.theme.lowContrast)
                     createDateString(issue)
                         .padding(.top, screenHeight/120)
                 }
