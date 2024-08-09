@@ -407,18 +407,16 @@ def get_under_master_approval_requests(user_id: int, db: Session = Depends(get_d
     user = db.query(User).filter(User.user_id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    
-    # Use spec_name instead of spec_id, assuming that's your intended design
+
     spec_name = user.spec_name
     if spec_name is None:
         raise HTTPException(status_code=400, detail="User does not have a spec_name")
-    
-    # Assuming request_type is related to specialization name, adjust accordingly
-    requests = db.query(Request).join(Specialization).filter(
+
+    requests = db.query(Request).join(Specialization, Specialization.spec_name == User.spec_name).filter(
         Request.status_id == 1,
         Specialization.spec_name == spec_name
     ).all()
-    
+
     return requests
 
 @app.get("/under-master-monitor", response_model=List[RequestModel])
@@ -426,14 +424,14 @@ def get_under_master_monitor_requests(user_id: int, db: Session = Depends(get_db
     user = db.query(User).filter(User.user_id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    
-    spec_id = user.spec_id
-    if spec_id is None:
-        raise HTTPException(status_code=400, detail="User does not have a spec_id")
-    
-    requests = db.query(Request).filter(
+
+    spec_name = user.spec_name
+    if spec_name is None:
+        raise HTTPException(status_code=400, detail="User does not have a spec_name")
+
+    requests = db.query(Request).join(Specialization, Specialization.spec_name == User.spec_name).filter(
         Request.status_id != 1,
-        Request.request_type == spec_id
+        Specialization.spec_name == spec_name
     ).all()
 
     return requests
