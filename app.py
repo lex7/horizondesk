@@ -423,12 +423,10 @@ def get_under_master_approval_requests(user_id: int, db: Session = Depends(get_d
 
     spec_id = specialization.spec_id
 
-    # Query for requests
-    requests = db.query(Request).join(
-        Specialization, Specialization.spec_id == Request.area_id  # Adjust this line if needed
-    ).filter(
+    # Query for requests where request_type matches the spec_id
+    requests = db.query(Request).filter(
         Request.status_id == 1,
-        Specialization.spec_id == spec_id
+        Request.request_type == spec_id  # Ensure request_type matches spec_id
     ).all()
     
     return requests
