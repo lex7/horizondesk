@@ -3,13 +3,13 @@ import SwiftUI
 
 enum MyAccountSwitcher: String, CaseIterable, Identifiable  {
     case information = "My Information"
-    case setup = "Rewards"
+    case rewards = "Rewards"
     
     mutating func toggle() {
         switch self {
         case .information:
-            self = .setup
-        case .setup:
+            self = .rewards
+        case .rewards:
             self = .information
         }
     }
@@ -63,13 +63,13 @@ struct MyAccountRightPickerView: View {
                         .weight(.bold)
                 )
                 .multilineTextAlignment(.trailing)
-                .foregroundColor(sectionSelected == .setup ? Color.theme.selected : Color.theme.mediumContrast)
+                .foregroundColor(sectionSelected == .rewards ? Color.theme.selected : Color.theme.mediumContrast)
         }
-        .disabled(sectionSelected == .setup)
+        .disabled(sectionSelected == .rewards)
         .padding(.horizontal, 12)
         .padding(.vertical, 11)
         .frame(maxWidth: .infinity, alignment: .center)
-        .background(sectionSelected == .setup ? AnyView(colorScheme == .dark ? Color.gradient.gradientLowDark : Color.gradient.gradientLowLight) : AnyView(Color.theme.surface))
+        .background(sectionSelected == .rewards ? AnyView(colorScheme == .dark ? Color.gradient.gradientLowDark : Color.gradient.gradientLowLight) : AnyView(Color.theme.surface))
         .cornerRadius(24)
     }
 }

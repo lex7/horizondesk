@@ -635,13 +635,13 @@
 		05D118722B4F157300E9FD9F /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				05B686332B5548FE00440537 /* LoginScreen */,
 				05597B622C657919007B96A0 /* LogsScreen */,
 				05096EBB2B84E912003FDB52 /* MainContent */,
 				05D65AEE2B6A1F06009CF788 /* CustomTabBar */,
 				05D759262B6309AD00578623 /* Environments */,
 				058F46722B54930400151850 /* ViewModifiers */,
 				05D7A6572C5EE47400275E9D /* StatisticScreen */,
-				05B686332B5548FE00440537 /* LoginScreen */,
 				054969C22B9F87B700A5B3F3 /* CreateIssueScreen */,
 				05F2D9522B92505B00BDDD36 /* MonitorIssueScreen */,
 				052A98E12B73A78C002249C5 /* ExecutorScreen */,

@@ -76,10 +76,10 @@ final class AuthStateEnvObject: ObservableObject {
             .sink { [unowned self] completion in
                 switch completion {
                 case .finished:
-                    debugPrint(String(describing: "[vm: ✅ assignFcmHorizon successfully]"))
+                    debugPrint(String(describing: "[vm: ✅ userLogin successfully]"))
                     break
                 case .failure(let error):
-                    debugPrint(String(describing: "[vm: \(error) - ❌ assignFcmHorizon]"))
+                    debugPrint(String(describing: "[vm: \(error) - ❌ userLogin]"))
                 }
                 self.showProgress = false
             } receiveValue: { [weak self] data in

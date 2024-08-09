@@ -19,7 +19,7 @@ struct UserInfoDataModel: Decodable {
     let email: String?
     let spec_id: Int
     let spec_name: String?
-    let fcm_token: String?
+    let fcm_token: [String?]
     let role_id: Int
     let shift_id: Int?
 }

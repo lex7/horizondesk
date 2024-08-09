@@ -133,7 +133,7 @@ struct MyAccountScreen: View {
                             }
                         }
                         .mask(LinearGradient(gradient: Gradient(colors: [.black, .black, .black, .black, .black, .clear]), startPoint: .top, endPoint: .bottom))
-                    case .setup:
+                    case .rewards:
                         Group {
                             VStack {
                                 Group {
@@ -186,7 +186,7 @@ private extension MyAccountScreen {
         switch selectedSegment {
         case .information:
             return "My information segment. Segment selected."
-        case .setup:
+        case .rewards:
             return "My information segment. Double tap to select segment"
         }
     }
@@ -195,7 +195,7 @@ private extension MyAccountScreen {
         switch selectedSegment {
         case .information:
             return "Setup account segment. Double tap to select segment."
-        case .setup:
+        case .rewards:
             return "Setup account segment. Segment selected."
         }
     }
@@ -215,7 +215,7 @@ private extension MyAccountScreen {
                     selectedSegment.toggle()
                     debugPrint(selectedSegment)
                 }
-                .allowsHitTesting(selectedSegment != .setup)
+                .allowsHitTesting(selectedSegment != .rewards)
             
             
         }
