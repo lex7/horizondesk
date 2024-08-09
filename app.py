@@ -1,11 +1,13 @@
 import os
 from fastapi import FastAPI, HTTPException, Depends
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, event, func, or_, literal_column
+from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey, event, func, or_, literal_column
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
-from sqlalchemy.types import TIMESTAMP, String, DATE
+from sqlalchemy.types import TIMESTAMP
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.dialects.postgresql import ARRAY
+
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -36,24 +38,24 @@ app = FastAPI()
 class User(Base):
     __tablename__ = 'users'
 
-    user_id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True, nullable=False)
-    password_hash = Column(String, nullable=False)
-    surname = Column(String, nullable=True)
-    name = Column(String, nullable=True)
-    middle_name = Column(String, nullable=True)
-    hire_date = Column(DATE, nullable=True)
-    phone_number = Column(String, nullable=True)
-    birth_date = Column(DATE, nullable=True)
-    email = Column(String, nullable=True)
-    spec_name = Column(String, nullable=True)
+    user_id = Column(Integer, primary_key=True)
+    username = Column(String(50), unique=True, nullable=False)
+    password_hash = Column(String(255), nullable=False)
+    surname = Column(String(50))
+    name = Column(String(50))
+    middle_name = Column(String(50))
+    hire_date = Column(Date)
+    phone_number = Column(String(15))
+    birth_date = Column(Date)
+    email = Column(String(100), unique=True)
+    spec_name = Column(String(50), ForeignKey('specializations.spec_name'))
+    fcm_token = Column(ARRAY(String(255)), default=[])
     role_id = Column(Integer, ForeignKey('roles.role_id'), nullable=False)
-    fcm_token = Column(String, nullable=True)
-    shift_id = Column(Integer, ForeignKey('worker_shifts.shift_id'), nullable=True)
+    shift_id = Column(Integer, ForeignKey('worker_shifts.shift_id'))
     tokens = Column(Integer, default=0)
     num_created = Column(Integer, default=0)
     num_completed = Column(Integer, default=0)
-    last_completed = Column(DATE)
+    last_completed = Column(Date)
 
     role = relationship("Role", back_populates="users")
     shift = relationship("WorkerShift", back_populates="users",
@@ -312,9 +314,15 @@ def update_request(request_id: int, new_status: int, user_id: int, db: Session, 
 
 def add_fcm_token(user: User, fcm_token: str, db: Session):
     device_id = extract_unique_device_id(fcm_token)
+    # Initialize fcm_token as an empty list if it is None
+    if user.fcm_token is None:
+        user.fcm_token = []
+    # Remove existing tokens with the same device_id
     user.fcm_token = [token for token in user.fcm_token if not token.startswith(device_id)]
+    # Add the new token
     user.fcm_token.append(fcm_token)
     db.commit()
+
 
 
 def remove_fcm_token(user: User, old_fcm: str, db: Session):
@@ -344,6 +352,10 @@ def get_user_by_device_id(db: Session, device_id: str):
 def remove_device_from_other_users(db: Session, device_id: str, user_id: int):
     users = db.query(User).filter(User.user_id != user_id).all()
     for user in users:
+        # Initialize fcm_token as an empty list if it is None
+        if user.fcm_token is None:
+            user.fcm_token = []
+        # Remove tokens starting with the device_id
         user.fcm_token = [token for token in user.fcm_token if not token.startswith(device_id)]
     db.commit()
     
