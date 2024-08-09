@@ -625,6 +625,7 @@ def logout(request: LogoutRequest, db: Session = Depends(get_db)):
 
 @app.post("/create-request", response_model=dict)
 def create_request(request: RequestCreate, db: Session = Depends(get_db)):
+    # Create a new request
     new_request = Request(
         request_type=request.request_type,
         created_by=request.user_id,
@@ -635,10 +636,24 @@ def create_request(request: RequestCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_request)
 
+    # Update creator's request count
     creator = db.query(User).filter(User.user_id == request.user_id).first()
     if creator:
         creator.num_created += 1
         db.commit()
+
+    # Log the creation of the request
+    log_entry = RequestStatusLog(
+        request_id=new_request.request_id,
+        old_status_id=None,  # Since this is the creation, there is no old status
+        new_status_id=new_request.status_id,
+        changed_at=datetime.now(timezone.utc),
+        changed_by=request.user_id,
+        reason="Request created"
+    )
+    db.add(log_entry)
+    db.commit()
+    db.refresh(log_entry)
 
     return {"message": "Request created successfully", "request_id": new_request.request_id}
 
