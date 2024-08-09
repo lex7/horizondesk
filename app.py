@@ -796,16 +796,15 @@ def deny_request(request: UpdateRequest, db: Session = Depends(get_db)):
     return {"message": "Request denied successfully", "request_id": existing_request.request_id}
 
 @app.post("/requestor-delete", response_model=dict)
-def soft_delete_request(request_id: int, user_id: int, db: Session = Depends(get_db)):
-    existing_request = db.query(Request).filter(Request.request_id == request_id, Request.created_by == user_id).first()
+def soft_delete_request(request: UpdateRequest, db: Session = Depends(get_db)):
+    existing_request = db.query(Request).filter(Request.request_id == request.request_id, Request.created_by == request.user_id).first()
 
     if existing_request is None:
         raise HTTPException(status_code=404, detail="Request not found")
 
-    update_request(request_id, new_status=7, user_id=user_id, db=db)
+    update_request(request.request_id, new_status=7, user_id=request.user_id, db=db, reason=request.reason)
 
     return {"message": "Request marked as deleted successfully"}
-
 
 
 # Firebase push
