@@ -7,6 +7,7 @@ import Moya
 enum EndPointsDolly {
     //case assignFcmToken(model: HorizonFcmModel)
     case login(model: LoginModel)
+    case logout(model: FcmOldModel)
     case requests
     case createRequest(message: CreateRequestModelIssue)
     /// User Data
@@ -30,6 +31,8 @@ enum EndPointsDolly {
     case executerCancel(model: ExecutorCancelModel)
     case executorComplete(model: ExecutorActionModel)
     case refreshUserToken(model: RefreshUserFcmModel)
+    /// Log Request
+    case requestLogsOfTask(model: RequestIdModel)
     
     var baseStrUrl: String {
         switch self {
@@ -59,10 +62,10 @@ extension EndPointsDolly: Moya.TargetType {
         switch self {
         case .login, .createRequest, .requestorConfirm, .requesterDeniedCompletion, .masterDeny,
                 .masterApprove, .takeOnWork, .executerCancel, .executorComplete, .requesterDeleteTask,
-                .refreshUserToken:
+                .refreshUserToken, .logout:
             return .post
         case .requests, .inprogress, .completed, .denied, .underMasterApproval, .executorUnassigned, .executorAssigned,
-                .userData, .rewards:
+                .userData, .rewards, .requestLogsOfTask:
             return .get
         }
     }
@@ -97,10 +100,14 @@ extension EndPointsDolly: Moya.TargetType {
             return .requestJSONEncodable(model)
         case .refreshUserToken(let model):
             return .requestJSONEncodable(model)
+        case .logout(let model):
+            return .requestJSONEncodable(model)
         case .userData(let model):
             return .requestParameters(parameters: ["user_id": model.user_id], encoding: URLEncoding.queryString)
         case .rewards(let model):
             return .requestParameters(parameters: ["user_id": model.user_id], encoding: URLEncoding.queryString)
+        case .requestLogsOfTask(let model):
+            return .requestParameters(parameters: ["request_id": model.request_id], encoding: URLEncoding.queryString)
         }
     }
 
@@ -116,6 +123,10 @@ extension EndPointsDolly: Moya.TargetType {
         switch self {
         case .login:
             return "login"
+        case .refreshUserToken:
+            return "refresh-user-token"
+        case .logout:
+            return "logout"
         case .requests:
             return "requests"
         case .createRequest:
@@ -152,8 +163,8 @@ extension EndPointsDolly: Moya.TargetType {
             return "my-data"
         case .rewards:
             return "rewards"
-        case .refreshUserToken:
-            return "/refresh-user-token"
+        case .requestLogsOfTask:
+            return "request-history"
         }
     }
     

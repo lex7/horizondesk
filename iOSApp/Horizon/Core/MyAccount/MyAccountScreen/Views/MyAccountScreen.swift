@@ -115,9 +115,11 @@ struct MyAccountScreen: View {
                                         }
                                     }
                                     Group {
-                                        titleAndValueMultiLines(title: "Должность", value: "Сварщик")
-                                            .padding(.top, 20)
-                                            .padding(.bottom, 20)
+                                        if let spec_name = authStateEnvObject.userDataModel?.spec_name {
+                                            titleAndValueMultiLines(title: "Должность", value: spec_name)
+                                                .padding(.top, 20)
+                                                .padding(.bottom, 20)
+                                        }
                                     }
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)

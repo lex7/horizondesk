@@ -25,20 +25,30 @@ struct MasterScreen: View {
                 topLeftHeader(title: "На Рассмотрение")
                 Spacer()
             }
-            if authStateEnvObject.requestsForMaster.isEmpty {
-                messageForEmptyList
+            if authStateEnvObject.masterIsLoading {
+                Spacer()
+                ProgressView()
             } else {
-                allIssues
+                if authStateEnvObject.requestsForMaster.isEmpty {
+                    messageForEmptyList
+                } else {
+                    allIssues
+                }
             }
             Spacer()
-        } 
+        }
         .sheet(item: $showIssueConfirm, onDismiss: {
             authStateEnvObject.getRequestsForMaster()
         }, content: { _ in
             IssueAcceptanceCheck(currentNode: $currentNode)
         })
+//        .fullScreenCover(item: $showIssueConfirm, onDismiss: {
+//            authStateEnvObject.getRequestsForMaster()
+//        }, content: { _ in
+//            IssueAcceptanceCheck(currentNode: $currentNode)
+//        })
         .background(Color.theme.background)
-        .onChange(of: tabSelection) { value in
+        .onChange(of: tabSelection) {
             if tabSelection == .masterReviewIssue {
                 authStateEnvObject.getRequestsForMaster()
             }

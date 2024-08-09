@@ -5,6 +5,7 @@ enum NamingEnum: String {
     case noTasks
     case noRequests
     case noReview
+    case noLogsFound
     
     var name: String {
         switch self {
@@ -14,6 +15,8 @@ enum NamingEnum: String {
             return "Список Пуст"
         case .noReview:
             return "Запросов на рассмотрение нет."
+        case .noLogsFound:
+            return "Логи по данному запросу не найдены."
         }
     }
 }

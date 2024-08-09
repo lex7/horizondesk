@@ -102,10 +102,6 @@ init() {
                         .padding(.horizontal, 10)
                     Spacer()
                     createSysImageTitle(title: "", systemName: "xmark", imageFirst: false)
-                        
-                        
-                        
-                        
                         .padding(.horizontal, 10)
                         .contentShape(Rectangle())
                         .onTapGesture {

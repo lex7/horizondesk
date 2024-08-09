@@ -119,6 +119,7 @@ private extension ExecutorScreen {
                     }
                     Button("Детали") {
                         currentNode = issue
+                        debugPrint("currentNode: \(currentNode)")
                         generator.impactOccurred()
                         showDetailsUnassigned.toggle()
                         Task {

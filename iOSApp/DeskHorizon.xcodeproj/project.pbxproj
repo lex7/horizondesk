@@ -32,7 +32,7 @@
 		0517DCC42B8396CF009F6979 /* WorkerAccView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0517DCC32B8396CF009F6979 /* WorkerAccView.swift */; };
 		051E62762BFD255C001FBD74 /* IssueStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 051E62752BFD255C001FBD74 /* IssueStatus.swift */; };
 		051E62782BFD44BF001FBD74 /* IssueAcceptanceCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 051E62772BFD44BF001FBD74 /* IssueAcceptanceCheck.swift */; };
-		051E627A2BFD49E0001FBD74 /* IssueAcceptModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 051E62792BFD49E0001FBD74 /* IssueAcceptModel.swift */; };
+		051E627A2BFD49E0001FBD74 /* UserIdModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 051E62792BFD49E0001FBD74 /* UserIdModel.swift */; };
 		052A98DD2B72D8F6002249C5 /* NetworkEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 052A98DC2B72D8F6002249C5 /* NetworkEnums.swift */; };
 		053088512B6AC86100E6772D /* TabBarItemsPreferenceKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053088502B6AC86100E6772D /* TabBarItemsPreferenceKey.swift */; };
 		053088532B6ACC2400E6772D /* TabBarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053088522B6ACC2400E6772D /* TabBarItem.swift */; };
@@ -49,8 +49,12 @@
 		05597B5D2C641D78007B96A0 /* RefreshUserFcmModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B5C2C641D78007B96A0 /* RefreshUserFcmModel.swift */; };
 		05597B5F2C641EA3007B96A0 /* UserInfoDataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B5E2C641EA3007B96A0 /* UserInfoDataModel.swift */; };
 		05597B612C642A0C007B96A0 /* UserRewardsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B602C642A0C007B96A0 /* UserRewardsModel.swift */; };
+		05597B652C657947007B96A0 /* LogsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B642C657946007B96A0 /* LogsScreen.swift */; };
+		05597B682C65822D007B96A0 /* LogsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B672C65822D007B96A0 /* LogsModel.swift */; };
+		05597B6A2C65826B007B96A0 /* RequestDoneModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B692C65826B007B96A0 /* RequestDoneModel.swift */; };
+		05597B6D2C658376007B96A0 /* RequestIdModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B6C2C658376007B96A0 /* RequestIdModel.swift */; };
 		056E6B7F2B700CBA008C1E1F /* MasterScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 056E6B7E2B700CBA008C1E1F /* MasterScreen.swift */; };
-		056E6B812B701F44008C1E1F /* MasterSegmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 056E6B802B701F44008C1E1F /* MasterSegmentView.swift */; };
+		056E6B812B701F44008C1E1F /* CustomTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 056E6B802B701F44008C1E1F /* CustomTextField.swift */; };
 		0574698D2B7B3A5700AA0F71 /* NamingEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0574698C2B7B3A5700AA0F71 /* NamingEnum.swift */; };
 		0588CE392BBC1D2C00E501B1 /* FCMTokenManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0588CE382BBC1D2C00E501B1 /* FCMTokenManager.swift */; };
 		058F30792BA87966006CBFB6 /* SplashScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 058F30782BA87966006CBFB6 /* SplashScreen.swift */; };
@@ -105,7 +109,7 @@
 		0517DCC32B8396CF009F6979 /* WorkerAccView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkerAccView.swift; sourceTree = "<group>"; };
 		051E62752BFD255C001FBD74 /* IssueStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueStatus.swift; sourceTree = "<group>"; };
 		051E62772BFD44BF001FBD74 /* IssueAcceptanceCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueAcceptanceCheck.swift; sourceTree = "<group>"; };
-		051E62792BFD49E0001FBD74 /* IssueAcceptModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueAcceptModel.swift; sourceTree = "<group>"; };
+		051E62792BFD49E0001FBD74 /* UserIdModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserIdModel.swift; sourceTree = "<group>"; };
 		052A98DC2B72D8F6002249C5 /* NetworkEnums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkEnums.swift; sourceTree = "<group>"; };
 		053088502B6AC86100E6772D /* TabBarItemsPreferenceKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarItemsPreferenceKey.swift; sourceTree = "<group>"; };
 		053088522B6ACC2400E6772D /* TabBarItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarItem.swift; sourceTree = "<group>"; };
@@ -123,8 +127,12 @@
 		05597B5C2C641D78007B96A0 /* RefreshUserFcmModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefreshUserFcmModel.swift; sourceTree = "<group>"; };
 		05597B5E2C641EA3007B96A0 /* UserInfoDataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInfoDataModel.swift; sourceTree = "<group>"; };
 		05597B602C642A0C007B96A0 /* UserRewardsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRewardsModel.swift; sourceTree = "<group>"; };
+		05597B642C657946007B96A0 /* LogsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogsScreen.swift; sourceTree = "<group>"; };
+		05597B672C65822D007B96A0 /* LogsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogsModel.swift; sourceTree = "<group>"; };
+		05597B692C65826B007B96A0 /* RequestDoneModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestDoneModel.swift; sourceTree = "<group>"; };
+		05597B6C2C658376007B96A0 /* RequestIdModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestIdModel.swift; sourceTree = "<group>"; };
 		056E6B7E2B700CBA008C1E1F /* MasterScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterScreen.swift; sourceTree = "<group>"; };
-		056E6B802B701F44008C1E1F /* MasterSegmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterSegmentView.swift; sourceTree = "<group>"; };
+		056E6B802B701F44008C1E1F /* CustomTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextField.swift; sourceTree = "<group>"; };
 		0574698C2B7B3A5700AA0F71 /* NamingEnum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NamingEnum.swift; sourceTree = "<group>"; };
 		0588CE382BBC1D2C00E501B1 /* FCMTokenManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FCMTokenManager.swift; sourceTree = "<group>"; };
 		058F30782BA87966006CBFB6 /* SplashScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashScreen.swift; sourceTree = "<group>"; };
@@ -211,8 +219,9 @@
 		0509CBF52BFC938100FBCEF1 /* HorizonModels */ = {
 			isa = PBXGroup;
 			children = (
+				05597B6B2C6582C1007B96A0 /* RequestsModel */,
+				05597B662C65821E007B96A0 /* LogsModel */,
 				0509CBF62BFC939300FBCEF1 /* IssueModel.swift */,
-				051E62792BFD49E0001FBD74 /* IssueAcceptModel.swift */,
 				05D7A66E2C618A7600275E9D /* Executor */,
 				05D7A66B2C618A5100275E9D /* Master */,
 				05597B572C641D1E007B96A0 /* User */,
@@ -387,6 +396,7 @@
 		05597B572C641D1E007B96A0 /* User */ = {
 			isa = PBXGroup;
 			children = (
+				051E62792BFD49E0001FBD74 /* UserIdModel.swift */,
 				0509CBF32BFC854C00FBCEF1 /* LoginModel.swift */,
 				05597B582C641D36007B96A0 /* LoginData.swift */,
 				05597B5E2C641EA3007B96A0 /* UserInfoDataModel.swift */,
@@ -395,6 +405,39 @@
 				05597B602C642A0C007B96A0 /* UserRewardsModel.swift */,
 			);
 			path = User;
+			sourceTree = "<group>";
+		};
+		05597B622C657919007B96A0 /* LogsScreen */ = {
+			isa = PBXGroup;
+			children = (
+				05597B632C657928007B96A0 /* View */,
+			);
+			path = LogsScreen;
+			sourceTree = "<group>";
+		};
+		05597B632C657928007B96A0 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				05597B642C657946007B96A0 /* LogsScreen.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		05597B662C65821E007B96A0 /* LogsModel */ = {
+			isa = PBXGroup;
+			children = (
+				05597B672C65822D007B96A0 /* LogsModel.swift */,
+				05597B6C2C658376007B96A0 /* RequestIdModel.swift */,
+			);
+			path = LogsModel;
+			sourceTree = "<group>";
+		};
+		05597B6B2C6582C1007B96A0 /* RequestsModel */ = {
+			isa = PBXGroup;
+			children = (
+				05597B692C65826B007B96A0 /* RequestDoneModel.swift */,
+			);
+			path = RequestsModel;
 			sourceTree = "<group>";
 		};
 		056E6B792B700BE0008C1E1F /* MasterScreen */ = {
@@ -417,7 +460,8 @@
 		056E6B7D2B700C9B008C1E1F /* Components */ = {
 			isa = PBXGroup;
 			children = (
-				056E6B802B701F44008C1E1F /* MasterSegmentView.swift */,
+				051E62772BFD44BF001FBD74 /* IssueAcceptanceCheck.swift */,
+				056E6B802B701F44008C1E1F /* CustomTextField.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -591,6 +635,7 @@
 		05D118722B4F157300E9FD9F /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				05597B622C657919007B96A0 /* LogsScreen */,
 				05096EBB2B84E912003FDB52 /* MainContent */,
 				05D65AEE2B6A1F06009CF788 /* CustomTabBar */,
 				05D759262B6309AD00578623 /* Environments */,
@@ -745,7 +790,6 @@
 			isa = PBXGroup;
 			children = (
 				05F2D95F2B94A52300BDDD36 /* MonitorPickerView.swift */,
-				051E62772BFD44BF001FBD74 /* IssueAcceptanceCheck.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -878,7 +922,7 @@
 				0591187F2B4DAE68006073C3 /* ExecutorScreen.swift in Sources */,
 				05D7A6722C6345DE00275E9D /* ExecutorMyTaskDetails.swift in Sources */,
 				05096EC32B84E9BF003FDB52 /* AuthState.swift in Sources */,
-				056E6B812B701F44008C1E1F /* MasterSegmentView.swift in Sources */,
+				056E6B812B701F44008C1E1F /* CustomTextField.swift in Sources */,
 				0574698D2B7B3A5700AA0F71 /* NamingEnum.swift in Sources */,
 				0509CBF22BFBDD8E00FBCEF1 /* GPToolView.swift in Sources */,
 				0517DCBF2B836A66009F6979 /* MyAccountScreen.swift in Sources */,
@@ -891,11 +935,13 @@
 				05D7A66D2C618A6C00275E9D /* ExecutorActionModel.swift in Sources */,
 				053088532B6ACC2400E6772D /* TabBarItem.swift in Sources */,
 				056E6B7F2B700CBA008C1E1F /* MasterScreen.swift in Sources */,
+				05597B652C657947007B96A0 /* LogsScreen.swift in Sources */,
 				05E353BE2B8BD75800C418B1 /* UIApplication+Extension.swift in Sources */,
 				0588CE392BBC1D2C00E501B1 /* FCMTokenManager.swift in Sources */,
 				055045EC2B8CC0500046543F /* ChangePasswordViewModel.swift in Sources */,
 				05597B5F2C641EA3007B96A0 /* UserInfoDataModel.swift in Sources */,
 				051E62782BFD44BF001FBD74 /* IssueAcceptanceCheck.swift in Sources */,
+				05597B6D2C658376007B96A0 /* RequestIdModel.swift in Sources */,
 				05B2304C2B764C4100A5B02A /* EndPointsDolly.swift in Sources */,
 				05597B5B2C641D4F007B96A0 /* UserInfoModel.swift in Sources */,
 				05096EC12B84E98C003FDB52 /* AuthStateEnvObject.swift in Sources */,
@@ -918,8 +964,9 @@
 				05F2D9592B92517E00BDDD36 /* MonitorIssueScreen.swift in Sources */,
 				05B686372B56D69D00440537 /* NetworkingManager.swift in Sources */,
 				05D7A6642C5F892C00275E9D /* RequestTypeEnum.swift in Sources */,
-				051E627A2BFD49E0001FBD74 /* IssueAcceptModel.swift in Sources */,
+				051E627A2BFD49E0001FBD74 /* UserIdModel.swift in Sources */,
 				05597B5D2C641D78007B96A0 /* RefreshUserFcmModel.swift in Sources */,
+				05597B682C65822D007B96A0 /* LogsModel.swift in Sources */,
 				0591187D2B4DAE68006073C3 /* DeskHorizonApp.swift in Sources */,
 				052A98DD2B72D8F6002249C5 /* NetworkEnums.swift in Sources */,
 				0517DCC22B837E4D009F6979 /* MyAccountPickerView.swift in Sources */,
@@ -930,6 +977,7 @@
 				054870CD2BBB3E1F002A8406 /* AppDelegate.swift in Sources */,
 				053E61412B86406E00D37C81 /* View+ExtensionExtra.swift in Sources */,
 				05B7CEBB2B4F488400FD502A /* Color.swift in Sources */,
+				05597B6A2C65826B007B96A0 /* RequestDoneModel.swift in Sources */,
 				0509CBF42BFC854C00FBCEF1 /* LoginModel.swift in Sources */,
 				05D7A6702C62BD8400275E9D /* ExecutorTaskDetails.swift in Sources */,
 				05D7A6662C601E6300275E9D /* RegionIssue.swift in Sources */,

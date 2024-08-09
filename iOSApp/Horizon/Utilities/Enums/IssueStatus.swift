@@ -64,4 +64,21 @@ enum IssueStatus: Int, CaseIterable {
             return .theme.positivePrimary
         }
     }
+    
+    var colorLogs: Color {
+        switch self {
+        case .new:
+            return .theme.primary
+        case .approved:
+            return .theme.vibrant
+        case .declined:
+            return .theme.negativePrimary
+        case .inprogress:
+            return .theme.primaryFire
+        case .review:
+            return .theme.positiveSecondary
+        case .done:
+            return .theme.positivePrimary
+        }
+    }
 }

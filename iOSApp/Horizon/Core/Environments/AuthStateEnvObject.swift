@@ -16,7 +16,11 @@ final class AuthStateEnvObject: ObservableObject {
     @Published var issuesDeclined: [RequestIssueModel] = []
     @Published var issuesApproved: [RequestIssueModel] = []
     @Published var issuesInProgress: [RequestIssueModel] = []
+    @Published private(set) var logsModel: [LogsModel] = []
     
+    // MARK: - Private loaders
+    @Published private(set) var masterIsLoading = false
+    @Published private(set) var logsIsLoading = false
     // Auth data
     @Published var username: String = ""
     @Published var password: String = ""
@@ -61,6 +65,7 @@ final class AuthStateEnvObject: ObservableObject {
     private init() {
         
     }
+    
     
     func userLogin() {
         showProgress = true
@@ -107,13 +112,57 @@ final class AuthStateEnvObject: ObservableObject {
             authState = .unauthorized
         }
     }
+    
+    
+    func refreshUserToken(_ fcm: String, _ userId: Int ) {
+        let model = RefreshUserFcmModel(user_id: userId, new_fcm: fcm)
+        networkManager.requestMoyaData(apis: .refreshUserToken(model: model))
+            .receive(on: DispatchQueue.main)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    debugPrint(String(describing: "[vm: ✅ refreshUserToken successfully]"))
+                    break
+                case .failure(let error):
+                    debugPrint(String(describing: "[vm: \(error) - ❌ refreshUserToken]"))
+                }
+            } receiveValue: { _ in
+                
+            }
+            .store(in: &cancellables)
+    }
+    
+    
+    private func sendUserLogout(_ action: @escaping () -> Void) {
+        guard let userId = credentialService.getUserId(),
+              let fcm = credentialService.getFcm() else { return }
+        let model = FcmOldModel(user_id: userId, fcm_token: fcm)
+        networkManager.requestMoyaData(apis: .logout(model: model))
+            .receive(on: DispatchQueue.main)
+            .sink {completion in
+                switch completion {
+                case .finished:
+                    debugPrint(String(describing: "[vm: ✅ sendUserLogout successfully]"))
+                    break
+                case .failure(let error):
+                    debugPrint(String(describing: "[vm: \(error) - ❌ sendUserLogout]"))
+                }
+                action()
+            } receiveValue: { _ in
+                
+            }
+            .store(in: &cancellables)
+    }
         
     // MARK: - Requests for Master
     func getRequestsForMaster() {
+        if requestsForMaster.isEmpty {
+            masterIsLoading = true
+        }
         let model = UserIdModel(user_id: credentialService.getUserId() ?? 777)
         networkManager.requestMoyaData(apis: .underMasterApproval(model: model))
             .receive(on: DispatchQueue.main)
-            .sink { completion in
+            .sink { [unowned self] completion in
                 switch completion {
                 case .finished:
                     debugPrint(String(describing: "[vm: ✅ inProgressIssue successfully]"))
@@ -121,6 +170,7 @@ final class AuthStateEnvObject: ObservableObject {
                 case .failure(let error):
                     debugPrint(String(describing: "[vm: \(error) - ❌ inProgressIssue]"))
                 }
+                self.masterIsLoading = false
             } receiveValue: { [unowned self] data in
                 // self.issuesDone = array.filter { $0.statusOfElement == .done }.reversed()
                 // po String(decoding: data, as: UTF8.self)
@@ -134,8 +184,10 @@ final class AuthStateEnvObject: ObservableObject {
             .store(in: &cancellables)
     }
     
-    func masterAcceptRequest(_ request_id: Int, action: @escaping (()->Void)) {
-        let model = MasterApproveModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, deadline: "")
+    func masterAcceptRequest(_ request_id: Int, _ deadline: String, action: @escaping (()->Void)) {
+        let model = MasterApproveModel(user_id: credentialService.getUserId() ?? 777,
+                                       request_id: request_id,
+                                       deadline: deadline)
         networkManager.requestMoyaData(apis: .masterApprove(model: model))
             .receive(on: DispatchQueue.main)
             .sink { completion in
@@ -152,8 +204,10 @@ final class AuthStateEnvObject: ObservableObject {
             .store(in: &cancellables)
     }
     
-    func masterDenyRequest(_ request_id: Int, action: @escaping (()->Void)) {
-        let model = MasterDenyModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, reason: "")
+    func masterDenyRequest(_ request_id: Int, _ reason: String, action: @escaping (()->Void)) {
+        let model = MasterDenyModel(user_id: credentialService.getUserId() ?? 777,
+                                    request_id: request_id,
+                                    reason: reason)
         networkManager.requestMoyaData(apis: .masterDeny(model: model))
             .receive(on: DispatchQueue.main)
             .sink { completion in
@@ -233,8 +287,8 @@ final class AuthStateEnvObject: ObservableObject {
             .store(in: &cancellables)
     }
     
-    func executerCancel(_ request_id: Int, action: @escaping ()->Void) {
-        let model = ExecutorCancelModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, reason: "")
+    func executerCancel(_ request_id: Int, reason: String = "", action: @escaping ()->Void) {
+        let model = ExecutorCancelModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, reason: reason)
         networkManager.requestMoyaData(apis: .executerCancel(model: model))
             .receive(on: DispatchQueue.main)
             .sink { completion in
@@ -444,6 +498,32 @@ final class AuthStateEnvObject: ObservableObject {
             .store(in: &cancellables)
     }
     
+    // MARK: - Task Logs
+    func getLogs(_ request_id: Int) {
+        let model = RequestIdModel(request_id: request_id)
+        logsIsLoading = true
+        networkManager.requestMoyaData(apis: .requestLogsOfTask(model: model))
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] completion in
+                switch completion {
+                case .finished:
+                    debugPrint(String(describing: "[vm: ✅ getLogs successfully]"))
+                    break
+                case .failure(let error):
+                    debugPrint(String(describing: "[vm: \(error) - ❌ getLogs]"))
+                }
+                self.logsIsLoading = false
+            } receiveValue: { [unowned self] data in
+                do {
+                    self.logsModel = try LogsModel.decode(from: data).sorted { $0.changed_at < $1.changed_at }
+                    debugPrint(self.logsModel)
+                } catch (let error) {
+                    debugPrint(error)
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
     // MARK: - Other Methods
     
     private func makeDateStamp() -> String {
@@ -455,7 +535,9 @@ final class AuthStateEnvObject: ObservableObject {
     
     func logout(action: @escaping () -> ()) {
         isStatistic = false
-        action()
+        sendUserLogout {
+            action()
+        }
     }
     
     private func setVariables() {

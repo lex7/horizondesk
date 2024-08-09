@@ -15,6 +15,8 @@ struct MonitorIssueScreen: View {
     // MARK: - Private State Variables
     @State private var showDetails = false
     @State private var showNeedActionDetails = false
+    @State private var showLogsForRequest = false
+    @State private var logId: Int  = 10000000
     @State private var forwardToTransaction = false
     @State private var screenHeight = UIScreen.main.bounds.height
     @State private var screenWidth = UIScreen.main.bounds.width
@@ -101,6 +103,9 @@ struct MonitorIssueScreen: View {
             }
             .padding(.horizontal, 12)
         }
+        .fullScreenCover(isPresented: $showLogsForRequest) {
+            LogsScreen(logId: $logId)
+        }
         .mask(LinearGradient(gradient: Gradient(colors: [.black, .black, .black, .black, .black, .clear]), startPoint: .top, endPoint: .bottom).ignoresSafeArea(edges: .top))
         .background(Color.theme.background)
     }
@@ -123,7 +128,7 @@ private extension MonitorIssueScreen {
                                 }
                             }
                         }
-                        Button("Не выполнено 👎") {
+                        Button("Не выполнено ❌") {
                             generator.impactOccurred()
                             authStateEnvObject.requesterDeniedCompletion(request_id: issue.request_id) {
                                 Task {
@@ -133,11 +138,49 @@ private extension MonitorIssueScreen {
                                 }
                             }
                         }
+                        Button("Просмотр логов") {
+                            generator.impactOccurred()
+                            logId = issue.request_id
+                            showLogsForRequest.toggle()
+                            Task {
+                                try await Task.sleep(nanoseconds: 500_000_000)
+                                authStateEnvObject.getInProgressIssue()
+                                authStateEnvObject.getCompletedIssue()
+                            }
+                        }
+                    } label: {
+                        issueCellFor(issue)
+                    }
+                case .approved, .declined, .inprogress:
+                    Menu {
+                        Button("Просмотр логов") {
+                            generator.impactOccurred()
+                            logId = issue.request_id
+                            showLogsForRequest.toggle()
+                            Task {
+                                try await Task.sleep(nanoseconds: 500_000_000)
+                                authStateEnvObject.getInProgressIssue()
+                                authStateEnvObject.getCompletedIssue()
+                            }
+                        }
                     } label: {
                         issueCellFor(issue)
                     }
                 case .new:
                     Menu {
+                        Button("Просмотр логов") {
+                            generator.impactOccurred()
+                            logId = issue.request_id
+                            Task {
+                                try await Task.sleep(nanoseconds: 200_000_000)
+                                showLogsForRequest.toggle()
+                            }
+                            Task {
+                                try await Task.sleep(nanoseconds: 500_000_000)
+                                authStateEnvObject.getInProgressIssue()
+                                authStateEnvObject.getCompletedIssue()
+                            }
+                        }
                         Button("Удалить ❌") {
                             generator.impactOccurred()
                             authStateEnvObject.requesterDeleteTask(request_id: issue.request_id) {

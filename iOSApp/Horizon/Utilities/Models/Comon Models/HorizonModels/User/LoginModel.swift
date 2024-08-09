@@ -11,3 +11,17 @@ struct LoginModel: Encodable {
     let fcm_token: String
 }
 
+
+struct FcmRefreshModel: Encodable {
+    let user_id: Int
+    let fcm_token: String
+}
+
+struct FcmOldModel: Encodable {
+    let user_id: Int
+    let fcm_token: String
+}
+
+
+
+

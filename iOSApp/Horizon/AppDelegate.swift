@@ -8,7 +8,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     
     // MARK: - Private constants
     private let credentialService = CredentialService.standard
-    let authStateEnvObject = AuthStateEnvObject.shared
+    private let authStateEnvObject = AuthStateEnvObject.shared
     
     override init() {
         super.init()
@@ -62,6 +62,9 @@ extension AppDelegate: MessagingDelegate {
         if let token = fcmToken {
             debugPrint("Firebase token FCM☀️🏁: \(String(describing: token))")
             credentialService.saveFcm(token)
+            if let userId = credentialService.getUserId() {
+                authStateEnvObject.refreshUserToken(token, userId)
+            }
         }
     }
 }
