@@ -56,7 +56,7 @@ class User(Base):
 
     role = relationship("Role", back_populates="users")
     shift = relationship("WorkerShift", back_populates="users",
-                         primaryjoin="User.shift_id == WorkerShift.shift_id")  # Add primaryjoin here
+                         primaryjoin="foreign(User.shift_id) == WorkerShift.shift_id")  # Add foreign() annotation
     specialization = relationship("Specialization", back_populates="users")
 
 class Specialization(Base):
@@ -79,8 +79,8 @@ class WorkerShift(Base):
     start_time = Column(String, nullable=False)
     end_time = Column(String, nullable=False)
     
-    users = relationship("User", back_populates="shift", 
-                         primaryjoin="User.shift_id == WorkerShift.shift_id")  # Add primaryjoin here
+    users = relationship("User", back_populates="shift",
+                         primaryjoin="User.shift_id == foreign(WorkerShift.shift_id)")  # Add foreign() annotation
 
 class RequestType(Base):
     __tablename__ = 'request_types'
