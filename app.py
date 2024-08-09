@@ -518,7 +518,15 @@ def get_unassigned(user_id: int, db: Session = Depends(get_db)):
 @app.get("/requests-log", response_model=List[RequestStatusLogModel])
 def get_requests_log(db: Session = Depends(get_db)):
     logs = db.query(RequestStatusLog).all()
-    return logs
+    return [RequestStatusLogModel(
+        log_id=log.log_id,
+        request_id=log.request_id,
+        old_status_id=log.old_status_id if log.old_status_id is not None else 0,  # Handle None values
+        new_status_id=log.new_status_id,
+        changed_at=log.changed_at,
+        changed_by=log.changed_by,
+        reason=log.reason
+    ) for log in logs]
 
 @app.get("/request-history", response_model=List[RequestStatusLogModel])
 def get_request_history(request_id: int, db: Session = Depends(get_db)):
