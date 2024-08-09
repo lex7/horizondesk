@@ -58,12 +58,12 @@ struct LogsScreen: View {
 }
 
 private extension LogsScreen {
-    
     @ViewBuilder
     private func logCell(_ log: LogsModel) -> some View {
         VStack {
-            if let new = IssueStatus(rawValue: log.old_status_id),
-               new == .new {
+            if let oldStatus = IssueStatus(rawValue: log.old_status_id),
+               let newStatus = IssueStatus(rawValue: log.new_status_id),
+               oldStatus == .new && newStatus != .declined {
                 HStack {
                     descriptionOfField("cтатус:", color: Color.theme.lowContrast)
                     descriptionOfField("cоздан и утвержден",
@@ -87,7 +87,7 @@ private extension LogsScreen {
                 if !rejection_reason.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     HStack {
                         descriptionOfField("пометка:", color: Color.theme.lowContrast)
-                        descriptionOfField(rejection_reason, color: Color.theme.lowContrast)
+                        descriptionOfField(rejection_reason.trimmingCharacters(in: .whitespacesAndNewlines), lines: 20, color: Color.theme.lowContrast)
                         Spacer()
                     }
                 }

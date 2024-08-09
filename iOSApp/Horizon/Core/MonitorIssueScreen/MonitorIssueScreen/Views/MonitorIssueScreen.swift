@@ -151,7 +151,7 @@ private extension MonitorIssueScreen {
                     } label: {
                         issueCellFor(issue)
                     }
-                case .approved, .declined, .inprogress:
+                case .approved, .inprogress:
                     Menu {
                         Button("Просмотр логов") {
                             generator.impactOccurred()
@@ -204,7 +204,24 @@ private extension MonitorIssueScreen {
     var doneIssues: some View {
         ScrollView {
             ForEach(authStateEnvObject.issuesDone, id: \.self) { issue in
+                Menu {
+                    Button("Просмотр логов") {
+                        generator.impactOccurred()
+                        logId = issue.request_id
+                        Task {
+                            try await Task.sleep(nanoseconds: 200_000_000)
+                            showLogsForRequest.toggle()
+                        }
+                        Task {
+                            try await Task.sleep(nanoseconds: 500_000_000)
+                            authStateEnvObject.getInProgressIssue()
+                            authStateEnvObject.getCompletedIssue()
+                        }
+                    }
+                }
+            label: {
                 issueCellFor(issue)
+            }
             }
         }
     }
@@ -212,7 +229,24 @@ private extension MonitorIssueScreen {
     var declinedIssues: some View {
         ScrollView {
             ForEach(authStateEnvObject.issuesDeclined, id: \.self) { issue in
+                Menu {
+                    Button("Просмотр логов") {
+                        generator.impactOccurred()
+                        logId = issue.request_id
+                        Task {
+                            try await Task.sleep(nanoseconds: 200_000_000)
+                            showLogsForRequest.toggle()
+                        }
+                        Task {
+                            try await Task.sleep(nanoseconds: 500_000_000)
+                            authStateEnvObject.getInProgressIssue()
+                            authStateEnvObject.getCompletedIssue()
+                        }
+                    }
+                }
+            label: {
                 issueCellFor(issue)
+            }
             }
         }
     }

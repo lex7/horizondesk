@@ -20,6 +20,8 @@ struct ExecutorScreen: View {
     @State private var screenHeight = UIScreen.main.bounds.height
     @State private var showDetailsUnassigned: Bool = false
     @State private var showDetailsMyTasks: Bool = false
+    @State private var showLogsForRequest = false
+    @State private var logId: Int  = 10000000
     
     @State private var currentNode: RequestIssueModel = RequestIssueModel(request_id: 1, request_type: 2, created_by: 99, assigned_to: nil, area_id: 3, description: nil, status_id: 99, created_at: nil, updated_at: nil, deadline: nil, rejection_reason: nil)
     
@@ -35,7 +37,6 @@ struct ExecutorScreen: View {
                 topLeftHeader(title: "Задания")
                 Spacer()
             }
-            
             HStack {
                 pickerContainer
                     .padding(.horizontal, 12)
@@ -82,6 +83,9 @@ struct ExecutorScreen: View {
             authStateEnvObject.executorUnassignRequest()
             authStateEnvObject.executorMyTasksRequest()
         }
+        .fullScreenCover(isPresented: $showLogsForRequest) {
+            LogsScreen(logId: $logId)
+        }
         .sheet(isPresented: $showDetailsUnassigned, onDismiss: {
             authStateEnvObject.executorUnassignRequest()
         }, content: {
@@ -127,6 +131,11 @@ private extension ExecutorScreen {
                             authStateEnvObject.executorUnassignRequest()
                         }
                     }
+                    Button("Просмотр логов") {
+                        generator.impactOccurred()
+                        logId = issue.request_id
+                        showLogsForRequest.toggle()
+                    }
                     Button("Отмена") {
                         generator.impactOccurred()
                         authStateEnvObject.executorUnassignRequest()
@@ -162,6 +171,11 @@ private extension ExecutorScreen {
                             try await Task.sleep(nanoseconds: 500_000_000)
                             authStateEnvObject.executorMyTasksRequest()
                         }
+                    }
+                    Button("Просмотр логов") {
+                        generator.impactOccurred()
+                        logId = issue.request_id
+                        showLogsForRequest.toggle()
                     }
                     Button("Отмена") {
                         generator.impactOccurred()
