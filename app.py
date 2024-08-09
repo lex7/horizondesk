@@ -402,6 +402,7 @@ def get_statuses(db: Session = Depends(get_db)):
     statuses = db.query(Status).all()
     return statuses
 
+
 @app.get("/under-master-approval", response_model=List[RequestModel])
 def get_under_master_approval_requests(user_id: int, db: Session = Depends(get_db)):
     # Find the user
@@ -424,16 +425,13 @@ def get_under_master_approval_requests(user_id: int, db: Session = Depends(get_d
 
     # Query for requests
     requests = db.query(Request).join(
-        User, User.user_id == Request.created_by
-    ).join(
-        Specialization, Specialization.spec_id == User.spec_id  # Ensure correct join
+        Specialization, Specialization.spec_id == Request.area_id  # Adjust this line if needed
     ).filter(
         Request.status_id == 1,
         Specialization.spec_id == spec_id
     ).all()
     
     return requests
-
 
 
 @app.get("/under-master-monitor", response_model=List[RequestModel])
