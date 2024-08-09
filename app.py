@@ -45,17 +45,18 @@ class User(Base):
     phone_number = Column(String, nullable=True)
     birth_date = Column(DATE, nullable=True)
     email = Column(String, nullable=True)
-    spec_name = Column(String, nullable=True)  # Added column for specialization name
+    spec_name = Column(String, nullable=True)
     role_id = Column(Integer, ForeignKey('roles.role_id'), nullable=False)
     fcm_token = Column(String, nullable=True)
-    shift_id = Column(Integer, ForeignKey('shifts.shift_id'), nullable=True)
+    shift_id = Column(Integer, nullable=True)  # Removed ForeignKey constraint here
     tokens = Column(Integer, default=0)
     num_created = Column(Integer, default=0)
     num_completed = Column(Integer, default=0)
     last_completed = Column(DATE)
 
     role = relationship("Role", back_populates="users")
-    shift = relationship("WorkerShift", back_populates="users")
+    shift = relationship("WorkerShift", back_populates="users",
+                         primaryjoin="User.shift_id == WorkerShift.shift_id")  # Add primaryjoin here
     specialization = relationship("Specialization", back_populates="users")
 
 class Specialization(Base):
@@ -78,7 +79,8 @@ class WorkerShift(Base):
     start_time = Column(String, nullable=False)
     end_time = Column(String, nullable=False)
     
-    users = relationship("User", back_populates="shift")
+    users = relationship("User", back_populates="shift", 
+                         primaryjoin="User.shift_id == WorkerShift.shift_id")  # Add primaryjoin here
 
 class RequestType(Base):
     __tablename__ = 'request_types'
@@ -364,11 +366,159 @@ def remove_device_from_other_users(db: Session, device_id: str, current_user_id:
     db.commit()
 
 
-# Endpoints
+# Get Endpoints
 
 @app.get("/")
 def read_root():
     return {"message": "home page"}
+
+
+@app.get("/requests", response_model=List[RequestModel])
+def get_requests(db: Session = Depends(get_db)):
+    requests = db.query(Request).all()
+    return requests
+
+@app.get("/request-types", response_model=List[RequestTypeModel])
+def get_request_types(db: Session = Depends(get_db)):
+    request_types = db.query(RequestType).all()
+    return request_types
+
+@app.get("/specializations", response_model=List[SpecializationModel])
+def get_specializations(db: Session = Depends(get_db)):
+    specializations = db.query(Specialization).all()
+    return specializations
+
+@app.get("/roles", response_model=List[RoleModel])
+def get_roles(db: Session = Depends(get_db)):
+    roles = db.query(Role).all()
+    return roles
+
+@app.get("/users", response_model=List[UserModel])
+def get_users(db: Session = Depends(get_db)):
+    users = db.query(User).all()
+    return users
+
+@app.get("/statuses", response_model=List[StatusModel])
+def get_statuses(db: Session = Depends(get_db)):
+    statuses = db.query(Status).all()
+    return statuses
+
+@app.get("/under-master-approval", response_model=List[RequestModel])
+def get_under_master_approval_requests(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    spec_id = user.spec_id
+    if spec_id is None:
+        raise HTTPException(status_code=400, detail="User does not have a spec_id")
+    
+    requests = db.query(Request).filter(
+        Request.status_id == 1,
+        Request.request_type == spec_id
+    ).all()
+    
+    return requests
+
+@app.get("/under-master-monitor", response_model=List[RequestModel])
+def get_under_master_monitor_requests(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    spec_id = user.spec_id
+    if spec_id is None:
+        raise HTTPException(status_code=400, detail="User does not have a spec_id")
+    
+    requests = db.query(Request).filter(
+        Request.status_id != 1,
+        Request.request_type == spec_id
+    ).all()
+
+    return requests
+
+@app.get("/in-progress", response_model=List[RequestModel])
+def get_in_progress_requests(user_id: int, db: Session = Depends(get_db)):
+    requests = db.query(Request).filter(
+        Request.status_id.in_([1, 2, 4, 5]), 
+        Request.created_by == user_id
+    ).all()
+    return requests
+
+@app.get("/denied", response_model=List[RequestModel])
+def get_denied_requests(user_id: int, db: Session = Depends(get_db)):
+    requests = db.query(Request).filter(Request.status_id == 3, Request.created_by == user_id).all()
+    return requests
+
+@app.get("/under-requestor-approval", response_model=List[RequestModel])
+def get_under_requestor_approval_requests(user_id: int, db: Session = Depends(get_db)):
+    requests = db.query(Request).filter(Request.status_id == 5, Request.created_by == user_id).all()
+    return requests
+
+@app.get("/completed", response_model=List[RequestModel])
+def get_completed_requests(user_id: int, db: Session = Depends(get_db)):
+    requests = db.query(Request).filter(Request.status_id == 6, Request.created_by == user_id).all()
+    return requests
+
+@app.get("/executor-assigned", response_model=List[RequestModel])
+def get_my_tasks(user_id: int, db: Session = Depends(get_db)):
+    tasks = db.query(Request).filter(Request.assigned_to == user_id).all()
+    return tasks
+
+@app.get("/executor-unassigned", response_model=List[RequestModel])
+def get_unassigned(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    spec_id = user.spec_id
+    if spec_id is None:
+        raise HTTPException(status_code=400, detail="User does not have a spec_id")
+    
+    tasks = db.query(Request).filter(
+        Request.assigned_to.is_(None),
+        Request.request_type == spec_id,
+        Request.status_id == 2
+    ).all()
+    
+    return tasks
+
+@app.get("/requests-log", response_model=List[RequestStatusLogModel])
+def get_requests_log(db: Session = Depends(get_db)):
+    logs = db.query(RequestStatusLog).all()
+    return logs
+
+@app.get("/request-history", response_model=List[RequestStatusLogModel])
+def get_request_history(request_id: int, db: Session = Depends(get_db)):
+    history = db.query(RequestStatusLog).filter(RequestStatusLog.request_id == request_id).order_by(RequestStatusLog.log_id.asc()).all()
+    if not history:
+        raise HTTPException(status_code=404, detail="No history found for the specified request_id")
+    return history
+
+@app.get("/my-data", response_model=UserModel)
+def get_user_data(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+@app.get("/rewards", response_model=RewardsResponse)
+def get_rewards(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    rewards_data = RewardsResponse(
+        tokens=user.tokens,
+        num_created=user.num_created,
+        num_completed=user.num_completed,
+        last_completed=user.last_completed
+    )
+
+    return rewards_data
+
+
+# Post endpoints
 
 @app.post("/register")
 def register(request: RegisterRequest, db: Session = Depends(get_db)):
@@ -618,152 +768,6 @@ def soft_delete_request(request_id: int, user_id: int, db: Session = Depends(get
     update_request(request_id, new_status=7, user_id=user_id, db=db)
 
     return {"message": "Request marked as deleted successfully"}
-
-
-@app.get("/requests", response_model=List[RequestModel])
-def get_requests(db: Session = Depends(get_db)):
-    requests = db.query(Request).all()
-    return requests
-
-@app.get("/request-types", response_model=List[RequestTypeModel])
-def get_request_types(db: Session = Depends(get_db)):
-    request_types = db.query(RequestType).all()
-    return request_types
-
-@app.get("/specializations", response_model=List[SpecializationModel])
-def get_specializations(db: Session = Depends(get_db)):
-    specializations = db.query(Specialization).all()
-    return specializations
-
-@app.get("/roles", response_model=List[RoleModel])
-def get_roles(db: Session = Depends(get_db)):
-    roles = db.query(Role).all()
-    return roles
-
-@app.get("/users", response_model=List[UserModel])
-def get_users(db: Session = Depends(get_db)):
-    users = db.query(User).all()
-    return users
-
-@app.get("/statuses", response_model=List[StatusModel])
-def get_statuses(db: Session = Depends(get_db)):
-    statuses = db.query(Status).all()
-    return statuses
-
-@app.get("/under-master-approval", response_model=List[RequestModel])
-def get_under_master_approval_requests(user_id: int, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.user_id == user_id).first()
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    spec_id = user.spec_id
-    if spec_id is None:
-        raise HTTPException(status_code=400, detail="User does not have a spec_id")
-    
-    requests = db.query(Request).filter(
-        Request.status_id == 1,
-        Request.request_type == spec_id
-    ).all()
-    
-    return requests
-
-@app.get("/under-master-monitor", response_model=List[RequestModel])
-def get_under_master_monitor_requests(user_id: int, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.user_id == user_id).first()
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    spec_id = user.spec_id
-    if spec_id is None:
-        raise HTTPException(status_code=400, detail="User does not have a spec_id")
-    
-    requests = db.query(Request).filter(
-        Request.status_id != 1,
-        Request.request_type == spec_id
-    ).all()
-
-    return requests
-
-@app.get("/in-progress", response_model=List[RequestModel])
-def get_in_progress_requests(user_id: int, db: Session = Depends(get_db)):
-    requests = db.query(Request).filter(
-        Request.status_id.in_([1, 2, 4, 5]), 
-        Request.created_by == user_id
-    ).all()
-    return requests
-
-@app.get("/denied", response_model=List[RequestModel])
-def get_denied_requests(user_id: int, db: Session = Depends(get_db)):
-    requests = db.query(Request).filter(Request.status_id == 3, Request.created_by == user_id).all()
-    return requests
-
-@app.get("/under-requestor-approval", response_model=List[RequestModel])
-def get_under_requestor_approval_requests(user_id: int, db: Session = Depends(get_db)):
-    requests = db.query(Request).filter(Request.status_id == 5, Request.created_by == user_id).all()
-    return requests
-
-@app.get("/completed", response_model=List[RequestModel])
-def get_completed_requests(user_id: int, db: Session = Depends(get_db)):
-    requests = db.query(Request).filter(Request.status_id == 6, Request.created_by == user_id).all()
-    return requests
-
-@app.get("/executor-assigned", response_model=List[RequestModel])
-def get_my_tasks(user_id: int, db: Session = Depends(get_db)):
-    tasks = db.query(Request).filter(Request.assigned_to == user_id).all()
-    return tasks
-
-@app.get("/executor-unassigned", response_model=List[RequestModel])
-def get_unassigned(user_id: int, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.user_id == user_id).first()
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    spec_id = user.spec_id
-    if spec_id is None:
-        raise HTTPException(status_code=400, detail="User does not have a spec_id")
-    
-    tasks = db.query(Request).filter(
-        Request.assigned_to.is_(None),
-        Request.request_type == spec_id,
-        Request.status_id == 2
-    ).all()
-    
-    return tasks
-
-@app.get("/requests-log", response_model=List[RequestStatusLogModel])
-def get_requests_log(db: Session = Depends(get_db)):
-    logs = db.query(RequestStatusLog).all()
-    return logs
-
-@app.get("/request-history", response_model=List[RequestStatusLogModel])
-def get_request_history(request_id: int, db: Session = Depends(get_db)):
-    history = db.query(RequestStatusLog).filter(RequestStatusLog.request_id == request_id).order_by(RequestStatusLog.log_id.asc()).all()
-    if not history:
-        raise HTTPException(status_code=404, detail="No history found for the specified request_id")
-    return history
-
-@app.get("/my-data", response_model=UserModel)
-def get_user_data(user_id: int, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.user_id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
-
-@app.get("/rewards", response_model=RewardsResponse)
-def get_rewards(user_id: int, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.user_id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    rewards_data = RewardsResponse(
-        tokens=user.tokens,
-        num_created=user.num_created,
-        num_completed=user.num_completed,
-        last_completed=user.last_completed
-    )
-
-    return rewards_data
-
 
 
 
