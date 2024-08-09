@@ -404,26 +404,36 @@ def get_statuses(db: Session = Depends(get_db)):
 
 @app.get("/under-master-approval", response_model=List[RequestModel])
 def get_under_master_approval_requests(user_id: int, db: Session = Depends(get_db)):
-    # Find the user and their spec_name
+    # Find the user
     user = db.query(User).filter(User.user_id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     
     spec_name = user.spec_name
-    if spec_name is None:
+    
+    if not spec_name:
         raise HTTPException(status_code=400, detail="User does not have a spec_name")
 
-    # Query for requests with the correct joins
+    # Get the spec_id for the given spec_name
+    specialization = db.query(Specialization).filter(Specialization.spec_name == spec_name).first()
+    
+    if not specialization:
+        raise HTTPException(status_code=400, detail="Specialization not found")
+
+    spec_id = specialization.spec_id
+
+    # Query for requests
     requests = db.query(Request).join(
-        User, User.user_id == Request.created_by  # Ensures the User table is included
+        User, User.user_id == Request.created_by
     ).join(
-        Specialization, Specialization.spec_name == User.spec_name
+        Specialization, Specialization.spec_id == User.spec_id  # Ensure correct join
     ).filter(
         Request.status_id == 1,
-        Specialization.spec_name == spec_name
+        Specialization.spec_id == spec_id
     ).all()
     
     return requests
+
 
 
 @app.get("/under-master-monitor", response_model=List[RequestModel])
@@ -431,16 +441,30 @@ def get_under_master_monitor_requests(user_id: int, db: Session = Depends(get_db
     user = db.query(User).filter(User.user_id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
-
+    
     spec_name = user.spec_name
-    if spec_name is None:
+    
+    if not spec_name:
         raise HTTPException(status_code=400, detail="User does not have a spec_name")
 
-    requests = db.query(Request).join(Specialization, Specialization.spec_name == User.spec_name).filter(
-        Request.status_id != 1,
-        Specialization.spec_name == spec_name
-    ).all()
+    # Get the spec_id for the given spec_name
+    specialization = db.query(Specialization).filter(Specialization.spec_name == spec_name).first()
+    
+    if not specialization:
+        raise HTTPException(status_code=400, detail="Specialization not found")
 
+    spec_id = specialization.spec_id
+
+    # Query for requests
+    requests = db.query(Request).join(
+        User, User.user_id == Request.created_by
+    ).join(
+        Specialization, Specialization.spec_id == User.spec_id  # Ensure correct join
+    ).filter(
+        Request.status_id != 1,
+        Specialization.spec_id == spec_id
+    ).all()
+    
     return requests
 
 @app.get("/in-progress", response_model=List[RequestModel])
