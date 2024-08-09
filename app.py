@@ -111,7 +111,7 @@ class Request(Base):
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP, onupdate=func.now())
     deadline = Column(TIMESTAMP)
-    rejection_reason = Column(String)
+    reason = Column(String)
 
     creator = relationship("User", foreign_keys=[created_by])
     assignee = relationship("User", foreign_keys=[assigned_to])
@@ -131,7 +131,7 @@ class RequestStatusLog(Base):
     new_status_id = Column(Integer, ForeignKey('statuses.status_id'))
     changed_at = Column(String, nullable=False)
     changed_by = Column(Integer, ForeignKey('users.user_id'))
-    rejection_reason = Column(String)
+    reason = Column(String)
 
     request_rel = relationship("Request")
 
@@ -197,7 +197,7 @@ class RequestModel(BaseModel):
     created_at: datetime
     updated_at: Optional[datetime]
     deadline: Optional[datetime]
-    rejection_reason: Optional[str]
+    reason: Optional[str]
 
     class Config:
         orm_mode = True
@@ -253,7 +253,7 @@ class RequestStatusLogModel(BaseModel):
     new_status_id: int
     changed_at: datetime
     changed_by: int
-    rejection_reason: Optional[str]
+    reason: Optional[str]
 
     class Config:
         orm_mode = True
@@ -296,7 +296,7 @@ def update_request(request_id: int, new_status: int, user_id: int, db: Session, 
         new_status_id=new_status,
         changed_at=datetime.now(timezone.utc),
         changed_by=user_id,
-        rejection_reason=kwargs.get('rejection_reason')
+        reason=kwargs.get('reason')
     )
     db.add(log_entry)
 
@@ -639,7 +639,7 @@ def deny_request(request: DenyRequest, db: Session = Depends(get_db)):
         new_status=3,
         user_id=request.user_id,
         db=db,
-        rejection_reason=request.reason
+        reason=request.reason
     )
     # creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
     # if creator_user is None or not creator_user.fcm_token:
@@ -686,7 +686,7 @@ def cancel_request(request: DenyRequest, db: Session = Depends(get_db)):
         user_id=request.user_id,
         db=db,
         assigned_to=None,
-        rejection_reason=request.reason
+        reason=request.reason
     )
     # creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
     # if creator_user is None or not creator_user.fcm_token:
@@ -744,7 +744,7 @@ def deny_request(request: DenyRequest, db: Session = Depends(get_db)):
         new_status=4,
         user_id=request.user_id,
         db=db,
-        rejection_reason=request.reason
+        reason=request.reason
     )
     # executor_user = db.query(User).filter(User.user_id == existing_request.assigned_to).first()
     # if executor_user is None or not executor_user.fcm_token:

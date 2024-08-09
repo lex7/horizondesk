@@ -69,7 +69,7 @@ CREATE TABLE requests (
     created_at TIMESTAMP NOT NULL DEFAULT now(),
     updated_at TIMESTAMP,
     deadline TIMESTAMP,
-    rejection_reason TEXT
+    reason TEXT
 );
 
 -- Table: request_status_log
@@ -80,5 +80,5 @@ CREATE TABLE request_status_log (
     new_status_id INTEGER REFERENCES statuses(status_id),
     changed_at TIMESTAMP NOT NULL DEFAULT now(),
     changed_by INTEGER REFERENCES users(user_id),
-    rejection_reason TEXT
+    reason TEXT
 );
