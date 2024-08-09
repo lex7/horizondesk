@@ -45,10 +45,10 @@ class User(Base):
     phone_number = Column(String, nullable=True)
     birth_date = Column(DATE, nullable=True)
     email = Column(String, nullable=True)
-    spec_name = Column(String, nullable=True)  # Assumes spec_name is a String type
+    spec_name = Column(String, nullable=True)
     role_id = Column(Integer, ForeignKey('roles.role_id'), nullable=False)
     fcm_token = Column(String, nullable=True)
-    shift_id = Column(Integer, nullable=True)
+    shift_id = Column(Integer, ForeignKey('worker_shifts.shift_id'), nullable=True)
     tokens = Column(Integer, default=0)
     num_created = Column(Integer, default=0)
     num_completed = Column(Integer, default=0)
@@ -56,7 +56,7 @@ class User(Base):
 
     role = relationship("Role", back_populates="users")
     shift = relationship("WorkerShift", back_populates="users",
-                         primaryjoin="foreign(User.shift_id) == WorkerShift.shift_id")
+                         primaryjoin="User.shift_id == WorkerShift.shift_id")
     specialization = relationship("Specialization", back_populates="users",
                                   primaryjoin="foreign(User.spec_name) == Specialization.spec_name")
 
@@ -78,12 +78,11 @@ class Role(Base):
 
 class WorkerShift(Base):
     __tablename__ = 'worker_shifts'
+
     shift_id = Column(Integer, primary_key=True, index=True)
-    start_time = Column(String, nullable=False)
-    end_time = Column(String, nullable=False)
-    
-    users = relationship("User", back_populates="shift",
-                         primaryjoin="User.shift_id == foreign(WorkerShift.shift_id)")  # Add foreign() annotation
+    shift_name = Column(String, nullable=False)
+
+    users = relationship("User", back_populates="shift")
 
 class RequestType(Base):
     __tablename__ = 'request_types'
