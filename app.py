@@ -432,8 +432,9 @@ def get_under_master_approval_requests(user_id: int, db: Session = Depends(get_d
     return requests
 
 
-@app.get("/under-master-monitor", response_model=List[RequestModel])
-def get_under_master_monitor_requests(user_id: int, db: Session = Depends(get_db)):
+@app.get("/under-master-approval", response_model=List[RequestModel])
+def get_under_master_approval_requests(user_id: int, db: Session = Depends(get_db)):
+    # Find the user
     user = db.query(User).filter(User.user_id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
@@ -451,14 +452,10 @@ def get_under_master_monitor_requests(user_id: int, db: Session = Depends(get_db
 
     spec_id = specialization.spec_id
 
-    # Query for requests
-    requests = db.query(Request).join(
-        User, User.user_id == Request.created_by
-    ).join(
-        Specialization, Specialization.spec_id == User.spec_id  # Ensure correct join
-    ).filter(
+    # Query for requests where request_type matches the spec_id
+    requests = db.query(Request).filter(
         Request.status_id != 1,
-        Specialization.spec_id == spec_id
+        Request.request_type == spec_id  # Ensure request_type matches spec_id
     ).all()
     
     return requests
