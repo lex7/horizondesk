@@ -34,21 +34,21 @@ app = FastAPI()
 
 class User(Base):
     __tablename__ = 'users'
+
     user_id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True, nullable=False)
     password_hash = Column(String, nullable=False)
-    surname = Column(String)
-    name = Column(String)
-    middle_name = Column(String)
-    hire_date = Column(DATE)
-    phone_number = Column(String)
-    birth_date = Column(DATE)
-    email = Column(String, unique=True)
-    spec_id = Column(Integer, ForeignKey('specializations.spec_id'), nullable=True)
-    spec_name = Column(String, nullable=True)
-    fcm_token = Column(ARRAY(String), nullable=True)
-    role_id = Column(Integer, ForeignKey('roles.role_id'))
-    shift_id = Column(Integer, ForeignKey('worker_shifts.shift_id'))
+    surname = Column(String, nullable=True)
+    name = Column(String, nullable=True)
+    middle_name = Column(String, nullable=True)
+    hire_date = Column(DATE, nullable=True)
+    phone_number = Column(String, nullable=True)
+    birth_date = Column(DATE, nullable=True)
+    email = Column(String, nullable=True)
+    spec_name = Column(String, nullable=True)  # Added column for specialization name
+    role_id = Column(Integer, ForeignKey('roles.role_id'), nullable=False)
+    fcm_token = Column(String, nullable=True)
+    shift_id = Column(Integer, ForeignKey('shifts.shift_id'), nullable=True)
     tokens = Column(Integer, default=0)
     num_created = Column(Integer, default=0)
     num_completed = Column(Integer, default=0)
@@ -145,7 +145,6 @@ class UserModel(BaseModel):
     phone_number: Optional[str]
     birth_date: Optional[date]
     email: Optional[str]
-    spec_id: Optional[int]
     spec_name: Optional[str]
     fcm_token: Optional[List[str]]
     role_id: int
@@ -181,7 +180,7 @@ class RegisterRequest(BaseModel):
     birth_date: Optional[date] = None
     email: Optional[str] = None
     role_id: int
-    spec_id: Optional[int] = None
+    spec_name: Optional[str] = None
 
 class RequestModel(BaseModel):
     request_id: int
@@ -385,18 +384,11 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
         birth_date=request.birth_date,
         email=request.email,
         role_id=request.role_id,
-        spec_id=request.spec_id
+        spec_name=request.spec_name
     )
     db.add(user)
     db.commit()
     db.refresh(user)
-
-    if user.spec_id:
-        specialization = db.query(Specialization).filter(Specialization.spec_id == user.spec_id).first()
-        if specialization:
-            user.spec_name = specialization.spec_name
-            db.commit()
-            db.refresh(user)
 
     return {"message": "User successfully registered", "user_id": user.user_id}
 
