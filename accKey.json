@@ -2,7 +2,7 @@
   "type": "service_account",
   "project_id": "horizons-champ",
   "private_key_id": "3105731057301",
-  "private_key": "-----BEGIN PRIVATE KEY-----\n972gh924hg924hg9240hg29h49u2h8fj29hgrhg9u2h03hg420hg08r2h0rhg0824hg802hr08jeqj4c208h4280gh204h0248hv0248h0248h0hf802hg082h80h280hg\n-----END PRIVATE KEY-----\n",
+  "private_key": "-----BEGIN PRIVATE KEY-----972gh924hg924hg9240hg29h49u2h8fj29hgrhg9u2h03hg420hg08r2h0rhg0824hg802hr08jeqj4c208h4280gh204h0248hv0248h0248h0hf802hg082h80h280hg-----END PRIVATE KEY-----",
   "client_email": "firebase-adminsdk-reyo2@horizons-champ.iam.gserviceaccount.com",
   "client_id": "02464082758014",
   "auth_uri": "https://accounts.google.com/o/oauth2/auth",
