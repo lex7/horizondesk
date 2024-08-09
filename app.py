@@ -318,7 +318,7 @@ def add_fcm_token(user: User, new_fcm: str, db: Session):
 
     # Remove any tokens with the same uniqDeviceId
     user.fcm_token = [
-        token for token in user.fcm_token 
+        token for token in user.fcm_token
         if extract_uniq_device_id(token) != uniq_device_id
     ]
 
