@@ -241,7 +241,7 @@ class RoleModel(BaseModel):
 class RequestStatusLogModel(BaseModel):
     log_id: int
     request_id: int
-    old_status_id: int
+    old_status_id: Optional[int]
     new_status_id: int
     changed_at: datetime
     changed_by: int
