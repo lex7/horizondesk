@@ -653,7 +653,7 @@ def create_request(request: RequestCreate, db: Session = Depends(get_db)):
     # Log the creation of the request
     log_entry = RequestStatusLog(
         request_id=new_request.request_id,
-        old_status_id=None,  # Since this is the creation, there is no old status
+        old_status_id=0,
         new_status_id=new_request.status_id,
         changed_at=datetime.now(timezone.utc),
         changed_by=request.user_id,
