@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, HTTPException, Depends
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, event, func, or_
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, event, func, or_, literal_column
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.types import TIMESTAMP, String, DATE
@@ -310,22 +310,13 @@ def update_request(request_id: int, new_status: int, user_id: int, db: Session, 
     return existing_request
 
 
-def add_fcm_token(user: User, new_fcm: str, db: Session):
-    if user.fcm_token is None:
-        user.fcm_token = []
-
-    uniq_device_id = extract_uniq_device_id(new_fcm)
-
-    # Remove any tokens with the same uniqDeviceId
-    user.fcm_token = [
-        token for token in user.fcm_token
-        if extract_uniq_device_id(token) != uniq_device_id
-    ]
-
-    # Add the new token
-    user.fcm_token.append(new_fcm)
+def add_fcm_token(user: User, fcm_token: str, db: Session):
+    device_id = extract_unique_device_id(fcm_token)
+    # Remove any existing token with the same device ID
+    user.fcm_token = [token for token in user.fcm_token if not token.startswith(device_id)]
+    # Append the new token
+    user.fcm_token.append(fcm_token)
     db.commit()
-    db.refresh(user)
 
 
 def remove_fcm_token(user: User, old_fcm: str, db: Session):
@@ -333,7 +324,6 @@ def remove_fcm_token(user: User, old_fcm: str, db: Session):
         user.fcm_token = [token for token in user.fcm_token if token != old_fcm]
         db.commit()
         db.refresh(user)
-
 
 
 def extract_uniq_device_id(fcm_token: str) -> str:
@@ -349,21 +339,20 @@ def get_user_by_username(db: Session, username: str):
 
 def get_user_by_device_id(db: Session, device_id: str):
     return db.query(User).filter(
-        User.fcm_token.contains([device_id])
+        User.fcm_token.any(f"{device_id}:%")
     ).first()
 
-def remove_device_from_other_users(db: Session, device_id: str, current_user_id: int):
-    other_users = db.query(User).filter(
-        User.user_id != current_user_id,
-        or_(User.fcm_token.contains([device_id]))
-    ).all()
-    
-    for user in other_users:
-        if user.fcm_token:
-            user.fcm_token = [token for token in user.fcm_token if not token.startswith(device_id)]
-            db.add(user)
-    
+def remove_device_from_other_users(db: Session, device_id: str, user_id: int):
+    # Get users with the device ID except the current user
+    users = db.query(User).filter(User.user_id != user_id).all()
+    for user in users:
+        # Filter out any tokens with the matching device ID
+        user.fcm_token = [token for token in user.fcm_token if not token.startswith(device_id)]
     db.commit()
+    
+
+def extract_unique_device_id(fcm_token: str) -> str:
+    return fcm_token.split(":")[0] 
 
 
 # Get Endpoints
@@ -597,23 +586,15 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     if request.fcm_token:
-        device_id = request.fcm_token.split(":")[0]
+        device_id = extract_unique_device_id(request.fcm_token)
         existing_user = get_user_by_device_id(db, device_id)
 
         if existing_user and existing_user.user_id != user.user_id:
             remove_device_from_other_users(db, device_id, user.user_id)
         
-        if user.fcm_token:
-            if request.fcm_token not in user.fcm_token:
-                user.fcm_token.append(request.fcm_token)
-        else:
-            user.fcm_token = [request.fcm_token]
-        
-        db.add(user)
-        db.commit()
+        add_fcm_token(user, request.fcm_token, db)
     
     return LoginResponse(user_id=user.user_id, role_id=user.role_id)
-
 
 @app.post("/refresh-user-token")
 def refresh_user_token(request: RefreshTokenRequest, db: Session = Depends(get_db)):
