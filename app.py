@@ -404,20 +404,27 @@ def get_statuses(db: Session = Depends(get_db)):
 
 @app.get("/under-master-approval", response_model=List[RequestModel])
 def get_under_master_approval_requests(user_id: int, db: Session = Depends(get_db)):
+    # Find the user and their spec_name
     user = db.query(User).filter(User.user_id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
-
+    
     spec_name = user.spec_name
     if spec_name is None:
         raise HTTPException(status_code=400, detail="User does not have a spec_name")
 
-    requests = db.query(Request).join(Specialization, Specialization.spec_name == User.spec_name).filter(
+    # Query for requests with the correct joins
+    requests = db.query(Request).join(
+        User, User.user_id == Request.created_by  # Ensures the User table is included
+    ).join(
+        Specialization, Specialization.spec_name == User.spec_name
+    ).filter(
         Request.status_id == 1,
         Specialization.spec_name == spec_name
     ).all()
-
+    
     return requests
+
 
 @app.get("/under-master-monitor", response_model=List[RequestModel])
 def get_under_master_monitor_requests(user_id: int, db: Session = Depends(get_db)):
