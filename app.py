@@ -5,12 +5,13 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.types import TIMESTAMP, String, DATE
 from sqlalchemy.orm import Session
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.exc import IntegrityError
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from datetime import datetime, timezone, date
 from typing import List, Optional
+from starlette.responses import JSONResponse
 
 load_dotenv()
 
@@ -555,25 +556,37 @@ def get_rewards(user_id: int, db: Session = Depends(get_db)):
 
 @app.post("/register")
 def register(request: RegisterRequest, db: Session = Depends(get_db)):
-    hashed_password = hash_password(request.password)
-    user = User(
-        username=request.username,
-        password_hash=hashed_password,
-        surname=request.surname,
-        name=request.name,
-        middle_name=request.middle_name,
-        hire_date=request.hire_date,
-        phone_number=request.phone_number,
-        birth_date=request.birth_date,
-        email=request.email,
-        role_id=request.role_id,
-        spec_name=request.spec_name
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
+    try:
+        hashed_password = hash_password(request.password)
+        user = User(
+            username=request.username,
+            password_hash=hashed_password,
+            surname=request.surname,
+            name=request.name,
+            middle_name=request.middle_name,
+            hire_date=request.hire_date,
+            phone_number=request.phone_number,
+            birth_date=request.birth_date,
+            email=request.email,
+            role_id=request.role_id,
+            spec_name=request.spec_name
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        return {"message": "User successfully registered", "user_id": user.user_id}
+    except IntegrityError as e:
+        db.rollback()  # Rollback the transaction if there's an error
+        detail = str(e.orig)  # Extracts the original error message
+        raise HTTPException(status_code=400, detail=detail)
+    
 
-    return {"message": "User successfully registered", "user_id": user.user_id}
+@app.exception_handler(IntegrityError)
+async def integrity_exception_handler(request: Request, exc: IntegrityError):
+    return JSONResponse(
+        status_code=400,
+        content={"detail": str(exc.orig)}
+    )
 
 
 @app.post("/login", response_model=LoginResponse)
