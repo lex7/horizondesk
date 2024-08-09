@@ -653,8 +653,6 @@ def approve_request(request: UpdateRequest, db: Session = Depends(get_db)):
         reason=request.reason
     )
     creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
-    if creator_user is None or not creator_user.fcm_token:
-        raise HTTPException(status_code=404, detail="Users's FCM token not found")
     try:
         send_push(
             token=creator_user.fcm_token,
@@ -677,8 +675,6 @@ def deny_request(request: UpdateRequest, db: Session = Depends(get_db)):
         reason=request.reason
     )
     creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
-    if creator_user is None or not creator_user.fcm_token:
-        raise HTTPException(status_code=404, detail="Users's FCM token not found")
     try:
         send_push(
             token=creator_user.fcm_token,
@@ -700,8 +696,6 @@ def take_request(request: UpdateRequest, db: Session = Depends(get_db)):
         assigned_to=request.user_id
     )
     creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
-    if creator_user is None or not creator_user.fcm_token:
-        raise HTTPException(status_code=404, detail="Users's FCM token not found")
     try:
         send_push(
             token=creator_user.fcm_token,
@@ -724,8 +718,6 @@ def cancel_request(request: UpdateRequest, db: Session = Depends(get_db)):
         reason=request.reason
     )
     creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
-    if creator_user is None or not creator_user.fcm_token:
-        raise HTTPException(status_code=404, detail="Users's FCM token not found")
     try:
         send_push(
             token=creator_user.fcm_token,
@@ -741,8 +733,6 @@ def cancel_request(request: UpdateRequest, db: Session = Depends(get_db)):
 def complete_request(request: UpdateRequest, db: Session = Depends(get_db)):
     existing_request = update_request(request.request_id, 5, request.user_id, db, reason=request.reason)
     creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
-    if creator_user is None or not creator_user.fcm_token:
-        raise HTTPException(status_code=404, detail="Users's FCM token not found")
     try:
         send_push(
             token=creator_user.fcm_token,
@@ -782,8 +772,6 @@ def deny_request(request: UpdateRequest, db: Session = Depends(get_db)):
         reason=request.reason
     )
     executor_user = db.query(User).filter(User.user_id == existing_request.assigned_to).first()
-    if executor_user is None or not executor_user.fcm_token:
-        raise HTTPException(status_code=404, detail="Users's FCM token not found")
     try:
         send_push(
             token=executor_user.fcm_token,
