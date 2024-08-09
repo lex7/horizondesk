@@ -63,7 +63,7 @@ class User(Base):
 class Specialization(Base):
     __tablename__ = 'specializations'
 
-    specialization_id = Column(Integer, primary_key=True, index=True)
+    spec_id = Column(Integer, primary_key=True, index=True)
     spec_name = Column(String, nullable=False, unique=True)
 
     users = relationship("User", back_populates="specialization",
