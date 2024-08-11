@@ -126,8 +126,8 @@ class RequestStatusLog(Base):
     changed_at = Column(String, nullable=False)
     changed_by = Column(Integer, ForeignKey('users.user_id'))
     reason = Column(String)
-    changer_name = Column(String, nullable=False)  # New field for changer's name
-    action_name = Column(String, nullable=False)   # New field for action name
+    changer_name = Column(String, nullable=True)  # New field for changer's name
+    action_name = Column(String, nullable=True)   # New field for action name
 
     request_rel = relationship("Request")
 
@@ -235,8 +235,8 @@ class RequestStatusLogModel(BaseModel):
     changed_at: datetime
     changed_by: int
     reason: Optional[str]
-    changer_name: str   # New field for changer's name
-    action_name: str    # New field for action name
+    changer_name: Optional[str]   # New field for changer's name
+    action_name: Optional[str]    # New field for action name
 
     class Config:
         from_attributes = True
