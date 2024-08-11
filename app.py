@@ -645,11 +645,13 @@ def approve_request(request: UpdateRequest, db: Session = Depends(get_db)):
     )
     creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
     try:
-        send_push(
+        resps = send_push(
             tokens=creator_user.fcm_token,
             title="Request Approved",
             body=f"Your request (ID: {existing_request.request_id}) has been approved."
         )
+        for resp in resps:
+            print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
     except Exception as e:
         print(e)
     return {"message": "Request approved successfully", "request_id": existing_request.request_id}
@@ -667,11 +669,13 @@ def deny_request(request: UpdateRequest, db: Session = Depends(get_db)):
     )
     creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
     try:
-        send_push(
+        resps=send_push(
             tokens=creator_user.fcm_token,
             title="Request Denied",
             body=f"Your request (ID: {existing_request.request_id}) has been denied."
         )
+        for resp in resps:
+            print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
     except Exception as e:
         print(e)
     return {"message": "Request denied successfully", "request_id": existing_request.request_id}
@@ -688,11 +692,13 @@ def take_request(request: UpdateRequest, db: Session = Depends(get_db)):
     )
     creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
     try:
-        send_push(
+        resps=send_push(
             tokens=creator_user.fcm_token,
             title="Request is in work",
             body=f"Your request (ID: {existing_request.request_id}) has been taken to work."
         )
+        for resp in resps:
+            print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
     except Exception as e:
         print(e)
     return {"message": "Request accepted into work successfully", "request_id": existing_request.request_id}
@@ -710,11 +716,13 @@ def cancel_request(request: UpdateRequest, db: Session = Depends(get_db)):
     )
     creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
     try:
-        send_push(
+        resps=send_push(
             tokens=creator_user.fcm_token,
             title="Request has been canceled",
             body=f"Your request (ID: {existing_request.request_id}) has been canceled by executor."
         )
+        for resp in resps:
+            print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
     except Exception as e:
         print(e)
     return {"message": "Request canceled successfully", "request_id": existing_request.request_id}
@@ -724,11 +732,13 @@ def complete_request(request: UpdateRequest, db: Session = Depends(get_db)):
     existing_request = update_request(request.request_id, 5, request.user_id, db, reason=request.reason, action_name='Исполнено')
     creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
     try:
-        send_push(
+        resps=send_push(
             tokens=creator_user.fcm_token,
             title="Request has been completed",
             body=f"Your request (ID: {existing_request.request_id}) has been completed by executor."
         )
+        for resp in resps:
+            print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
     except Exception as e:
         print(e)
     return {"message": "Request completed successfully", "request_id": request.request_id}
@@ -763,11 +773,13 @@ def deny_request(request: UpdateRequest, db: Session = Depends(get_db)):
     )
     executor_user = db.query(User).filter(User.user_id == existing_request.assigned_to).first()
     try:
-        send_push(
+        resps=send_push(
             tokens=executor_user.fcm_token,
             title="Request has been declined",
             body=f"Your work (ID: {existing_request.request_id}) has been declined by requestor."
         )
+        for resp in resps:
+            print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
     except Exception as e:
         print(e)
     return {"message": "Request denied successfully", "request_id": existing_request.request_id}
@@ -801,29 +813,40 @@ FCM_ENDPOINT = 'v1/projects/' + PROJECT_ID + '/messages:send'
 FCM_URL = BASE_URL + '/' + FCM_ENDPOINT
 SCOPES = ['https://www.googleapis.com/auth/firebase.messaging']
 
-def send_push(tokens: str, title="title", body="body"):
+def send_push(tokens: list, title="title", body="body"):
+    results = []
+    
     for token in tokens:
-        credentials = service_account.Credentials.from_service_account_file(
-            'accKey.json', scopes=SCOPES)
-        request = google.auth.transport.requests.Request()
-        credentials.refresh(request)
-        googleToken = credentials.token
-        headers = {
-            'Authorization': 'Bearer ' + googleToken,
-            'Content-Type': 'application/json; UTF-8',
-        }
-        message = {
-            "message": {
-                "token": token,
-                "notification": {
-                    "title": title,
-                    "body": body
+        try:
+            credentials = service_account.Credentials.from_service_account_file(
+                'accKey.json', scopes=SCOPES)
+            request = google.auth.transport.requests.Request()
+            credentials.refresh(request)
+            googleToken = credentials.token
+            
+            headers = {
+                'Authorization': 'Bearer ' + googleToken,
+                'Content-Type': 'application/json; UTF-8',
+            }
+            message = {
+                "message": {
+                    "token": token,
+                    "notification": {
+                        "title": title,
+                        "body": body
+                    }
                 }
             }
-        }
-        message_json = json.dumps(message)
-        resp = requests.post(FCM_URL, data=message_json, headers=headers)
-        if resp.status_code == 200:
-            return {'message': 'Message sent to Firebase for delivery', 'response': resp.text}
-        else:
-            raise HTTPException(status_code=resp.status_code, detail=resp.text)
+            message_json = json.dumps(message)
+            
+            resp = requests.post(FCM_URL, data=message_json, headers=headers)
+            
+            if resp.status_code == 200:
+                results.append({'token': token, 'status': 'success', 'response': resp.text})
+            else:
+                results.append({'token': token, 'status': 'failure', 'error': resp.text})
+        
+        except Exception as e:
+            results.append({'token': token, 'status': 'failure', 'error': str(e)})
+    
+    return results
