@@ -647,8 +647,8 @@ def approve_request(request: UpdateRequest, db: Session = Depends(get_db)):
     try:
         resps = send_push(
             tokens=creator_user.fcm_token,
-            title="Request Approved",
-            body=f"Your request (ID: {existing_request.request_id}) has been approved."
+            title="Запрос согласован",
+            body=f"Ваш запрос (ID: {existing_request.request_id}) был согласован мастером."
         )
         for resp in resps:
             print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
@@ -671,8 +671,8 @@ def deny_request(request: UpdateRequest, db: Session = Depends(get_db)):
     try:
         resps=send_push(
             tokens=creator_user.fcm_token,
-            title="Request Denied",
-            body=f"Your request (ID: {existing_request.request_id}) has been denied."
+            title="Запрос отклонен",
+            body=f"Ваш запрос (ID: {existing_request.request_id}) был отклонен мастером."
         )
         for resp in resps:
             print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
@@ -694,8 +694,8 @@ def take_request(request: UpdateRequest, db: Session = Depends(get_db)):
     try:
         resps=send_push(
             tokens=creator_user.fcm_token,
-            title="Request is in work",
-            body=f"Your request (ID: {existing_request.request_id}) has been taken to work."
+            title="Запрос в работе",
+            body=f"Ваш запрос (ID: {existing_request.request_id}) был взят в работу."
         )
         for resp in resps:
             print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
@@ -718,8 +718,8 @@ def cancel_request(request: UpdateRequest, db: Session = Depends(get_db)):
     try:
         resps=send_push(
             tokens=creator_user.fcm_token,
-            title="Request has been canceled",
-            body=f"Your request (ID: {existing_request.request_id}) has been canceled by executor."
+            title="Запрос был отменен",
+            body=f"Ваш запрос (ID: {existing_request.request_id}) был возвращен исполнителем."
         )
         for resp in resps:
             print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
@@ -734,8 +734,8 @@ def complete_request(request: UpdateRequest, db: Session = Depends(get_db)):
     try:
         resps=send_push(
             tokens=creator_user.fcm_token,
-            title="Request has been completed",
-            body=f"Your request (ID: {existing_request.request_id}) has been completed by executor."
+            title="Запрос исполнен",
+            body=f"Ваш запрос (ID: {existing_request.request_id}) был исполнен и ожидает проверки."
         )
         for resp in resps:
             print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
@@ -758,6 +758,17 @@ def confirm_request(request: UpdateRequest, db: Session = Depends(get_db)):
     if creator:
         creator.tokens += 100
 
+    try:
+        resps = send_push(
+            tokens=executor.fcm_token,
+            title="Работа принята",
+            body=f"Ваша работа (ID: {existing_request.request_id}) была принята заявителем."
+        )
+        for resp in resps:
+            print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
+    except Exception as e:
+        print(e)
+
     db.commit()
     return {"message": "Request confirmed successfully", "request_id": request.request_id}
 
@@ -775,8 +786,8 @@ def deny_request(request: UpdateRequest, db: Session = Depends(get_db)):
     try:
         resps=send_push(
             tokens=executor_user.fcm_token,
-            title="Request has been declined",
-            body=f"Your work (ID: {existing_request.request_id}) has been declined by requestor."
+            title="Работа отклонена",
+            body=f"Ваша работа (ID: {existing_request.request_id}) была отправлена на доработку заявителем."
         )
         for resp in resps:
             print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
