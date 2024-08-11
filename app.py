@@ -623,7 +623,8 @@ def create_request(request: RequestCreate, db: Session = Depends(get_db)):
         new_status_id=new_request.status_id,
         changed_at=datetime.now(timezone.utc),
         changed_by=request.user_id,
-        reason="Запрос создан"
+        changer_name=f"{creator.surname} {creator.name}",
+        action_name='Запрос создан'
     )
     db.add(log_entry)
     db.commit()
