@@ -126,6 +126,8 @@ class RequestStatusLog(Base):
     changed_at = Column(String, nullable=False)
     changed_by = Column(Integer, ForeignKey('users.user_id'))
     reason = Column(String)
+    changer_name = Column(String, nullable=False)  # New field for changer's name
+    action_name = Column(String, nullable=False)   # New field for action name
 
     request_rel = relationship("Request")
 
@@ -233,6 +235,8 @@ class RequestStatusLogModel(BaseModel):
     changed_at: datetime
     changed_by: int
     reason: Optional[str]
+    changer_name: str   # New field for changer's name
+    action_name: str    # New field for action name
 
     class Config:
         from_attributes = True
@@ -272,10 +276,16 @@ def verify_password(plain_password, hashed_password):
 def hash_password(password):
     return pwd_context.hash(password)
 
-def update_request(request_id: int, new_status: int, user_id: int, db: Session, **kwargs):
+def update_request(request_id: int, new_status: int, user_id: int, db: Session, action_name: str, **kwargs):
     existing_request = db.query(Request).filter(Request.request_id == request_id).first()
     if existing_request is None:
         raise HTTPException(status_code=404, detail="Request not found")
+
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    changer_name = f"{user.surname} {user.name}"
     
     log_entry = RequestStatusLog(
         request_id=existing_request.request_id,
@@ -283,7 +293,9 @@ def update_request(request_id: int, new_status: int, user_id: int, db: Session, 
         new_status_id=new_status,
         changed_at=datetime.now(timezone.utc),
         changed_by=user_id,
-        reason=kwargs.get('reason')
+        reason=kwargs.get('reason'),
+        changer_name=changer_name,  # Populate changer_name
+        action_name=action_name     # Populate action_name
     )
     db.add(log_entry)
 
@@ -627,7 +639,8 @@ def approve_request(request: UpdateRequest, db: Session = Depends(get_db)):
         new_status=2,
         user_id=request.user_id,
         db=db,
-        reason=request.reason
+        reason=request.reason,
+        action_name='Согласовано мастером'
     )
     creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
     try:
@@ -649,7 +662,8 @@ def deny_request(request: UpdateRequest, db: Session = Depends(get_db)):
         new_status=3,
         user_id=request.user_id,
         db=db,
-        reason=request.reason
+        reason=request.reason,
+        action_name='Отклонено мастером'
     )
     creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
     try:
@@ -670,7 +684,8 @@ def take_request(request: UpdateRequest, db: Session = Depends(get_db)):
         new_status=4,
         user_id=request.user_id,
         db=db,
-        assigned_to=request.user_id
+        assigned_to=request.user_id,
+        action_name='Взято в работу'
     )
     creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
     try:
@@ -692,7 +707,8 @@ def cancel_request(request: UpdateRequest, db: Session = Depends(get_db)):
         user_id=request.user_id,
         db=db,
         assigned_to=None,
-        reason=request.reason
+        reason=request.reason,
+        action_name='Исполнитель отказался'
     )
     creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
     try:
@@ -708,7 +724,7 @@ def cancel_request(request: UpdateRequest, db: Session = Depends(get_db)):
 
 @app.post("/executor-complete", response_model=dict)
 def complete_request(request: UpdateRequest, db: Session = Depends(get_db)):
-    existing_request = update_request(request.request_id, 5, request.user_id, db, reason=request.reason)
+    existing_request = update_request(request.request_id, 5, request.user_id, db, reason=request.reason, action_name='Исполнено')
     creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
     try:
         send_push(
@@ -724,7 +740,7 @@ def complete_request(request: UpdateRequest, db: Session = Depends(get_db)):
 
 @app.post("/requestor-confirm", response_model=dict)
 def confirm_request(request: UpdateRequest, db: Session = Depends(get_db)):
-    existing_request = update_request(request.request_id, 6, request.user_id, db, reason=request.reason)
+    existing_request = update_request(request.request_id, 6, request.user_id, db, reason=request.reason, action_name='Принято')
     creator = db.query(User).filter(User.user_id == request.user_id).first()
     executor = db.query(User).filter(User.user_id == existing_request.assigned_to).first()
     
@@ -746,7 +762,8 @@ def deny_request(request: UpdateRequest, db: Session = Depends(get_db)):
         new_status=4,
         user_id=request.user_id,
         db=db,
-        reason=request.reason
+        reason=request.reason,
+        action_name='Отправлено на доработку'
     )
     executor_user = db.query(User).filter(User.user_id == existing_request.assigned_to).first()
     try:
@@ -767,7 +784,7 @@ def soft_delete_request(request: UpdateRequest, db: Session = Depends(get_db)):
     if existing_request is None:
         raise HTTPException(status_code=404, detail="Request not found")
 
-    update_request(request.request_id, new_status=7, user_id=request.user_id, db=db, reason=request.reason)
+    update_request(request.request_id, new_status=7, user_id=request.user_id, db=db, reason=request.reason, action_name='Удалено')
 
     return {"message": "Request marked as deleted successfully"}
 

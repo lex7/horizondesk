@@ -74,5 +74,7 @@ CREATE TABLE request_status_log (
     new_status_id INTEGER REFERENCES statuses(status_id),
     changed_at TIMESTAMP NOT NULL DEFAULT now(),
     changed_by INTEGER REFERENCES users(user_id),
-    reason TEXT
+    reason TEXT,
+    changer_name VARCHAR(100),
+    action_name VARCHAR(50)
 );
