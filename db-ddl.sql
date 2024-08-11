@@ -4,12 +4,6 @@ CREATE TABLE roles (
     role_name VARCHAR(50) NOT NULL UNIQUE
 );
 
--- Table: specializations
-CREATE TABLE specializations (
-    spec_id SERIAL PRIMARY KEY,
-    spec_name VARCHAR(50) NOT NULL UNIQUE
-);
-
 -- Table: worker_shifts
 CREATE TABLE worker_shifts (
     shift_id SERIAL PRIMARY KEY,
@@ -29,7 +23,8 @@ CREATE TABLE users (
     phone_number VARCHAR(15),
     birth_date DATE,
     email VARCHAR(100) UNIQUE,
-    spec_name VARCHAR(50) REFERENCES specializations(spec_name),
+    specialization VARCHAR(50),
+    request_type INTEGER REFERENCES request_types(request_type) DEFAULT 1,
     fcm_token VARCHAR(255)[] DEFAULT '{}',
     role_id INTEGER NOT NULL REFERENCES roles(role_id),
     shift_id INTEGER REFERENCES worker_shifts(shift_id),

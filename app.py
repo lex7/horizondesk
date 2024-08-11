@@ -48,7 +48,7 @@ class User(Base):
     phone_number = Column(String(15))
     birth_date = Column(Date)
     email = Column(String(100), unique=True)
-    spec_name = Column(String(50), ForeignKey('specializations.spec_name'))
+    specialization = Column(String(50))
     fcm_token = Column(ARRAY(String(255)), default=[])
     role_id = Column(Integer, ForeignKey('roles.role_id'), nullable=False)
     shift_id = Column(Integer, ForeignKey('worker_shifts.shift_id'))
@@ -56,21 +56,13 @@ class User(Base):
     num_created = Column(Integer, default=0)
     num_completed = Column(Integer, default=0)
     last_completed = Column(Date)
+    request_type = Column(Integer, ForeignKey('request_types.request_type'))
 
     role = relationship("Role", back_populates="users")
     shift = relationship("WorkerShift", back_populates="users",
                          primaryjoin="User.shift_id == WorkerShift.shift_id")
-    specialization = relationship("Specialization", back_populates="users",
-                                  primaryjoin="foreign(User.spec_name) == Specialization.spec_name")
+    request_type_rel = relationship("RequestType")
 
-class Specialization(Base):
-    __tablename__ = 'specializations'
-
-    spec_id = Column(Integer, primary_key=True, index=True)
-    spec_name = Column(String, nullable=False, unique=True)
-
-    users = relationship("User", back_populates="specialization",
-                         primaryjoin="foreign(User.spec_name) == Specialization.spec_name")
 
 class Role(Base):
     __tablename__ = 'roles'
@@ -151,10 +143,11 @@ class UserModel(BaseModel):
     phone_number: Optional[str]
     birth_date: Optional[date]
     email: Optional[str]
-    spec_name: Optional[str]
     fcm_token: Optional[List[str]]
     role_id: int
     shift_id: Optional[int]
+    specialization: Optional[str] = None
+    request_type: int
 
     class Config:
         from_attributes = True
@@ -186,7 +179,8 @@ class RegisterRequest(BaseModel):
     birth_date: Optional[date] = None
     email: Optional[str] = None
     role_id: int
-    spec_name: Optional[str] = None
+    specialization: Optional[str] = None
+    request_type: int
 
 class RequestModel(BaseModel):
     request_id: int
@@ -220,13 +214,6 @@ class UpdateRequest(BaseModel):
 class RequestTypeModel(BaseModel):
     request_type: int
     type_name: str
-
-    class Config:
-        from_attributes = True
-
-class SpecializationModel(BaseModel):
-    spec_id: int
-    spec_name: str
 
     class Config:
         from_attributes = True
@@ -381,11 +368,6 @@ def get_request_types(db: Session = Depends(get_db)):
     request_types = db.query(RequestType).all()
     return request_types
 
-@app.get("/specializations", response_model=List[SpecializationModel])
-def get_specializations(db: Session = Depends(get_db)):
-    specializations = db.query(Specialization).all()
-    return specializations
-
 @app.get("/roles", response_model=List[RoleModel])
 def get_roles(db: Session = Depends(get_db)):
     roles = db.query(Role).all()
@@ -408,26 +390,16 @@ def get_under_master_approval_requests(user_id: int, db: Session = Depends(get_d
     user = db.query(User).filter(User.user_id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    
-    spec_name = user.spec_name
-    
-    if not spec_name:
-        raise HTTPException(status_code=400, detail="User does not have a spec_name")
 
-    # Get the spec_id for the given spec_name
-    specialization = db.query(Specialization).filter(Specialization.spec_name == spec_name).first()
-    
-    if not specialization:
-        raise HTTPException(status_code=400, detail="Specialization not found")
+    if user.request_type is None:
+        raise HTTPException(status_code=400, detail="User does not have a request_type")
 
-    spec_id = specialization.spec_id
-
-    # Query for requests where request_type matches the spec_id
+    # Query for requests where request_type matches the user's request_type
     requests = db.query(Request).filter(
         Request.status_id == 1,
-        Request.request_type == spec_id  # Ensure request_type matches spec_id
+        Request.request_type == user.request_type  # Ensure request_type matches user's request_type
     ).all()
-    
+
     return requests
 
 
@@ -437,26 +409,16 @@ def get_under_master_monitor_requests(user_id: int, db: Session = Depends(get_db
     user = db.query(User).filter(User.user_id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    
-    spec_name = user.spec_name
-    
-    if not spec_name:
-        raise HTTPException(status_code=400, detail="User does not have a spec_name")
 
-    # Get the spec_id for the given spec_name
-    specialization = db.query(Specialization).filter(Specialization.spec_name == spec_name).first()
-    
-    if not specialization:
-        raise HTTPException(status_code=400, detail="Specialization not found")
+    if user.request_type is None:
+        raise HTTPException(status_code=400, detail="User does not have a request_type")
 
-    spec_id = specialization.spec_id
-
-    # Query for requests where request_type matches the spec_id
+    # Query for requests where request_type matches the user's request_type
     requests = db.query(Request).filter(
         Request.status_id != 1,
-        Request.request_type == spec_id  # Ensure request_type matches spec_id
+        Request.request_type == user.request_type  # Ensure request_type matches user's request_type
     ).all()
-    
+
     return requests
 
 @app.get("/in-progress", response_model=List[RequestModel])
@@ -493,26 +455,17 @@ def get_unassigned(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.user_id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    
-    spec_name = user.spec_name
-    if spec_name is None:
-        raise HTTPException(status_code=400, detail="User does not have a spec_name")
 
-    # Get the spec_id for the given spec_name
-    specialization = db.query(Specialization).filter(Specialization.spec_name == spec_name).first()
-    
-    if not specialization:
-        raise HTTPException(status_code=400, detail="Specialization not found")
+    if user.request_type is None:
+        raise HTTPException(status_code=400, detail="User does not have a request_type")
 
-    spec_id = specialization.spec_id
-
-    # Query for requests
+    # Query for unassigned requests where request_type matches the user's request_type
     tasks = db.query(Request).filter(
         Request.assigned_to.is_(None),
-        Request.request_type == spec_id,
+        Request.request_type == user.request_type,
         Request.status_id == 2
     ).all()
-    
+
     return tasks
 
 @app.get("/requests-log", response_model=List[RequestStatusLogModel])
@@ -575,7 +528,8 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
             birth_date=request.birth_date,
             email=request.email,
             role_id=request.role_id,
-            spec_name=request.spec_name
+            specialization=request.specialization,
+            request_type=request.request_type
         )
         db.add(user)
         db.commit()
@@ -657,7 +611,7 @@ def create_request(request: RequestCreate, db: Session = Depends(get_db)):
         new_status_id=new_request.status_id,
         changed_at=datetime.now(timezone.utc),
         changed_by=request.user_id,
-        reason="Request created"
+        reason="Запрос создан"
     )
     db.add(log_entry)
     db.commit()
