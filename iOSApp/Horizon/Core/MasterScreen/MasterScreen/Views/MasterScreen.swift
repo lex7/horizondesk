@@ -6,12 +6,14 @@ struct MasterScreen: View {
     // MARK: - Environment variables
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var authStateEnvObject: AuthStateEnvObject
-
+    
     // MARK: - Private State Variables
     @State private var masterSegment: MasterSwitcher = .underMasterApproval
     @State private var showIssueConfirm: Bool?
+    @State private var showIssueMonitor: Bool?
     @State private var screenHeight = UIScreen.main.bounds.height
     @State private var currentNode: RequestIssueModel = RequestIssueModel(request_id: 1, request_type: 2, created_by: 99, assigned_to: nil, area_id: 3, description: nil, status_id: 99, created_at: nil, updated_at: nil, reason: nil)
+    @State private var logId: Int  = 10000000
     
     // MARK: - Private Constants
     private let generator = UIImpactFeedbackGenerator(style: .light)
@@ -65,11 +67,12 @@ struct MasterScreen: View {
         }, content: { _ in
             IssueAcceptanceCheck(currentNode: $currentNode)
         })
-//        .fullScreenCover(item: $showIssueConfirm, onDismiss: {
-//            authStateEnvObject.getRequestsForMaster()
-//        }, content: { _ in
-//            IssueAcceptanceCheck(currentNode: $currentNode)
-//        })
+        .sheet(item: $showIssueMonitor, onDismiss: {
+            authStateEnvObject.getRequestsForMaster()
+            authStateEnvObject.getRequestsForMasterMonitor()
+        }, content: { _ in
+            MasterMonitorScreen(currentNode: $currentNode, logId: $logId)
+        })
         .background(Color.theme.background)
         .onChange(of: tabSelection) {
             if tabSelection == .masterReviewIssue {
@@ -129,12 +132,13 @@ private extension MasterScreen {
     }
     
     var masterMonitor: some View {
-        ScrollView {
+        ScrollView { //
             ForEach(authStateEnvObject.requestsForMasterMonitor, id: \.self) { issue in
                 issueCellFor(issue)
                     .onTapGesture {
                         currentNode = issue
-                        showIssueConfirm = true
+                        logId = issue.request_id
+                        showIssueMonitor = true
                     }
             }
         }
@@ -152,29 +156,29 @@ private extension MasterScreen {
         relativeTextStyle: Font.TextStyle = .headline,
         uppercase: Bool = true,
         font: String = "NexaRegular") -> some View {
-        Group {
-            if uppercase {
-                Text(title)
-                    .textCase(.uppercase)
-                    .withMultiTextModifier(
-                        font: font,
-                        size: size,
-                        relativeTextStyle: relativeTextStyle,
-                        color: color,
-                        lines: lines
-                    )
-            } else {
-                Text(title)
-                    .withMultiTextModifier(
-                        font: font,
-                        size: size,
-                        relativeTextStyle: relativeTextStyle,
-                        color: color,
-                        lines: lines
-                    )
+            Group {
+                if uppercase {
+                    Text(title)
+                        .textCase(.uppercase)
+                        .withMultiTextModifier(
+                            font: font,
+                            size: size,
+                            relativeTextStyle: relativeTextStyle,
+                            color: color,
+                            lines: lines
+                        )
+                } else {
+                    Text(title)
+                        .withMultiTextModifier(
+                            font: font,
+                            size: size,
+                            relativeTextStyle: relativeTextStyle,
+                            color: color,
+                            lines: lines
+                        )
+                }
             }
         }
-    }
     
     @ViewBuilder
     func issueCellFor(_ issue: RequestIssueModel) -> some View {

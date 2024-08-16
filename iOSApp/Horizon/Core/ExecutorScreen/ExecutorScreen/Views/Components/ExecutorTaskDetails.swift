@@ -43,9 +43,11 @@ struct ExecutorTaskDetails: View {
             titleAndValueMultiLines(title: "Текст заявки", value: currentNode.description ?? "", lines: 20, maxWidth: 1)
                 .padding(.horizontal, 28)
             if let reason = currentNode.reason {
-                defaultSpacer
-                titleAndValueMultiLines(title: "Комментарий", value: reason, lines: 30, maxWidth: 1)
-                    .padding(.horizontal, 28)
+                if !reason.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    defaultSpacer
+                    titleAndValueMultiLines(title: "Комментарий", value: reason, lines: 30, maxWidth: 1)
+                        .padding(.horizontal, 28)
+                }
             }
             monsterSpacer
             doubleSpacer

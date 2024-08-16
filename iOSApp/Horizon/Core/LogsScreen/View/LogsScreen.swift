@@ -45,12 +45,15 @@ struct LogsScreen: View {
                         }
                     }
                     .listStyle(.insetGrouped)
+                    Spacer()
                 }
-                
             }
         }
         .onAppear {
-            authStateEnvObject.getLogs(logId)
+            Task {
+                try await Task.sleep(nanoseconds: 200_000_000)
+                authStateEnvObject.getLogs(logId)
+            }
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden()
@@ -119,6 +122,26 @@ private extension LogsScreen {
     }
 }
 
+
+private extension LogsScreen {
+    @ViewBuilder
+    private var messageForEmptyList: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Spacer()
+            Text(NamingEnum.noLogsFound.name)
+                .withDefaultTextModifier(font: "NexaRegular", size: 16, relativeTextStyle: .callout, color: Color.theme.lowContrast)
+            Text(NamingTextEnum.emptyScreenDebts.name)
+                .lineLimit(8)
+                .lineSpacing(5)
+                .multilineTextAlignment(.leading)
+                .withDefaultTextModifier(font: "NexaRegular", size: 13, relativeTextStyle: .footnote, color: Color.theme.lowContrast)
+            Spacer()
+        }
+        .padding(.horizontal, 24)
+    }
+}
+
+
 private extension LogsScreen {
     var header: some View {
         HStack {
@@ -139,23 +162,5 @@ private extension LogsScreen {
                     presentationMode.wrappedValue.dismiss()
                 }
         }
-    }
-}
-
-private extension LogsScreen {
-    @ViewBuilder
-    private var messageForEmptyList: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Spacer()
-            Text(NamingEnum.noLogsFound.name)
-                .withDefaultTextModifier(font: "NexaRegular", size: 16, relativeTextStyle: .callout, color: Color.theme.lowContrast)
-            Text(NamingTextEnum.emptyScreenDebts.name)
-                .lineLimit(8)
-                .lineSpacing(5)
-                .multilineTextAlignment(.leading)
-                .withDefaultTextModifier(font: "NexaRegular", size: 13, relativeTextStyle: .footnote, color: Color.theme.lowContrast)
-            Spacer()
-        }
-        .padding(.horizontal, 24)
     }
 }
