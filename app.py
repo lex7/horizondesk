@@ -211,7 +211,7 @@ class RequestCreate(BaseModel):
 class UpdateRequest(BaseModel):
     user_id: int
     request_id: int
-    reason: Optional[str] = None
+    reason: Optional[str] = Field(default=None)
 
 class RequestTypeModel(BaseModel):
     request_type: int
