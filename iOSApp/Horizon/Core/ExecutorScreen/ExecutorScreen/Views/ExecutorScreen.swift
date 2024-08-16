@@ -24,7 +24,7 @@ struct ExecutorScreen: View {
     @State private var logId: Int  = 10000000
     
     
-    @State private var currentNode: RequestIssueModel = RequestIssueModel(request_id: 1, request_type: 2, created_by: 99, assigned_to: nil, area_id: 3, description: nil, status_id: 99, created_at: nil, updated_at: nil, deadline: nil, rejection_reason: nil)
+    @State private var currentNode: RequestIssueModel = RequestIssueModel(request_id: 1, request_type: 2, created_by: 99, assigned_to: nil, area_id: 3, description: nil, status_id: 99, created_at: nil, updated_at: nil, reason: nil)
     
     
     init() {
@@ -132,7 +132,7 @@ private extension ExecutorScreen {
                             authStateEnvObject.executorUnassignRequest()
                         }
                     }
-                    Button("Просмотр логов") {
+                    Button("Просмотр истории") {
                         generator.impactOccurred()
                         logId = issue.request_id
                         showLogsForRequest.toggle()
@@ -175,7 +175,7 @@ private extension ExecutorScreen {
                             authStateEnvObject.executorMyTasksRequest()
                         }
                     }
-                    Button("Просмотр логов") {
+                    Button("Просмотр истории") {
                         generator.impactOccurred()
                         logId = issue.request_id
                         showLogsForRequest.toggle()
@@ -332,10 +332,8 @@ private extension ExecutorScreen {
                     descriptionOfField(issue.updatedAtString, color: Color.theme.lowContrast)
                 }
             /// Decline should not display
-            case .declined:
-                HStack(spacing: 3) { // completed ??
-                    descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
-                }
+            default:
+                EmptyView()
             }
         } else {
             EmptyView()

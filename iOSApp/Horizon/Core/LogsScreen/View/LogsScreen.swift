@@ -13,6 +13,7 @@ struct LogsScreen: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var authStateEnvObject: AuthStateEnvObject
     @Environment(\.presentationMode) private var presentationMode
+    @State private var screenWidth = UIScreen.main.bounds.width
     
     @Binding var logId: Int
     
@@ -61,54 +62,67 @@ private extension LogsScreen {
     @ViewBuilder
     private func logCell(_ log: LogsModel) -> some View {
         VStack {
-            if log.old_status_id == nil {
-                HStack {
-                    descriptionOfField("cтатус:", color: Color.theme.lowContrast)
-                    descriptionOfField("cоздан",
-                                       color: .theme.primary)
-                    Spacer()
-                }
-            } else if let oldStatus = IssueStatus(rawValue: log.old_status_id ?? 999),
-                      let newStatus = IssueStatus(rawValue: log.new_status_id),
-                      oldStatus == .new && newStatus != .declined {
-                HStack {
-                    descriptionOfField("cтатус:", color: Color.theme.lowContrast)
-                    descriptionOfField("направлен в работу",
-                                       color: .theme.primary)
-                    Spacer()
-                }
-            } else {
-                HStack {
-                    descriptionOfField("cтатус:", color: Color.theme.lowContrast)
-                    descriptionOfField(IssueStatus(rawValue: log.new_status_id)?.descriptionIssuer ?? "",
-                                       color: IssueStatus(rawValue: log.new_status_id)?.colorLogs ?? .cyan)
-                    Spacer()
-                }
-            }
-            HStack {
-                descriptionOfField("время:", color: Color.theme.lowContrast)
-                descriptionOfField(log.сhangedAtString, color: Color.theme.lowContrast)
-                Spacer()
-            }
-            if let reason = log.reason {
-                if !reason.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    if log.old_status_id != nil {
-                        HStack {
-                            descriptionOfField("пометка:", color: Color.theme.lowContrast)
-                            descriptionOfField(reason.trimmingCharacters(in: .whitespacesAndNewlines), lines: 20, color: Color.theme.lowContrast)
-                            Spacer()
+            HStack(spacing: 0) {
+                VStack(alignment: .leading) {
+                    HStack(spacing: 0) {
+                        descriptionOfField("cтатус:", color: Color.theme.lowContrast)
+                    }
+                    HStack(spacing: 0) {
+                        descriptionOfField("время:", color: Color.theme.lowContrast)
+                    }
+                    HStack(spacing: 0) {
+                        descriptionOfField("имя:", color: Color.theme.lowContrast)
+                    }
+                    if let reason = log.reason {
+                        if !reason.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            if log.old_status_id != nil {
+                                HStack {
+                                    descriptionOfField("пометка:", color: Color.theme.lowContrast)
+                                }
+                            }
                         }
                     }
                 }
+                .frame(width: screenWidth/7)
+                VStack(alignment: .leading) {
+                    HStack(spacing: 0) {
+                        descriptionOfField(log.action_name,
+                                           color: IssueStatus(rawValue: log.new_status_id)?.colorLogs ?? .cyan)
+                    }
+                    HStack(spacing: 0) {
+                        descriptionOfField(log.сhangedAtString, color: Color.theme.lowContrast)
+                    }
+                    HStack(spacing: 0) {
+                        descriptionOfField(log.changer_name, color: Color.theme.lowContrast)
+                    }
+                    HStack(spacing: 0) {
+                        if let reason = log.reason {
+                            if !reason.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                if log.old_status_id != nil {
+                                    HStack(spacing: 0) {
+                                        descriptionOfField(reason.trimmingCharacters(in: .whitespacesAndNewlines), lines: 20, color: Color.theme.lowContrast)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                VStack {
+                    Spacer()
+                }
+                .background(.orange)
             }
-        }
+            .alignmentGuide(.listRowSeparatorLeading) { viewDimensions in
+                return viewDimensions[.listRowSeparatorLeading] - 10
+            }
+        } // End of Vstack Cell
     }
 }
 
 private extension LogsScreen {
     var header: some View {
         HStack {
-            Text("Просмотр Логов")
+            Text("Просмотр истории")
                 .withDefaultTextModifier(
                     font: "NexaRegular",
                     size: 16,

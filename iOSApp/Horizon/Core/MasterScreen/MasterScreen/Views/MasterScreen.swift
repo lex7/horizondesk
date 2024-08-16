@@ -8,13 +8,14 @@ struct MasterScreen: View {
     @EnvironmentObject private var authStateEnvObject: AuthStateEnvObject
 
     // MARK: - Private State Variables
+    @State private var masterSegment: MasterSwitcher = .underMasterApproval
     @State private var showIssueConfirm: Bool?
-    
-    @State private var currentNode: RequestIssueModel = RequestIssueModel(request_id: 1, request_type: 2, created_by: 99, assigned_to: nil, area_id: 3, description: nil, status_id: 99, created_at: nil, updated_at: nil, deadline: nil, rejection_reason: nil)
+    @State private var screenHeight = UIScreen.main.bounds.height
+    @State private var currentNode: RequestIssueModel = RequestIssueModel(request_id: 1, request_type: 2, created_by: 99, assigned_to: nil, area_id: 3, description: nil, status_id: 99, created_at: nil, updated_at: nil, reason: nil)
     
     // MARK: - Private Constants
     private let generator = UIImpactFeedbackGenerator(style: .light)
-    @State private var screenHeight = UIScreen.main.bounds.height
+    
     
     // MARK: - Binding Variables
     @Binding var tabSelection: TabBarItem
@@ -25,20 +26,42 @@ struct MasterScreen: View {
                 topLeftHeader(title: "На Рассмотрение")
                 Spacer()
             }
-            if authStateEnvObject.masterIsLoading {
-                Spacer()
-                ProgressView()
-            } else {
-                if authStateEnvObject.requestsForMaster.isEmpty {
-                    messageForEmptyList
-                } else {
-                    allIssues
-                }
+            HStack {
+                pickerContainer
+                    .padding(.horizontal, 12)
+                    .background(Color.theme.background)
             }
-            Spacer()
+            .frame(maxWidth: .infinity)
+            switch masterSegment {
+            case .underMasterApproval:
+                if authStateEnvObject.masterIsLoading {
+                    Spacer()
+                    ProgressView()
+                } else {
+                    if authStateEnvObject.requestsForMaster.isEmpty {
+                        messageForEmptyList
+                    } else {
+                        masterApproval
+                    }
+                }
+                Spacer()
+            case .masterMonitor:
+                if authStateEnvObject.masterIsLoading {
+                    Spacer()
+                    ProgressView()
+                } else {
+                    if authStateEnvObject.requestsForMasterMonitor.isEmpty {
+                        messageForEmptyList
+                    } else {
+                        masterMonitor
+                    }
+                }
+                Spacer()
+            }
         }
         .sheet(item: $showIssueConfirm, onDismiss: {
             authStateEnvObject.getRequestsForMaster()
+            authStateEnvObject.getRequestsForMasterMonitor()
         }, content: { _ in
             IssueAcceptanceCheck(currentNode: $currentNode)
         })
@@ -51,6 +74,7 @@ struct MasterScreen: View {
         .onChange(of: tabSelection) {
             if tabSelection == .masterReviewIssue {
                 authStateEnvObject.getRequestsForMaster()
+                authStateEnvObject.getRequestsForMasterMonitor()
             }
         }
     }
@@ -61,9 +85,52 @@ struct MasterScreen: View {
 }
 
 private extension MasterScreen {
-    var allIssues: some View {
+    var pickerContainer: some View {
+        HStack(alignment: .center, spacing: 4) {
+            MasterLeftSegmentView(sectionSelected: $masterSegment, label: "На рассмотрение")
+                .onTapGesture {
+                    masterSegment.toggle()
+                    generator.prepare()
+                    generator.impactOccurred()
+                }
+                .allowsHitTesting(masterSegment != .underMasterApproval)
+            MasterRightSegmentView(sectionSelected: $masterSegment, label: "Мониторинг")
+                .onTapGesture {
+                    masterSegment.toggle()
+                    generator.prepare()
+                    generator.impactOccurred()
+                }
+                .allowsHitTesting(masterSegment != .masterMonitor)
+        }
+        .padding(8)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .overlay(
+            RoundedRectangle(cornerRadius: 28)
+                .inset(by: 0.5)
+                .stroke(Color.theme.extraLowContrast, lineWidth: 1)
+        )
+        .background(Color.theme.surface)
+        .cornerRadius(28)
+    }
+}
+
+private extension MasterScreen {
+    var masterApproval: some View {
         ScrollView {
             ForEach(authStateEnvObject.requestsForMaster, id: \.self) { issue in
+                issueCellFor(issue)
+                    .onTapGesture {
+                        currentNode = issue
+                        showIssueConfirm = true
+                    }
+            }
+        }
+        .padding(.bottom, screenHeight/16)
+    }
+    
+    var masterMonitor: some View {
+        ScrollView {
+            ForEach(authStateEnvObject.requestsForMasterMonitor, id: \.self) { issue in
                 issueCellFor(issue)
                     .onTapGesture {
                         currentNode = issue
@@ -187,27 +254,10 @@ private extension MasterScreen {
                     descriptionOfField("создано:", color: Color.theme.lowContrast)
                     descriptionOfField(issue.createdAtString, color: Color.theme.lowContrast)
                 }
-            case .approved:
+            default:
                 HStack(spacing: 3) {
-                    descriptionOfField("до:", color: Color.theme.lowContrast)
-                    descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
-                }
-            case .declined:
-                HStack(spacing: 3) { // completed ??
-                    descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
-                }
-            case .inprogress:
-                HStack(spacing: 3) {
-                    descriptionOfField("до:", color: Color.theme.lowContrast)
-                    descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
-                }
-            case .review:
-                HStack {
-                    descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
-                }
-            case .done:
-                HStack {
-                    descriptionOfField(issue.deadlineAtString, color: Color.theme.lowContrast)
+                    descriptionOfField("обновлено:", color: Color.theme.lowContrast)
+                    descriptionOfField(issue.updatedAtString, color: Color.theme.lowContrast)
                 }
             }
         } else {

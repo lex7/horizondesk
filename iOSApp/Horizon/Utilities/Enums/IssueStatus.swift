@@ -70,7 +70,7 @@ enum IssueStatus: Int, CaseIterable {
         case .new:
             return .theme.primary
         case .approved:
-            return .theme.vibrant
+            return .theme.primaryAmber
         case .declined:
             return .theme.negativePrimary
         case .inprogress:

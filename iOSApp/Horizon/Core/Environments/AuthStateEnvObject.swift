@@ -11,6 +11,7 @@ final class AuthStateEnvObject: ObservableObject {
     @Published var userDataModel: UserInfoDataModel?
     @Published var userRewardsDataModel: UserRewardsModel?
     @Published var requestsForMaster: [RequestIssueModel] = []
+    @Published var requestsForMasterMonitor: [RequestIssueModel] = []
     @Published var issuesInWork: [RequestIssueModel] = []
     @Published var issuesDone: [RequestIssueModel] = []
     @Published var issuesDeclined: [RequestIssueModel] = []
@@ -47,7 +48,7 @@ final class AuthStateEnvObject: ObservableObject {
     // MASTER SCREEN
     @Published var issueRequestSegment: IssuesMontitorSwitcher = .masterReview
     // MASTER SCREEN
-    @Published var documentSegment: MasterSwitcher = .reviewTab
+    @Published var documentSegment: MasterSwitcher = .underMasterApproval
     // Application Version
     @Published var updateNeeded: Bool = false
     
@@ -177,6 +178,32 @@ final class AuthStateEnvObject: ObservableObject {
                 do {
                     self.requestsForMaster = try RequestIssueModel.decode(from: data).sorted { ($0.created_at ?? Date()) > ($1.created_at ?? Date()) }
 //                    debugPrint(requestsForMaster.count)
+                } catch {
+                    print(error)
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    func getRequestsForMasterMonitor() {
+        if requestsForMasterMonitor.isEmpty {
+            masterIsLoading = true
+        }
+        let model = UserIdModel(user_id: credentialService.getUserId() ?? 777)
+        networkManager.requestMoyaData(apis: .underMasterMonitor(model: model))
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] completion in
+                switch completion {
+                case .finished:
+                    debugPrint(String(describing: "[vm: ✅ inProgressIssue successfully]"))
+                    break
+                case .failure(let error):
+                    debugPrint(String(describing: "[vm: \(error) - ❌ inProgressIssue]"))
+                }
+                self.masterIsLoading = false
+            } receiveValue: { [unowned self] data in
+                do {
+                    self.requestsForMasterMonitor = try RequestIssueModel.decode(from: data).sorted { ($0.created_at ?? Date()) > ($1.created_at ?? Date()) }
                 } catch {
                     print(error)
                 }
@@ -399,7 +426,7 @@ final class AuthStateEnvObject: ObservableObject {
     }
         
     func requestDone(request_id: Int, action: @escaping (()->Void)) {
-        let model = RequestDoneModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id)
+        let model = RequestDoneModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, reason: nil)
         networkManager.requestMoyaData(apis: .requestorConfirm(model: model))
             .receive(on: DispatchQueue.main)
             .sink { completion in

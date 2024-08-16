@@ -23,8 +23,7 @@ struct RequestIssueModel: Hashable, Codable {
     let status_id: Int
     let created_at: Date?
     let updated_at: Date?
-    let deadline: Date?
-    let rejection_reason: String?
+    let reason: String?
     
     var createdAtString: String {
         guard let created = created_at else { return "N/A" }
@@ -38,16 +37,6 @@ struct RequestIssueModel: Hashable, Codable {
     
     var updatedAtString: String {
         guard let created = updated_at else { return "N/A" }
-        let dateFormatter = DateFormatter()
-        dateFormatter.locale = Locale(identifier: "ru_RU")
-        dateFormatter.timeZone = TimeZone.current
-        dateFormatter.dateStyle = .medium
-        dateFormatter.timeStyle = .short
-        return dateFormatter.string(from: created)
-    }
-    
-    var deadlineAtString: String {
-        guard let created = deadline else { return "N/A" }
         let dateFormatter = DateFormatter()
         dateFormatter.locale = Locale(identifier: "ru_RU")
         dateFormatter.timeZone = TimeZone.current

@@ -10,6 +10,7 @@ import Foundation
 struct RequestDoneModel: Encodable {
     let user_id: Int
     let request_id: Int
+    let reason: String?
 }
 
 struct RequesterDeniedModel: Encodable {

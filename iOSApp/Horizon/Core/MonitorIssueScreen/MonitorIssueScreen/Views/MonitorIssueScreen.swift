@@ -122,7 +122,7 @@ private extension MonitorIssueScreen {
                             generator.impactOccurred()
                             authStateEnvObject.requestDone(request_id: issue.request_id) {
                                 Task {
-                                    try await Task.sleep(nanoseconds: 500_000_000)
+                                    try await Task.sleep(nanoseconds: 750_000_000)
                                     authStateEnvObject.getInProgressIssue()
                                     authStateEnvObject.getCompletedIssue()
                                 }
@@ -132,18 +132,18 @@ private extension MonitorIssueScreen {
                             generator.impactOccurred()
                             authStateEnvObject.requesterDeniedCompletion(request_id: issue.request_id) {
                                 Task {
-                                    try await Task.sleep(nanoseconds: 500_000_000)
+                                    try await Task.sleep(nanoseconds: 750_000_000)
                                     authStateEnvObject.getInProgressIssue()
                                     authStateEnvObject.getCompletedIssue()
                                 }
                             }
                         }
-                        Button("Просмотр логов") {
+                        Button("Просмотр истории") {
                             generator.impactOccurred()
                             logId = issue.request_id
                             showLogsForRequest.toggle()
                             Task {
-                                try await Task.sleep(nanoseconds: 500_000_000)
+                                try await Task.sleep(nanoseconds: 750_000_000)
                                 authStateEnvObject.getInProgressIssue()
                                 authStateEnvObject.getCompletedIssue()
                             }
@@ -153,7 +153,7 @@ private extension MonitorIssueScreen {
                     }
                 case .approved, .inprogress:
                     Menu {
-                        Button("Просмотр логов") {
+                        Button("Просмотр истории") {
                             generator.impactOccurred()
                             logId = issue.request_id
                             showLogsForRequest.toggle()
@@ -168,7 +168,7 @@ private extension MonitorIssueScreen {
                     }
                 case .new:
                     Menu {
-                        Button("Просмотр логов") {
+                        Button("Просмотр истории") {
                             generator.impactOccurred()
                             logId = issue.request_id
                             Task {
@@ -205,7 +205,7 @@ private extension MonitorIssueScreen {
         ScrollView {
             ForEach(authStateEnvObject.issuesDone, id: \.self) { issue in
                 Menu {
-                    Button("Просмотр логов") {
+                    Button("Просмотр истории") {
                         generator.impactOccurred()
                         logId = issue.request_id
                         Task {
@@ -230,7 +230,7 @@ private extension MonitorIssueScreen {
         ScrollView {
             ForEach(authStateEnvObject.issuesDeclined, id: \.self) { issue in
                 Menu {
-                    Button("Просмотр логов") {
+                    Button("Просмотр истории") {
                         generator.impactOccurred()
                         logId = issue.request_id
                         Task {

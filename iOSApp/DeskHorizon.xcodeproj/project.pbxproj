@@ -54,7 +54,7 @@
 		05597B6A2C65826B007B96A0 /* RequestDoneModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B692C65826B007B96A0 /* RequestDoneModel.swift */; };
 		05597B6D2C658376007B96A0 /* RequestIdModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B6C2C658376007B96A0 /* RequestIdModel.swift */; };
 		056E6B7F2B700CBA008C1E1F /* MasterScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 056E6B7E2B700CBA008C1E1F /* MasterScreen.swift */; };
-		056E6B812B701F44008C1E1F /* CustomTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 056E6B802B701F44008C1E1F /* CustomTextField.swift */; };
+		056E6B812B701F44008C1E1F /* MasterSegmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 056E6B802B701F44008C1E1F /* MasterSegmentView.swift */; };
 		0574698D2B7B3A5700AA0F71 /* NamingEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0574698C2B7B3A5700AA0F71 /* NamingEnum.swift */; };
 		0588CE392BBC1D2C00E501B1 /* FCMTokenManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0588CE382BBC1D2C00E501B1 /* FCMTokenManager.swift */; };
 		058F30792BA87966006CBFB6 /* SplashScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 058F30782BA87966006CBFB6 /* SplashScreen.swift */; };
@@ -64,6 +64,7 @@
 		059118812B4DAE6B006073C3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 059118802B4DAE6B006073C3 /* Assets.xcassets */; };
 		059118842B4DAE6B006073C3 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 059118832B4DAE6B006073C3 /* Preview Assets.xcassets */; };
 		05A140702B86CA1F00AE7CDC /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 05A1406F2B86CA1F00AE7CDC /* Localizable.strings */; };
+		05A663C72C6FE1AE0007C6C4 /* MasterMonitorScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05A663C62C6FE1AE0007C6C4 /* MasterMonitorScreen.swift */; };
 		05ACCD3F2B54A03D003AC0A2 /* Nexa Light.otf in Resources */ = {isa = PBXBuildFile; fileRef = 05ACCD3C2B54A03D003AC0A2 /* Nexa Light.otf */; };
 		05ACCD402B54A03D003AC0A2 /* Nexa.otf in Resources */ = {isa = PBXBuildFile; fileRef = 05ACCD3D2B54A03D003AC0A2 /* Nexa.otf */; };
 		05ACCD412B54A03D003AC0A2 /* Nexa Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 05ACCD3E2B54A03D003AC0A2 /* Nexa Bold.otf */; };
@@ -132,7 +133,7 @@
 		05597B692C65826B007B96A0 /* RequestDoneModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestDoneModel.swift; sourceTree = "<group>"; };
 		05597B6C2C658376007B96A0 /* RequestIdModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestIdModel.swift; sourceTree = "<group>"; };
 		056E6B7E2B700CBA008C1E1F /* MasterScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterScreen.swift; sourceTree = "<group>"; };
-		056E6B802B701F44008C1E1F /* CustomTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextField.swift; sourceTree = "<group>"; };
+		056E6B802B701F44008C1E1F /* MasterSegmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterSegmentView.swift; sourceTree = "<group>"; };
 		0574698C2B7B3A5700AA0F71 /* NamingEnum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NamingEnum.swift; sourceTree = "<group>"; };
 		0588CE382BBC1D2C00E501B1 /* FCMTokenManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FCMTokenManager.swift; sourceTree = "<group>"; };
 		058F30782BA87966006CBFB6 /* SplashScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashScreen.swift; sourceTree = "<group>"; };
@@ -143,6 +144,7 @@
 		059118802B4DAE6B006073C3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		059118832B4DAE6B006073C3 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		05A1406F2B86CA1F00AE7CDC /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = Localizable.strings; sourceTree = "<group>"; };
+		05A663C62C6FE1AE0007C6C4 /* MasterMonitorScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterMonitorScreen.swift; sourceTree = "<group>"; };
 		05ACCD3C2B54A03D003AC0A2 /* Nexa Light.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nexa Light.otf"; sourceTree = "<group>"; };
 		05ACCD3D2B54A03D003AC0A2 /* Nexa.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Nexa.otf; sourceTree = "<group>"; };
 		05ACCD3E2B54A03D003AC0A2 /* Nexa Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nexa Bold.otf"; sourceTree = "<group>"; };
@@ -461,7 +463,8 @@
 			isa = PBXGroup;
 			children = (
 				051E62772BFD44BF001FBD74 /* IssueAcceptanceCheck.swift */,
-				056E6B802B701F44008C1E1F /* CustomTextField.swift */,
+				05A663C62C6FE1AE0007C6C4 /* MasterMonitorScreen.swift */,
+				056E6B802B701F44008C1E1F /* MasterSegmentView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -922,7 +925,7 @@
 				0591187F2B4DAE68006073C3 /* ExecutorScreen.swift in Sources */,
 				05D7A6722C6345DE00275E9D /* ExecutorMyTaskDetails.swift in Sources */,
 				05096EC32B84E9BF003FDB52 /* AuthState.swift in Sources */,
-				056E6B812B701F44008C1E1F /* CustomTextField.swift in Sources */,
+				056E6B812B701F44008C1E1F /* MasterSegmentView.swift in Sources */,
 				0574698D2B7B3A5700AA0F71 /* NamingEnum.swift in Sources */,
 				0509CBF22BFBDD8E00FBCEF1 /* GPToolView.swift in Sources */,
 				0517DCBF2B836A66009F6979 /* MyAccountScreen.swift in Sources */,
@@ -965,6 +968,7 @@
 				05B686372B56D69D00440537 /* NetworkingManager.swift in Sources */,
 				05D7A6642C5F892C00275E9D /* RequestTypeEnum.swift in Sources */,
 				051E627A2BFD49E0001FBD74 /* UserIdModel.swift in Sources */,
+				05A663C72C6FE1AE0007C6C4 /* MasterMonitorScreen.swift in Sources */,
 				05597B5D2C641D78007B96A0 /* RefreshUserFcmModel.swift in Sources */,
 				05597B682C65822D007B96A0 /* LogsModel.swift in Sources */,
 				0591187D2B4DAE68006073C3 /* DeskHorizonApp.swift in Sources */,

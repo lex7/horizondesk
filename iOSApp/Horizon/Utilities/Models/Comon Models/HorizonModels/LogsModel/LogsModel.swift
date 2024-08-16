@@ -15,6 +15,8 @@ struct LogsModel: Decodable, Hashable {
     let changed_at: Date
     let changed_by: Int
     let reason: String?
+    let changer_name: String
+    let action_name: String
     
     var сhangedAtString: String {
         let dateFormatter = DateFormatter()

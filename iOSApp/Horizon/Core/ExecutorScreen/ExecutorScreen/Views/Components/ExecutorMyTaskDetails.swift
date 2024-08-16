@@ -13,7 +13,7 @@ struct ExecutorMyTaskDetails: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.presentationMode) private var presentationMode
     @EnvironmentObject private var authStateEnvObject: AuthStateEnvObject
-
+    
     // MARK: - Private Variables
     @State private var describeStateLoadingOrError = "Loading history transactions"
     @State private var tfMinHeight: CGFloat = 45
@@ -23,7 +23,7 @@ struct ExecutorMyTaskDetails: View {
     // MARK: - Private Constants
     @State private var screenHeight = UIScreen.main.bounds.height
     private let generator = UIImpactFeedbackGenerator(style: .light)
-
+    
     @Binding var currentNode: RequestIssueModel
     
     var body: some View {
@@ -46,13 +46,18 @@ struct ExecutorMyTaskDetails: View {
                 defaultSpacer
                 titleAndValueMultiLines(title: "Текст заявки", value: currentNode.description ?? "", lines: 20, maxWidth: 1)
                     .padding(.horizontal, 28)
-                    .padding(.bottom, 20)
+                if let reason = currentNode.reason {
+                    defaultSpacer
+                    titleAndValueMultiLines(title: "Комментарий", value: reason, lines: 30, maxWidth: 1)
+                        .padding(.horizontal, 28)
+                }
                 justificationTextField
                     .onTapGesture {
                         generator.prepare()
                         generator.impactOccurred()
                         isFocused = true
                     }
+                    .padding(.top, 20)
                 Spacer()
             }
         }
