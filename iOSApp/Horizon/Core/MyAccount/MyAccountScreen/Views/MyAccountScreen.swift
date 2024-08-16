@@ -109,8 +109,8 @@ struct MyAccountScreen: View {
                                         }
                                     }
                                     Group {
-                                        if let spec_id = authStateEnvObject.userDataModel?.spec_id {
-                                            titleAndValueMultiLines(title: "Специализация", value: RequestTypeEnum(rawValue: spec_id)?.name ?? "")
+                                        if let spec_name = authStateEnvObject.userDataModel?.spec_name {
+                                            titleAndValueMultiLines(title: "Специализация", value: spec_name)
                                                 .padding(.top, 20)
                                         }
                                     }

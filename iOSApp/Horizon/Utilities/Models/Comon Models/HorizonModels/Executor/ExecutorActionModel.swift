@@ -10,6 +10,7 @@ import Foundation
 struct ExecutorActionModel: Encodable {
     let user_id: Int
     let request_id: Int
+    let reason: String?
 }
 
 struct ExecutorCancelModel: Encodable {

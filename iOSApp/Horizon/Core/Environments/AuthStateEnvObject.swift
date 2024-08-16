@@ -16,7 +16,7 @@ final class AuthStateEnvObject: ObservableObject {
     @Published var issuesDeclined: [RequestIssueModel] = []
     @Published var issuesApproved: [RequestIssueModel] = []
     @Published var issuesInProgress: [RequestIssueModel] = []
-    @Published private(set) var logsModel: [LogsModel] = []
+    @Published var logsModel: [LogsModel] = []
     
     // MARK: - Private loaders
     @Published private(set) var masterIsLoading = false
@@ -136,7 +136,7 @@ final class AuthStateEnvObject: ObservableObject {
     private func sendUserLogout(_ action: @escaping () -> Void) {
         guard let userId = credentialService.getUserId(),
               let fcm = credentialService.getFcm() else { return }
-        let model = FcmOldModel(user_id: userId, fcm_token: fcm)
+        let model = FcmOldModel(user_id: userId, old_fcm: fcm)
         networkManager.requestMoyaData(apis: .logout(model: model))
             .receive(on: DispatchQueue.main)
             .sink {completion in
@@ -184,10 +184,10 @@ final class AuthStateEnvObject: ObservableObject {
             .store(in: &cancellables)
     }
     
-    func masterAcceptRequest(_ request_id: Int, _ deadline: String, action: @escaping (()->Void)) {
+    func masterAcceptRequest(_ request_id: Int, _ reason: String, action: @escaping (()->Void)) {
         let model = MasterApproveModel(user_id: credentialService.getUserId() ?? 777,
                                        request_id: request_id,
-                                       deadline: deadline)
+                                       reason: reason)
         networkManager.requestMoyaData(apis: .masterApprove(model: model))
             .receive(on: DispatchQueue.main)
             .sink { completion in
@@ -270,7 +270,7 @@ final class AuthStateEnvObject: ObservableObject {
     }
 
     func executerTakeOnWork(_ request_id: Int, action: @escaping ()->Void) {
-        let model = ExecutorActionModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id)
+        let model = ExecutorActionModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, reason: "")
         networkManager.requestMoyaData(apis: .takeOnWork(model: model))
             .receive(on: DispatchQueue.main)
             .sink { completion in
@@ -305,8 +305,8 @@ final class AuthStateEnvObject: ObservableObject {
             .store(in: &cancellables)
     }
     
-    func executerCompleteSendReview(_ request_id: Int, action: @escaping ()->Void) {
-        let model = ExecutorActionModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id)
+    func executerCompleteSendReview(_ request_id: Int, reason: String?, action: @escaping ()->Void) {
+        let model = ExecutorActionModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, reason: reason)
         networkManager.requestMoyaData(apis: .executorComplete(model: model))
             .receive(on: DispatchQueue.main)
             .sink { completion in

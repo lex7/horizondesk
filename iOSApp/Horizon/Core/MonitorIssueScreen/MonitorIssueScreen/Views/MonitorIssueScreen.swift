@@ -365,12 +365,12 @@ private extension MonitorIssueScreen {
                 }
             case .approved:
                 HStack(spacing: 3) {
-                    descriptionOfField("направлен:", color: Color.theme.lowContrast)
+//                    descriptionOfField("направлен:", color: Color.theme.lowContrast)
                     descriptionOfField(issue.updatedAtString, color: Color.theme.lowContrast)
                 }
             case .inprogress:
                 HStack(spacing: 3) {
-                    descriptionOfField("начат:", color: Color.theme.lowContrast)
+                    //descriptionOfField("начат:", color: Color.theme.lowContrast)
                     descriptionOfField(issue.updatedAtString, color: Color.theme.lowContrast)
                 }
             case .review:

@@ -62,7 +62,8 @@ extension AppDelegate: MessagingDelegate {
         if let token = fcmToken {
             debugPrint("Firebase token FCM☀️🏁: \(String(describing: token))")
             credentialService.saveFcm(token)
-            if let userId = credentialService.getUserId() {
+            if let userId = credentialService.getUserId(),
+               userId != 0 {
                 authStateEnvObject.refreshUserToken(token, userId)
             }
         }

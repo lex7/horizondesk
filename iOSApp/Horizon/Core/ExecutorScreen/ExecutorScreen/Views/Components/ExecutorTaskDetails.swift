@@ -40,7 +40,7 @@ struct ExecutorTaskDetails: View {
             // 3. Transaction ID Block
             titleAndValue(title: "Участок", value: RegionIssue(rawValue: currentNode.area_id)?.name ?? "")
             defaultSpacer
-            titleAndValueMultiLines(title: "Текст заявки", value: currentNode.description ?? "", lines: 20)
+            titleAndValueMultiLines(title: "Текст заявки", value: currentNode.description ?? "", lines: 20, maxWidth: 1)
                 .padding(.horizontal, 28)
             monsterSpacer
             doubleSpacer

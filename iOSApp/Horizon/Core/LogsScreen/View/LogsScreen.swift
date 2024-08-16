@@ -61,12 +61,19 @@ private extension LogsScreen {
     @ViewBuilder
     private func logCell(_ log: LogsModel) -> some View {
         VStack {
-            if let oldStatus = IssueStatus(rawValue: log.old_status_id),
-               let newStatus = IssueStatus(rawValue: log.new_status_id),
-               oldStatus == .new && newStatus != .declined {
+            if log.old_status_id == nil {
                 HStack {
                     descriptionOfField("cтатус:", color: Color.theme.lowContrast)
-                    descriptionOfField("cоздан и утвержден",
+                    descriptionOfField("cоздан",
+                                       color: .theme.primary)
+                    Spacer()
+                }
+            } else if let oldStatus = IssueStatus(rawValue: log.old_status_id ?? 999),
+                      let newStatus = IssueStatus(rawValue: log.new_status_id),
+                      oldStatus == .new && newStatus != .declined {
+                HStack {
+                    descriptionOfField("cтатус:", color: Color.theme.lowContrast)
+                    descriptionOfField("направлен в работу",
                                        color: .theme.primary)
                     Spacer()
                 }
@@ -83,12 +90,14 @@ private extension LogsScreen {
                 descriptionOfField(log.сhangedAtString, color: Color.theme.lowContrast)
                 Spacer()
             }
-            if let rejection_reason = log.rejection_reason {
-                if !rejection_reason.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    HStack {
-                        descriptionOfField("пометка:", color: Color.theme.lowContrast)
-                        descriptionOfField(rejection_reason.trimmingCharacters(in: .whitespacesAndNewlines), lines: 20, color: Color.theme.lowContrast)
-                        Spacer()
+            if let reason = log.reason {
+                if !reason.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    if log.old_status_id != nil {
+                        HStack {
+                            descriptionOfField("пометка:", color: Color.theme.lowContrast)
+                            descriptionOfField(reason.trimmingCharacters(in: .whitespacesAndNewlines), lines: 20, color: Color.theme.lowContrast)
+                            Spacer()
+                        }
                     }
                 }
             }
@@ -112,6 +121,7 @@ private extension LogsScreen {
                 .padding(.horizontal, 10)
                 .contentShape(Rectangle())
                 .onTapGesture {
+                    authStateEnvObject.logsModel = []
                     presentationMode.wrappedValue.dismiss()
                 }
         }

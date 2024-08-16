@@ -23,6 +23,7 @@ struct ExecutorScreen: View {
     @State private var showLogsForRequest = false
     @State private var logId: Int  = 10000000
     
+    
     @State private var currentNode: RequestIssueModel = RequestIssueModel(request_id: 1, request_type: 2, created_by: 99, assigned_to: nil, area_id: 3, description: nil, status_id: 99, created_at: nil, updated_at: nil, deadline: nil, rejection_reason: nil)
     
     
@@ -155,10 +156,12 @@ private extension ExecutorScreen {
                     if IssueStatus(rawValue: issue.status_id) == .inprogress {
                         Button("Отправить на проверку.") {
                             generator.impactOccurred()
-                            authStateEnvObject.executerCompleteSendReview(issue.request_id) {
-                                Task {
-                                    try await Task.sleep(nanoseconds: 200_000_000)
-                                    authStateEnvObject.executorMyTasksRequest()
+                            Task {
+                                authStateEnvObject.executerCompleteSendReview(issue.request_id, reason: nil) {
+                                    Task {
+                                        try await Task.sleep(nanoseconds: 200_000_000)
+                                        authStateEnvObject.executorMyTasksRequest()
+                                    }
                                 }
                             }
                         }

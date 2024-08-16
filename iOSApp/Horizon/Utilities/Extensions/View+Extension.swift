@@ -195,30 +195,32 @@ extension View {
     @ViewBuilder
     func titleAndValueMultiLines(title: String, value: String, lines: Int = 3,
                                  valueRelativeTxtStyle: Font.TextStyle = .subheadline,
-                                 valueSize: CGFloat = 15) -> some View {
-        HStack {
-            VStack(alignment: .leading) {
-                Text(value)
-                    .withMultiTextModifier(
-                        font: "NexaRegular",
-                        size: valueSize,
-                        relativeTextStyle: valueRelativeTxtStyle,
-                        color: Color.theme.highContrast,
-                        lines: lines
-                    )
-                    .padding(.vertical, 2)
-                    .frame(maxWidth: UIScreen.main.bounds.width / 2, alignment: .leading)
-                    .lineLimit(lines)
-                Text(title)
-                    .withDefaultTextModifier(
-                        font: "NexaRegular",
-                        size: 12,
-                        relativeTextStyle: .caption,
-                        color: Color.theme.lowContrast
-                    )
+                                 valueSize: CGFloat = 15, maxWidth: CGFloat = 2) -> some View {
+            VStack(alignment: .leading, spacing: 2) {
+                HStack {
+                    Text(value)
+                        .withMultiTextModifier(
+                            font: "NexaRegular",
+                            size: valueSize,
+                            relativeTextStyle: valueRelativeTxtStyle,
+                            color: Color.theme.highContrast,
+                            lines: lines
+                        )
+                        .padding(.vertical, 2)
+                        .frame(maxWidth: UIScreen.main.bounds.width / maxWidth, alignment: .leading)
+                        .lineLimit(lines)
+                }
+                HStack {
+                    Text(title)
+                        .withDefaultTextModifier(
+                            font: "NexaRegular",
+                            size: 12,
+                            relativeTextStyle: .caption,
+                            color: Color.theme.lowContrast
+                        )
+                    Spacer()
+                }
             }
-            Spacer()
-        }
     }
     
     @ViewBuilder

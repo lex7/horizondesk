@@ -41,7 +41,7 @@ struct IssueAcceptanceCheck: View {
                     // 3. Transaction ID Block
                     titleAndValue(title: "Участок", value: RegionIssue(rawValue: currentNode.area_id)?.name ?? "")
                     defaultSpacer
-                    titleAndValueMultiLines(title: "Текст заявки", value: currentNode.description ?? "", lines: 20)
+                    titleAndValueMultiLines(title: "Текст заявки", value: currentNode.description ?? "", lines: 20, maxWidth: 1)
                         .padding(.horizontal, 28)
                         .padding(.bottom, 20)
                     justificationTextField
@@ -51,7 +51,10 @@ struct IssueAcceptanceCheck: View {
                             isFocused = true
                         }
                 }
-                Spacer()
+                defaultSpacer
+                defaultSpacer
+                defaultSpacer
+                defaultSpacer
             } /// end of Vstack
         } /// end of ScrollView
         .overlay {
@@ -98,8 +101,10 @@ private extension IssueAcceptanceCheck {
                     .padding(.horizontal, 30)
                     .onTapGesture {
                         generator.impactOccurred()
-                        authStateEnvObject.masterDenyRequest(currentNode.request_id, taskJastification) {
-                            presentationMode.wrappedValue.dismiss()
+                        Task {
+                            authStateEnvObject.masterDenyRequest(currentNode.request_id, taskJastification) {
+                                presentationMode.wrappedValue.dismiss()
+                            }
                         }
                     }
                 Spacer()

@@ -22,6 +22,7 @@ enum EndPointsDolly {
     case requesterDeleteTask(model: RequestDeleteModel)
     /// Master
     case underMasterApproval(model: UserIdModel)
+    case underMasterMonitor(model: UserIdModel)
     case masterApprove(model: MasterApproveModel)
     case masterDeny(model: MasterDenyModel)
     /// Executor
@@ -64,7 +65,7 @@ extension EndPointsDolly: Moya.TargetType {
                 .masterApprove, .takeOnWork, .executerCancel, .executorComplete, .requesterDeleteTask,
                 .refreshUserToken, .logout:
             return .post
-        case .requests, .inprogress, .completed, .denied, .underMasterApproval, .executorUnassigned, .executorAssigned,
+        case .requests, .inprogress, .completed, .denied, .underMasterApproval, .underMasterMonitor, .executorUnassigned, .executorAssigned,
                 .userData, .rewards, .requestLogsOfTask:
             return .get
         }
@@ -80,7 +81,8 @@ extension EndPointsDolly: Moya.TargetType {
         case .requests:
             return .requestPlain
         case .inprogress(let model), .denied(let model), .completed(let model),
-                .underMasterApproval(let model), .executorUnassigned(let model), .executorAssigned(let model):
+                .underMasterApproval(let model), .underMasterMonitor(let model),
+                .executorUnassigned(let model), .executorAssigned(let model):
             return .requestParameters(parameters: ["user_id": model.user_id], encoding: URLEncoding.queryString)
         case .masterApprove(let model):
             return .requestJSONEncodable(model)
@@ -139,6 +141,8 @@ extension EndPointsDolly: Moya.TargetType {
             return "denied"
         case .underMasterApproval:
             return "under-master-approval"
+        case .underMasterMonitor:
+            return "under-master-monitor"
         case .masterDeny:
             return "master-deny"
         case .masterApprove:

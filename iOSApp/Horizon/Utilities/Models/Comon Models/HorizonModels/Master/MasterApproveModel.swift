@@ -10,5 +10,5 @@ import Foundation
 struct MasterApproveModel: Encodable {
     let user_id: Int
     let request_id: Int
-    let deadline: String
+    let reason: String
 }
