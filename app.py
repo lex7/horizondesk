@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.dialects.postgresql import ARRAY
 
 from passlib.context import CryptContext
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 from datetime import datetime, timezone, date
 from typing import List, Optional
@@ -211,7 +211,7 @@ class RequestCreate(BaseModel):
 class UpdateRequest(BaseModel):
     user_id: int
     request_id: int
-    reason: Optional[str]
+    reason: Optional[str] = None
 
 class RequestTypeModel(BaseModel):
     request_type: int
@@ -781,7 +781,6 @@ def complete_request(request: UpdateRequest, db: Session = Depends(get_db)):
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 
 
 @app.post("/requestor-confirm", response_model=dict)
