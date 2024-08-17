@@ -342,11 +342,13 @@ def get_password_hash(password):
 def get_user_by_username(db: Session, username: str):
     return db.query(User).filter(User.username == username).first()
 
+
 def get_user_by_device_id(db: Session, device_id: str):
     pattern = f"{device_id}:%"
     return db.query(User).filter(
         func.array_to_string(User.fcm_token, ',').contains(pattern)
     ).first()
+
 
 def remove_device_from_other_users(db: Session, device_id: str, user_id: int):
     users = db.query(User).filter(User.user_id != user_id).all()
@@ -375,20 +377,24 @@ def get_requests(db: Session = Depends(get_db)):
     requests = db.query(Request).all()
     return requests
 
+
 @app.get("/request-types", response_model=List[RequestTypeModel])
 def get_request_types(db: Session = Depends(get_db)):
     request_types = db.query(RequestType).all()
     return request_types
+
 
 @app.get("/roles", response_model=List[RoleModel])
 def get_roles(db: Session = Depends(get_db)):
     roles = db.query(Role).all()
     return roles
 
+
 @app.get("/users", response_model=List[UserModel])
 def get_users(db: Session = Depends(get_db)):
     users = db.query(User).all()
     return users
+
 
 @app.get("/statuses", response_model=List[StatusModel])
 def get_statuses(db: Session = Depends(get_db)):
@@ -433,6 +439,7 @@ def get_under_master_monitor_requests(user_id: int, db: Session = Depends(get_db
 
     return requests
 
+
 @app.get("/in-progress", response_model=List[RequestModel])
 def get_in_progress_requests(user_id: int, db: Session = Depends(get_db)):
     requests = db.query(Request).filter(
@@ -441,25 +448,30 @@ def get_in_progress_requests(user_id: int, db: Session = Depends(get_db)):
     ).all()
     return requests
 
+
 @app.get("/denied", response_model=List[RequestModel])
 def get_denied_requests(user_id: int, db: Session = Depends(get_db)):
     requests = db.query(Request).filter(Request.status_id == 3, Request.created_by == user_id).all()
     return requests
+
 
 @app.get("/under-requestor-approval", response_model=List[RequestModel])
 def get_under_requestor_approval_requests(user_id: int, db: Session = Depends(get_db)):
     requests = db.query(Request).filter(Request.status_id == 5, Request.created_by == user_id).all()
     return requests
 
+
 @app.get("/completed", response_model=List[RequestModel])
 def get_completed_requests(user_id: int, db: Session = Depends(get_db)):
     requests = db.query(Request).filter(Request.status_id == 6, Request.created_by == user_id).all()
     return requests
 
+
 @app.get("/executor-assigned", response_model=List[RequestModel])
 def get_my_tasks(user_id: int, db: Session = Depends(get_db)):
     tasks = db.query(Request).filter(Request.assigned_to == user_id).all()
     return tasks
+
 
 @app.get("/executor-unassigned", response_model=List[RequestModel])
 def get_unassigned(user_id: int, db: Session = Depends(get_db)):
@@ -480,6 +492,7 @@ def get_unassigned(user_id: int, db: Session = Depends(get_db)):
 
     return tasks
 
+
 @app.get("/requests-log", response_model=List[RequestStatusLogModel])
 def get_requests_log(db: Session = Depends(get_db)):
     try:
@@ -498,6 +511,7 @@ def get_requests_log(db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.get("/request-history", response_model=List[RequestStatusLogModel])
 def get_request_history(request_id: int, db: Session = Depends(get_db)):
     history = db.query(RequestStatusLog).filter(RequestStatusLog.request_id == request_id).order_by(RequestStatusLog.log_id.asc()).all()
@@ -505,12 +519,14 @@ def get_request_history(request_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="No history found for the specified request_id")
     return history
 
+
 @app.get("/my-data", response_model=UserModel)
 def get_user_data(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.user_id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
+
 
 @app.get("/rewards", response_model=RewardsResponse)
 def get_rewards(user_id: int, db: Session = Depends(get_db)):
@@ -657,7 +673,6 @@ def create_request(request: RequestCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-
 @app.post("/master-approve", response_model=dict)
 def approve_request(request: UpdateRequest, db: Session = Depends(get_db)):
     try:
@@ -682,7 +697,6 @@ def approve_request(request: UpdateRequest, db: Session = Depends(get_db)):
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 
 
 @app.post("/master-deny", response_model=dict)
@@ -853,7 +867,6 @@ def soft_delete_request(request: UpdateRequest, db: Session = Depends(get_db)):
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 
 
 # Firebase push

@@ -1,1 +1,0 @@
-ALTER TABLE requests ALTER COLUMN deadline TYPE DATE;
