@@ -5,7 +5,7 @@ import requests
 import json
 
 
-cred = credentials.Certificate("accKey.json")
+cred = credentials.Certificate("../accKey.json")
 initialize_app(cred)
 
 PROJECT_ID = 'horizons-champ'
