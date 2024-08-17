@@ -6,9 +6,9 @@ from sqlalchemy.exc import IntegrityError
 from passlib.context import CryptContext
 from starlette.responses import JSONResponse
 from datetime import datetime, timezone
-from backend.utils import send_push
-from backend.schemas import *
-from backend.models import engine, Request, RequestType, Role, User, Status, RequestStatusLog
+from utils import send_push
+from schemas import *
+from models import engine, Request, RequestType, Role, User, Status, RequestStatusLog
 
 
 app = FastAPI()
