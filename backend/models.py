@@ -5,7 +5,10 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.types import TIMESTAMP
 from datetime import datetime, timezone
 import os
+from dotenv import load_dotenv
 
+
+load_dotenv()
 
 DATABASE_USER = os.getenv("DATABASE_USER")
 DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
