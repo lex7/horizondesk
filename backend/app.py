@@ -1,267 +1,20 @@
-import os
 from fastapi import FastAPI, HTTPException, Depends
-from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey, event, func, or_, literal_column
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
-from sqlalchemy.types import TIMESTAMP
-from sqlalchemy.orm import Session
+from typing import List
+from sqlalchemy import func
+from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.dialects.postgresql import ARRAY
-
 from passlib.context import CryptContext
-from pydantic import BaseModel, Field
-from dotenv import load_dotenv
-from datetime import datetime, timezone, date
-from typing import List, Optional
 from starlette.responses import JSONResponse
+from datetime import datetime, timezone
+from backend.utils import send_push
+from backend.schemas import *
+from backend.models import engine, Request, RequestType, Role, User, Status, RequestStatusLog
 
-load_dotenv()
-
-DATABASE_USER = os.getenv("DATABASE_USER")
-DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
-DATABASE_HOST = os.getenv("DATABASE_HOST")
-DATABASE_PORT = os.getenv("DATABASE_PORT")
-DATABASE_NAME = os.getenv("DATABASE_NAME")
-
-DATABASE_URL = f"postgresql+psycopg2://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
-
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 app = FastAPI()
 
-# Table models
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-class User(Base):
-    __tablename__ = 'users'
-
-    user_id = Column(Integer, primary_key=True)
-    username = Column(String(50), unique=True, nullable=False)
-    password_hash = Column(String(255), nullable=False)
-    surname = Column(String(50))
-    name = Column(String(50))
-    middle_name = Column(String(50))
-    hire_date = Column(Date)
-    phone_number = Column(String(15))
-    birth_date = Column(Date)
-    email = Column(String(100), unique=True)
-    specialization = Column(String(50))
-    fcm_token = Column(ARRAY(String(255)), default=[])
-    role_id = Column(Integer, ForeignKey('roles.role_id'), nullable=False)
-    shift_id = Column(Integer, ForeignKey('worker_shifts.shift_id'))
-    tokens = Column(Integer, default=0)
-    num_created = Column(Integer, default=0)
-    num_completed = Column(Integer, default=0)
-    last_completed = Column(Date)
-    request_type = Column(Integer, ForeignKey('request_types.request_type'))
-
-    role = relationship("Role", back_populates="users")
-    shift = relationship("WorkerShift", back_populates="users",
-                         primaryjoin="User.shift_id == WorkerShift.shift_id")
-    request_type_rel = relationship("RequestType")
-
-
-class Role(Base):
-    __tablename__ = 'roles'
-    role_id = Column(Integer, primary_key=True, index=True)
-    role_name = Column(String, unique=True, index=True, nullable=False)
-    
-    users = relationship("User", back_populates="role")
-
-class WorkerShift(Base):
-    __tablename__ = 'worker_shifts'
-
-    shift_id = Column(Integer, primary_key=True, index=True)
-    shift_name = Column(String, nullable=False)
-
-    users = relationship("User", back_populates="shift")
-
-class RequestType(Base):
-    __tablename__ = 'request_types'
-    request_type = Column(Integer, primary_key=True, index=True)
-    type_name = Column(String, unique=True, index=True, nullable=False)
-
-class Area(Base):
-    __tablename__ = 'areas'
-    area_id = Column(Integer, primary_key=True, index=True)
-    area_name = Column(String, unique=True, index=True, nullable=False)
-
-class Status(Base):
-    __tablename__ = 'statuses'
-    status_id = Column(Integer, primary_key=True, index=True)
-    status_name = Column(String, unique=True, index=True, nullable=False)
-
-class Request(Base):
-    __tablename__ = 'requests'
-    request_id = Column(Integer, primary_key=True, index=True)
-    request_type = Column(Integer, ForeignKey('request_types.request_type'), nullable=False)
-    created_by = Column(Integer, ForeignKey('users.user_id'), nullable=False)
-    assigned_to = Column(Integer, ForeignKey('users.user_id'))
-    area_id = Column(Integer, ForeignKey('areas.area_id'), nullable=False)
-    description = Column(String, nullable=False)
-    status_id = Column(Integer, ForeignKey('statuses.status_id'), default=1, nullable=False)
-    created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
-    updated_at = Column(TIMESTAMP, onupdate=func.now())
-    reason = Column(String)
-
-    creator = relationship("User", foreign_keys=[created_by])
-    assignee = relationship("User", foreign_keys=[assigned_to])
-    request_type_rel = relationship("RequestType")
-    area_rel = relationship("Area")
-    status_rel = relationship("Status")
-
-@event.listens_for(Request, 'before_update')
-def receive_before_update(mapper, connection, target):
-    target.updated_at = datetime.now(timezone.utc)
-
-class RequestStatusLog(Base):
-    __tablename__ = 'request_status_log'
-    log_id = Column(Integer, primary_key=True, index=True)
-    request_id = Column(Integer, ForeignKey('requests.request_id'))
-    old_status_id = Column(Integer, ForeignKey('statuses.status_id'))
-    new_status_id = Column(Integer, ForeignKey('statuses.status_id'))
-    changed_at = Column(String, nullable=False)
-    changed_by = Column(Integer, ForeignKey('users.user_id'))
-    reason = Column(String)
-    changer_name = Column(String, nullable=True)  # New field for changer's name
-    action_name = Column(String, nullable=True)   # New field for action name
-
-    request_rel = relationship("Request")
-
-Base.metadata.create_all(bind=engine)
-
-# Models
-
-class UserModel(BaseModel):
-    user_id: int
-    username: str
-    surname: Optional[str]
-    name: Optional[str]
-    middle_name: Optional[str]
-    hire_date: Optional[date]
-    phone_number: Optional[str]
-    birth_date: Optional[date]
-    email: Optional[str]
-    fcm_token: Optional[List[str]]
-    role_id: int
-    shift_id: Optional[int]
-    specialization: Optional[str] = None
-    request_type: int
-
-    class Config:
-        from_attributes = True
-
-class StatusModel(BaseModel):
-    status_id: int
-    status_name: str
-
-    class Config:
-        from_attributes = True
-
-class LoginRequest(BaseModel):
-    username: str
-    password: str
-    fcm_token: Optional[str] = None
-
-class LoginResponse(BaseModel):
-    user_id: int
-    role_id: int
-
-class RegisterRequest(BaseModel):
-    username: str
-    password: str
-    surname: Optional[str] = None
-    name: Optional[str] = None
-    middle_name: Optional[str] = None
-    hire_date: Optional[date] = None
-    phone_number: Optional[str] = None
-    birth_date: Optional[date] = None
-    email: Optional[str] = None
-    role_id: int
-    specialization: Optional[str] = None
-    request_type: int
-
-class RequestModel(BaseModel):
-    request_id: int
-    request_type: int
-    created_by: int
-    assigned_to: Optional[int]
-    area_id: int
-    description: str
-    status_id: int
-    created_at: datetime
-    updated_at: Optional[datetime]
-    reason: Optional[str]
-
-    class Config:
-        from_attributes = True
-        json_encoders = {
-            datetime: lambda v: v.strftime("%Y-%m-%dT%H:%M:%S")
-        }
-
-class RequestCreate(BaseModel):
-    request_type: int
-    user_id: int
-    area_id: int
-    description: str
-
-class UpdateRequest(BaseModel):
-    user_id: int
-    request_id: int
-    reason: Optional[str] = Field(default=None)
-
-class RequestTypeModel(BaseModel):
-    request_type: int
-    type_name: str
-
-    class Config:
-        from_attributes = True
-
-class RoleModel(BaseModel):
-    role_id: int
-    role_name: str
-
-    class Config:
-        from_attributes = True
-
-class RequestStatusLogModel(BaseModel):
-    log_id: int
-    request_id: int
-    old_status_id: Optional[int]
-    new_status_id: int
-    changed_at: datetime
-    changed_by: int
-    reason: Optional[str]
-    changer_name: Optional[str] = None   # Set default value
-    action_name: Optional[str] = None    # Set default value
-
-    class Config:
-        from_attributes = True
-        json_encoders = {
-            datetime: lambda v: v.strftime("%Y-%m-%dT%H:%M:%S")
-        }
-
-class RewardsResponse(BaseModel):
-    tokens: int
-    num_created: int
-    num_completed: int
-    last_completed: Optional[date]
-
-    class Config:
-        from_attributes = True
-
-class RefreshTokenRequest(BaseModel):
-    user_id: int
-    new_fcm: str
-
-class LogoutRequest(BaseModel):
-    user_id: int
-    old_fcm: str
-
-# Extra funcs
 
 def get_db():
     db = SessionLocal()
@@ -269,100 +22,6 @@ def get_db():
         yield db
     finally:
         db.close()
-
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
-
-def hash_password(password):
-    return pwd_context.hash(password)
-
-def update_request(request_id: int, new_status: int, user_id: int, db: Session, action_name: str, **kwargs):
-    existing_request = db.query(Request).filter(Request.request_id == request_id).first()
-    if existing_request is None:
-        raise HTTPException(status_code=404, detail="Request not found")
-
-    user = db.query(User).filter(User.user_id == user_id).first()
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    changer_name = f"{user.surname} {user.name}"
-    
-    log_entry = RequestStatusLog(
-        request_id=existing_request.request_id,
-        old_status_id=existing_request.status_id,
-        new_status_id=new_status,
-        changed_at=datetime.now(timezone.utc),
-        changed_by=user_id,
-        reason=kwargs.get('reason'),
-        changer_name=changer_name,  # Populate changer_name
-        action_name=action_name     # Populate action_name
-    )
-    db.add(log_entry)
-
-    existing_request.status_id = new_status
-    existing_request.updated_at = datetime.now(timezone.utc)
-    
-    for key, value in kwargs.items():
-        setattr(existing_request, key, value)
-
-    db.commit()
-    db.refresh(existing_request)
-    db.refresh(log_entry)
-    return existing_request
-
-
-def add_fcm_token(user: User, fcm_token: str, db: Session):
-    device_id = extract_unique_device_id(fcm_token)
-    # Initialize fcm_token as an empty list if it is None
-    if user.fcm_token is None:
-        user.fcm_token = []
-    # Remove existing tokens with the same device_id
-    user.fcm_token = [token for token in user.fcm_token if not token.startswith(device_id)]
-    # Add the new token
-    user.fcm_token.append(fcm_token)
-    db.commit()
-
-
-
-def remove_fcm_token(user: User, old_fcm: str, db: Session):
-    if user.fcm_token and old_fcm in user.fcm_token:
-        user.fcm_token = [token for token in user.fcm_token if token != old_fcm]
-        db.commit()
-        db.refresh(user)
-
-
-def extract_uniq_device_id(fcm_token: str) -> str:
-    return fcm_token.split(":")[0] if ":" in fcm_token else fcm_token
-
-
-def get_password_hash(password):
-    return pwd_context.hash(password)
-
-
-def get_user_by_username(db: Session, username: str):
-    return db.query(User).filter(User.username == username).first()
-
-
-def get_user_by_device_id(db: Session, device_id: str):
-    pattern = f"{device_id}:%"
-    return db.query(User).filter(
-        func.array_to_string(User.fcm_token, ',').contains(pattern)
-    ).first()
-
-
-def remove_device_from_other_users(db: Session, device_id: str, user_id: int):
-    users = db.query(User).filter(User.user_id != user_id).all()
-    for user in users:
-        # Initialize fcm_token as an empty list if it is None
-        if user.fcm_token is None:
-            user.fcm_token = []
-        # Remove tokens starting with the device_id
-        user.fcm_token = [token for token in user.fcm_token if not token.startswith(device_id)]
-    db.commit()
-    
-
-def extract_unique_device_id(fcm_token: str) -> str:
-    return fcm_token.split(":")[0] 
 
 
 # Get Endpoints
@@ -546,6 +205,11 @@ def get_rewards(user_id: int, db: Session = Depends(get_db)):
 
 # Post endpoints
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def hash_password(password):
+    return pwd_context.hash(password)
+
 @app.post("/register")
 def register(request: RegisterRequest, db: Session = Depends(get_db)):
     try:
@@ -580,6 +244,48 @@ async def integrity_exception_handler(request: Request, exc: IntegrityError):
         status_code=400,
         content={"detail": str(exc.orig)}
     )
+
+
+def get_user_by_username(db: Session, username: str):
+    return db.query(User).filter(User.username == username).first()
+
+
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+
+def extract_unique_device_id(fcm_token: str) -> str:
+    return fcm_token.split(":")[0] 
+
+
+def get_user_by_device_id(db: Session, device_id: str):
+    pattern = f"{device_id}:%"
+    return db.query(User).filter(
+        func.array_to_string(User.fcm_token, ',').contains(pattern)
+    ).first()
+
+
+def remove_device_from_other_users(db: Session, device_id: str, user_id: int):
+    users = db.query(User).filter(User.user_id != user_id).all()
+    for user in users:
+        # Initialize fcm_token as an empty list if it is None
+        if user.fcm_token is None:
+            user.fcm_token = []
+        # Remove tokens starting with the device_id
+        user.fcm_token = [token for token in user.fcm_token if not token.startswith(device_id)]
+    db.commit()
+
+
+def add_fcm_token(user: User, fcm_token: str, db: Session):
+    device_id = extract_unique_device_id(fcm_token)
+    # Initialize fcm_token as an empty list if it is None
+    if user.fcm_token is None:
+        user.fcm_token = []
+    # Remove existing tokens with the same device_id
+    user.fcm_token = [token for token in user.fcm_token if not token.startswith(device_id)]
+    # Add the new token
+    user.fcm_token.append(fcm_token)
+    db.commit()
 
 
 @app.post("/login", response_model=LoginResponse)
@@ -617,6 +323,13 @@ def refresh_user_token(request: RefreshTokenRequest, db: Session = Depends(get_d
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+def remove_fcm_token(user: User, old_fcm: str, db: Session):
+    if user.fcm_token and old_fcm in user.fcm_token:
+        user.fcm_token = [token for token in user.fcm_token if token != old_fcm]
+        db.commit()
+        db.refresh(user)
 
 
 @app.post("/logout")
@@ -671,6 +384,41 @@ def create_request(request: RequestCreate, db: Session = Depends(get_db)):
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+def update_request(request_id: int, new_status: int, user_id: int, db: Session, action_name: str, **kwargs):
+    existing_request = db.query(Request).filter(Request.request_id == request_id).first()
+    if existing_request is None:
+        raise HTTPException(status_code=404, detail="Request not found")
+
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    changer_name = f"{user.surname} {user.name}"
+    
+    log_entry = RequestStatusLog(
+        request_id=existing_request.request_id,
+        old_status_id=existing_request.status_id,
+        new_status_id=new_status,
+        changed_at=datetime.now(timezone.utc),
+        changed_by=user_id,
+        reason=kwargs.get('reason'),
+        changer_name=changer_name,  # Populate changer_name
+        action_name=action_name     # Populate action_name
+    )
+    db.add(log_entry)
+
+    existing_request.status_id = new_status
+    existing_request.updated_at = datetime.now(timezone.utc)
+    
+    for key, value in kwargs.items():
+        setattr(existing_request, key, value)
+
+    db.commit()
+    db.refresh(existing_request)
+    db.refresh(log_entry)
+    return existing_request
 
 
 @app.post("/master-approve", response_model=dict)
@@ -867,59 +615,3 @@ def soft_delete_request(request: UpdateRequest, db: Session = Depends(get_db)):
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-
-# Firebase push
-
-from firebase_admin import credentials, initialize_app
-from google.oauth2 import service_account
-import google.auth.transport.requests
-import requests
-import json
-
-cred = credentials.Certificate("accKey.json")
-initialize_app(cred)
-
-PROJECT_ID = 'horizons-champ'
-BASE_URL = 'https://fcm.googleapis.com'
-FCM_ENDPOINT = 'v1/projects/' + PROJECT_ID + '/messages:send'
-FCM_URL = BASE_URL + '/' + FCM_ENDPOINT
-SCOPES = ['https://www.googleapis.com/auth/firebase.messaging']
-
-def send_push(tokens: list, title="title", body="body"):
-    results = []
-    
-    for token in tokens:
-        try:
-            credentials = service_account.Credentials.from_service_account_file(
-                'accKey.json', scopes=SCOPES)
-            request = google.auth.transport.requests.Request()
-            credentials.refresh(request)
-            googleToken = credentials.token
-            
-            headers = {
-                'Authorization': 'Bearer ' + googleToken,
-                'Content-Type': 'application/json; UTF-8',
-            }
-            message = {
-                "message": {
-                    "token": token,
-                    "notification": {
-                        "title": title,
-                        "body": body
-                    }
-                }
-            }
-            message_json = json.dumps(message)
-            
-            resp = requests.post(FCM_URL, data=message_json, headers=headers)
-            
-            if resp.status_code == 200:
-                results.append({'token': token, 'status': 'success', 'response': resp.text})
-            else:
-                results.append({'token': token, 'status': 'failure', 'error': resp.text})
-        
-        except Exception as e:
-            results.append({'token': token, 'status': 'failure', 'error': str(e)})
-    
-    return results
