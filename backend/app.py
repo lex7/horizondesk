@@ -9,9 +9,36 @@ from datetime import datetime, timezone
 from backend.utils import send_push
 from backend.schemas import *
 from backend.models import engine, Request, RequestType, Role, User, Status, RequestStatusLog
+from traceback import format_exception
 
 
 app = FastAPI()
+
+@app.exception_handler(Exception)
+async def exception_handler(request: Request, exc: Exception):
+    error_response = {
+        "message": str(exc),
+        "status_code": 500,
+        "error": {
+            "type": type(exc).__name__,
+            "message": str(exc),
+            "traceback": format_exception(type(exc), exc, exc.__traceback__)
+        }
+    }
+    return JSONResponse(error_response, status_code=500)
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    error_response = {
+        "message": exc.detail,
+        "status_code": exc.status_code,
+        "error": {
+            "type": type(exc).__name__,
+            "message": exc.detail,
+            "traceback": format_exception(type(exc), exc, exc.__traceback__)
+        }
+    }
+    return JSONResponse(error_response, status_code=exc.status_code)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
