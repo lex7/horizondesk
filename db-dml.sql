@@ -1,7 +1,6 @@
 INSERT INTO roles (role_name)
 VALUES ('Рабочий'),
        ('Мастер'),
-       ('Начальник'),
        ('Босс');
 
 INSERT INTO worker_shifts (start_time, end_time)
@@ -15,13 +14,6 @@ VALUES ('Электрика'),
        ('Санитарно-бытовые условия'),
        ('Безопасность труда'),
        ('Документооборот');
-
-INSERT INTO specializations (spec_name)
-VALUES ('Электрик'),
-       ('Механик'),
-       ('Завхоз'),
-       ('Начальник безопасности'),
-       ('Секретарь');
 
 INSERT INTO areas (area_name)
 VALUES ('Участок #1'),
@@ -37,10 +29,4 @@ VALUES ('На рассмотрении'),
        ('Требует подтверждения'),
        ('Завершена'),
        ('Удалена');
-
--- INSERT INTO users (username, password_hash, surname, name, spec_id, fcm_token, role_id, shift_id)
--- VALUES 
---     ('ivan', 'password123', 'Иван', 'Иванов', 1, NULL, 1, 1),
---     ('vasya', 'password456', 'Василий', 'Васильев', 2, NULL, 2, 1),
---     ('masha', 'password789', 'Мария', 'Мариевна', 3, NULL, 1, 1);
 
