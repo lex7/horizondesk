@@ -6,6 +6,12 @@ BEGIN
 END
 $$;
 
+-- Table: request_types
+CREATE TABLE request_types (
+    request_type SERIAL PRIMARY KEY,
+    type_name VARCHAR(50) NOT NULL UNIQUE
+);
+
 -- Table: roles
 CREATE TABLE roles (
     role_id SERIAL PRIMARY KEY,
@@ -18,6 +24,7 @@ CREATE TABLE worker_shifts (
     start_time TIME NOT NULL,
     end_time TIME NOT NULL
 );
+
 
 -- Table: users
 CREATE TABLE users (
@@ -40,12 +47,6 @@ CREATE TABLE users (
     num_created INTEGER DEFAULT 0,
     num_completed INTEGER DEFAULT 0,
     last_completed DATE
-);
-
--- Table: request_types
-CREATE TABLE request_types (
-    request_type SERIAL PRIMARY KEY,
-    type_name VARCHAR(50) NOT NULL UNIQUE
 );
 
 -- Table: areas
