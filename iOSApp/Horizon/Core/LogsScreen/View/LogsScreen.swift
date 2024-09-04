@@ -27,7 +27,7 @@ struct LogsScreen: View {
                 ProgressView()
                 Spacer()
             } else {
-                if authStateEnvObject.logsModel.isEmpty {
+                if authStateEnvObject.logsModel.isEmpty && !authStateEnvObject.logsIsLoading {
                     messageForEmptyList
                 } else {
                     List {

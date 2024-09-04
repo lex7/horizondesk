@@ -168,6 +168,19 @@ private extension MonitorIssueScreen {
                     }
                 case .new:
                     Menu {
+                        Button("Детали заявки") {
+                            generator.impactOccurred()
+                            logId = issue.request_id
+                            Task {
+                                try await Task.sleep(nanoseconds: 200_000_000)
+                                showLogsForRequest.toggle()
+                            }
+                            Task {
+                                try await Task.sleep(nanoseconds: 500_000_000)
+                                authStateEnvObject.getInProgressIssue()
+                                authStateEnvObject.getCompletedIssue()
+                            }
+                        }
                         Button("Просмотр истории") {
                             generator.impactOccurred()
                             logId = issue.request_id

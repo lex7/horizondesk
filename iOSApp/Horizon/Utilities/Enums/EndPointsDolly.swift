@@ -38,7 +38,7 @@ enum EndPointsDolly {
     var baseStrUrl: String {
         switch self {
         default:
-            return "http://34.141.180.59:443/"
+            return "http://timofmax.fvds.ru:8000/"
         }
     }
     
