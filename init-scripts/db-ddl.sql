@@ -1,4 +1,10 @@
-CREATE DATABASE db;
+DO $$
+BEGIN
+   IF NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'db') THEN
+      CREATE DATABASE db;
+   END IF;
+END
+$$;
 
 -- Table: roles
 CREATE TABLE roles (
