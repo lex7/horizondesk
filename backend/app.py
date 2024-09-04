@@ -403,9 +403,27 @@ def create_request(request: RequestCreate, db: Session = Depends(get_db)):
             changer_name=f"{creator.surname} {creator.name}",
             action_name='Запрос создан'
         )
+
         db.add(log_entry)
         db.commit()
         db.refresh(log_entry)
+
+        # Find users with matching request_type and role_id=2
+        matching_users = db.query(User).filter(
+            User.request_type == request.request_type,
+            User.role_id == 2
+        ).all()
+
+        # Extract FCM tokens and send push notifications
+        for user in matching_users:
+            if user.fcm_token:
+                resps = send_push(
+                    tokens=user.fcm_token,
+                    title="Новый запрос",
+                    body=f"Поступил новый запрос (№ {new_request.request_id})"
+                )
+                for resp in resps:
+                    print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
 
         return {"message": "Request created successfully", "request_id": new_request.request_id}
     
@@ -459,6 +477,8 @@ def approve_request(request: UpdateRequest, db: Session = Depends(get_db)):
             reason=request.reason,
             action_name='Согласовано мастером'
         )
+        
+        # Send push notification to the request creator
         creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
         resps = send_push(
             tokens=creator_user.fcm_token,
@@ -467,7 +487,21 @@ def approve_request(request: UpdateRequest, db: Session = Depends(get_db)):
         )
         for resp in resps:
             print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
-        
+
+        # Send push notification to all users with the same request_type and role_id=1
+        executor_users = db.query(User).filter(
+            User.request_type == existing_request.request_type,
+            User.role_id == 1
+        ).all()
+
+        resps = send_push(
+            tokens=[user.fcm_token for user in executor_users if user.fcm_token],
+            title="Запрос ожидает исполнения",
+            body=f"Запрос (№ {existing_request.request_id}) был согласован и ожидает выполнения"
+        )
+        for resp in resps:
+            print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
+
         return {"message": "Request approved successfully", "request_id": existing_request.request_id}
     
     except Exception as e:
