@@ -1,3 +1,5 @@
+CREATE DATABASE db;
+
 -- Table: roles
 CREATE TABLE roles (
     role_id SERIAL PRIMARY KEY,
