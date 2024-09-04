@@ -50,7 +50,6 @@ def get_db():
     finally:
         db.close()
 
-
 # Get Endpoints
 
 @app.get("/")
@@ -324,6 +323,7 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
             raise HTTPException(status_code=401, detail="Invalid credentials")
         
         if request.fcm_token:
+            print(request.fcm_token)
             device_id = extract_unique_device_id(request.fcm_token)
             existing_user = get_user_by_device_id(db, device_id)
 
