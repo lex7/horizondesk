@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey, event, func
+from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey, event, func, Time
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import TIMESTAMP
@@ -56,7 +56,8 @@ class WorkerShift(Base):
     __tablename__ = 'worker_shifts'
 
     shift_id = Column(Integer, primary_key=True, index=True)
-    shift_name = Column(String, nullable=False)
+    start_time = Column(Time, nullable=False)
+    end_time = Column(Time, nullable=False)
 
     users = relationship("User", back_populates="shift")
 
