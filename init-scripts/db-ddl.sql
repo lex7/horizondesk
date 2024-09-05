@@ -1,6 +1,3 @@
-CREATE USER db_worker_user WITH PASSWORD '5v592r4QmsyD';
-CREATE DATABASE hdb01-p OWNER db_worker_user;
-
 -- Table: request_types
 CREATE TABLE request_types (
     request_type SERIAL PRIMARY KEY,
