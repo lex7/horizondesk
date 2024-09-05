@@ -53,6 +53,7 @@
 		05597B682C65822D007B96A0 /* LogsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B672C65822D007B96A0 /* LogsModel.swift */; };
 		05597B6A2C65826B007B96A0 /* RequestDoneModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B692C65826B007B96A0 /* RequestDoneModel.swift */; };
 		05597B6D2C658376007B96A0 /* RequestIdModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B6C2C658376007B96A0 /* RequestIdModel.swift */; };
+		055B6E8B2C88AEE600CBA7F8 /* IssuerTaskDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 055B6E8A2C88AEE600CBA7F8 /* IssuerTaskDetail.swift */; };
 		056E6B7F2B700CBA008C1E1F /* MasterScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 056E6B7E2B700CBA008C1E1F /* MasterScreen.swift */; };
 		056E6B812B701F44008C1E1F /* MasterSegmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 056E6B802B701F44008C1E1F /* MasterSegmentView.swift */; };
 		0574698D2B7B3A5700AA0F71 /* NamingEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0574698C2B7B3A5700AA0F71 /* NamingEnum.swift */; };
@@ -132,6 +133,7 @@
 		05597B672C65822D007B96A0 /* LogsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogsModel.swift; sourceTree = "<group>"; };
 		05597B692C65826B007B96A0 /* RequestDoneModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestDoneModel.swift; sourceTree = "<group>"; };
 		05597B6C2C658376007B96A0 /* RequestIdModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestIdModel.swift; sourceTree = "<group>"; };
+		055B6E8A2C88AEE600CBA7F8 /* IssuerTaskDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssuerTaskDetail.swift; sourceTree = "<group>"; };
 		056E6B7E2B700CBA008C1E1F /* MasterScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterScreen.swift; sourceTree = "<group>"; };
 		056E6B802B701F44008C1E1F /* MasterSegmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterSegmentView.swift; sourceTree = "<group>"; };
 		0574698C2B7B3A5700AA0F71 /* NamingEnum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NamingEnum.swift; sourceTree = "<group>"; };
@@ -793,6 +795,7 @@
 			isa = PBXGroup;
 			children = (
 				05F2D95F2B94A52300BDDD36 /* MonitorPickerView.swift */,
+				055B6E8A2C88AEE600CBA7F8 /* IssuerTaskDetail.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -926,6 +929,7 @@
 				05D7A6722C6345DE00275E9D /* ExecutorMyTaskDetails.swift in Sources */,
 				05096EC32B84E9BF003FDB52 /* AuthState.swift in Sources */,
 				056E6B812B701F44008C1E1F /* MasterSegmentView.swift in Sources */,
+				055B6E8B2C88AEE600CBA7F8 /* IssuerTaskDetail.swift in Sources */,
 				0574698D2B7B3A5700AA0F71 /* NamingEnum.swift in Sources */,
 				0509CBF22BFBDD8E00FBCEF1 /* GPToolView.swift in Sources */,
 				0517DCBF2B836A66009F6979 /* MyAccountScreen.swift in Sources */,

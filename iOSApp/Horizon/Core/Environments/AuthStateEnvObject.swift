@@ -425,8 +425,15 @@ final class AuthStateEnvObject: ObservableObject {
             .store(in: &cancellables)
     }
         
-    func requestDone(request_id: Int, action: @escaping (()->Void)) {
-        let model = RequestDoneModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, reason: nil)
+    func requestDone(request_id: Int, reason: String = "", action: @escaping (()->Void)) {
+        
+        var model = RequestDoneModel(user_id: 0, request_id: 0, reason: "")
+        if !reason.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            model = RequestDoneModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, reason: reason)
+        } else {
+            model = RequestDoneModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, reason: nil)
+        }
+
         networkManager.requestMoyaData(apis: .requestorConfirm(model: model))
             .receive(on: DispatchQueue.main)
             .sink { completion in
@@ -443,8 +450,14 @@ final class AuthStateEnvObject: ObservableObject {
             .store(in: &cancellables)
     }
     
-    func requesterDeniedCompletion(request_id: Int, action: @escaping (()->Void)) {
-        let model = RequesterDeniedModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, reason: "")
+    func requesterDeniedCompletion(request_id: Int, reason: String = "", action: @escaping (()->Void)) {
+        var model = RequesterDeniedModel(user_id: 0, request_id: 0, reason: "")
+        if !reason.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            model = RequesterDeniedModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, reason: reason)
+        } else {
+            model = RequesterDeniedModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, reason: "")
+        }
+//        let model = RequesterDeniedModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, reason: clearReason)
         networkManager.requestMoyaData(apis: .requesterDeniedCompletion(model: model))
             .receive(on: DispatchQueue.main)
             .sink { completion in

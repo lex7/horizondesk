@@ -82,7 +82,7 @@ struct ExecutorMyTaskDetails: View {
 private extension ExecutorMyTaskDetails {
     @ViewBuilder
     var justificationTextField: some View {
-        if IssueStatus(rawValue: currentNode.status_id) != .done && IssueStatus(rawValue: currentNode.status_id) != .review {
+        if IssueStatus(rawValue: currentNode.status_id) != .review {
             TextField("Пояснение к заявке", text: $taskJastification, axis: .vertical)
                 .padding(.horizontal, 20)
                 .padding(.vertical, 10)

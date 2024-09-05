@@ -14,6 +14,9 @@ struct MonitorIssueScreen: View {
     
     // MARK: - Private State Variables
     @State private var showDetails = false
+    @State private var showDetailsIssue = false
+    @State private var currentNode: RequestIssueModel = RequestIssueModel(request_id: 1, request_type: 2, created_by: 99, assigned_to: nil, area_id: 3, description: nil, status_id: 99, created_at: nil, updated_at: nil, reason: nil)
+    
     @State private var showNeedActionDetails = false
     @State private var showLogsForRequest = false
     @State private var logId: Int  = 10000000
@@ -108,6 +111,11 @@ struct MonitorIssueScreen: View {
         }
         .mask(LinearGradient(gradient: Gradient(colors: [.black, .black, .black, .black, .black, .clear]), startPoint: .top, endPoint: .bottom).ignoresSafeArea(edges: .top))
         .background(Color.theme.background)
+        .sheet(isPresented: $showDetailsIssue, onDismiss: {
+            authStateEnvObject.executorUnassignRequest()
+        }, content: {
+            IssuerTaskDetail(currentNode: $currentNode)
+        })
     }
 }
 
@@ -138,6 +146,20 @@ private extension MonitorIssueScreen {
                                 }
                             }
                         }
+                        Button("Детали заявки") {
+                            currentNode = issue
+                            generator.impactOccurred()
+                            logId = issue.request_id
+                            Task {
+                                try await Task.sleep(nanoseconds: 200_000_000)
+                                showDetailsIssue.toggle()
+                            }
+                            Task {
+                                try await Task.sleep(nanoseconds: 500_000_000)
+                                authStateEnvObject.getInProgressIssue()
+                                authStateEnvObject.getCompletedIssue()
+                            }
+                        }
                         Button("Просмотр истории") {
                             generator.impactOccurred()
                             logId = issue.request_id
@@ -153,6 +175,20 @@ private extension MonitorIssueScreen {
                     }
                 case .approved, .inprogress:
                     Menu {
+                        Button("Детали заявки") {
+                            currentNode = issue
+                            generator.impactOccurred()
+                            logId = issue.request_id
+                            Task {
+                                try await Task.sleep(nanoseconds: 200_000_000)
+                                showDetailsIssue.toggle()
+                            }
+                            Task {
+                                try await Task.sleep(nanoseconds: 500_000_000)
+                                authStateEnvObject.getInProgressIssue()
+                                authStateEnvObject.getCompletedIssue()
+                            }
+                        }
                         Button("Просмотр истории") {
                             generator.impactOccurred()
                             logId = issue.request_id
@@ -169,11 +205,12 @@ private extension MonitorIssueScreen {
                 case .new:
                     Menu {
                         Button("Детали заявки") {
+                            currentNode = issue
                             generator.impactOccurred()
                             logId = issue.request_id
                             Task {
                                 try await Task.sleep(nanoseconds: 200_000_000)
-                                showLogsForRequest.toggle()
+                                showDetailsIssue.toggle()
                             }
                             Task {
                                 try await Task.sleep(nanoseconds: 500_000_000)
@@ -218,6 +255,20 @@ private extension MonitorIssueScreen {
         ScrollView {
             ForEach(authStateEnvObject.issuesDone, id: \.self) { issue in
                 Menu {
+                    Button("Детали заявки") {
+                        currentNode = issue
+                        generator.impactOccurred()
+                        logId = issue.request_id
+                        Task {
+                            try await Task.sleep(nanoseconds: 200_000_000)
+                            showDetailsIssue.toggle()
+                        }
+                        Task {
+                            try await Task.sleep(nanoseconds: 500_000_000)
+                            authStateEnvObject.getInProgressIssue()
+                            authStateEnvObject.getCompletedIssue()
+                        }
+                    }
                     Button("Просмотр истории") {
                         generator.impactOccurred()
                         logId = issue.request_id
@@ -243,6 +294,15 @@ private extension MonitorIssueScreen {
         ScrollView {
             ForEach(authStateEnvObject.issuesDeclined, id: \.self) { issue in
                 Menu {
+                    Button("Детали заявки") {
+                        currentNode = issue
+                        generator.impactOccurred()
+                        logId = issue.request_id
+                        Task {
+                            try await Task.sleep(nanoseconds: 200_000_000)
+                            showDetailsIssue.toggle()
+                        }
+                    }
                     Button("Просмотр истории") {
                         generator.impactOccurred()
                         logId = issue.request_id

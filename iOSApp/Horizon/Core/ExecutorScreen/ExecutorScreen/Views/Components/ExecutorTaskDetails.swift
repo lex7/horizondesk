@@ -16,7 +16,7 @@ struct ExecutorTaskDetails: View {
 
     // MARK: - Private Variables
     @State private var describeStateLoadingOrError = "Loading history transactions"
-
+    
     // MARK: - Private Constants
     @State private var screenHeight = UIScreen.main.bounds.height
     private let generator = UIImpactFeedbackGenerator(style: .light)

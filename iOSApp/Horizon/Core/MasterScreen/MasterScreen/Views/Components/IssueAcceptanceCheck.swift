@@ -97,7 +97,7 @@ private extension IssueAcceptanceCheck {
     var bottomButtons: some View {
         Group {
             HStack {
-                makeMediumContrastView(text: "Отклонить", image: "xmark", imageFirst: true)
+                makeMediumContrastView(text: "Отклонить", image: "xmark", imageFirst: true, color: .negativePrimary)
                     .padding(.horizontal, 30)
                     .onTapGesture {
                         generator.impactOccurred()
