@@ -1,10 +1,5 @@
-DO $$
-BEGIN
-   IF NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'db') THEN
-      CREATE DATABASE db;
-   END IF;
-END
-$$;
+CREATE USER db_worker_user WITH PASSWORD '5v592r4QmsyD';
+CREATE DATABASE hdb01-p OWNER db_worker_user;
 
 -- Table: request_types
 CREATE TABLE request_types (
