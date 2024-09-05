@@ -5,8 +5,8 @@ import requests
 import json
 
 
-with open("accKey.json") as f:
-    print(f.read())
+# with open("accKey.json") as f:
+#     print(f.read())
     
 cred = credentials.Certificate("accKey.json")
 initialize_app(cred)
