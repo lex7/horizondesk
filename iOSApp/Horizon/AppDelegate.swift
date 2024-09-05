@@ -76,7 +76,6 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         willPresent _: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
-        UIApplication.shared.applicationIconBadgeNumber = authStateEnvObject.notificationCount
         completionHandler([.banner, .sound, .badge, .list])
     }
     
@@ -86,6 +85,19 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
         let pushPayload = response.notification.request.content.userInfo
+        if let aps = pushPayload["aps"] as? [String: Any],
+           let badge = aps["badge"] as? Int {
+            DispatchQueue.main.async {
+                UIApplication.shared.applicationIconBadgeNumber = badge
+            }
+        }
+                
+        if let stringPayload  = pushPayload["type-of-request"] as? String {
+            if authStateEnvObject.authState == .authorized {
+                debugPrint(stringPayload)
+            }
+        }
+        
         DispatchQueue.main.async { [unowned self] in
             authStateEnvObject.updateAllData()
         }

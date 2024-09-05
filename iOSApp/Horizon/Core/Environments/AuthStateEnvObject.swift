@@ -614,15 +614,12 @@ extension AuthStateEnvObject: UIDataUpdatable {
     func updateAllData() {
         //
         Task {
-            try await Task.sleep(nanoseconds: 100_000_000)
             getInProgressIssue()
             getCompletedIssue()
             getDeniedIssue()
-            try await Task.sleep(nanoseconds: 100_000_000)
             // Master
             getRequestsForMaster()
             getRequestsForMasterMonitor()
-            try await Task.sleep(nanoseconds: 100_000_000)
             // Executor
             executorUnassignRequest()
             executorMyTasksRequest()
