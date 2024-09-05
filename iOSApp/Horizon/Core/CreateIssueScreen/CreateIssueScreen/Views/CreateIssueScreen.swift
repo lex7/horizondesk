@@ -11,6 +11,7 @@ struct CreateIssueScreen: View {
     @Binding var tabSelection: TabBarItem
 
     // MARK: - Private Constants
+    private let generator = UIImpactFeedbackGenerator(style: .light)
     @State private var screenHeight = UIScreen.main.bounds.height
     @State private var screenWidth = UIScreen.main.bounds.width
     
@@ -49,14 +50,25 @@ struct CreateIssueScreen: View {
 }
 
 private extension CreateIssueScreen {
-@ViewBuilder
+    @ViewBuilder
     func makeAdditionalHeader() -> some View {
         HStack(spacing: 10) {
             Group {
-                Group {
-                    makeMediumContrastView(text: "", image: "bell", color: .selected, size: 18, txtStyle: .headline)
-                    labelWithColoredPadding(txt: "2", size: 11, relativeTextStyle: .caption2, color: Color.theme.extraLowContrast, bkColor: .selected)
-                        .offset(y: -2)
+                if authStateEnvObject.notificationCount != 0 {
+                    Group {
+                        makeMediumContrastView(text: "", image: "bell", color: .selected, size: 18, txtStyle: .headline)
+                        labelWithColoredPadding(txt: "\(authStateEnvObject.notificationCount)", size: 11, relativeTextStyle: .caption2, color: Color.theme.extraLowContrast, bkColor: .selected)
+                            .offset(y: -2)
+                    }
+                    .onTapGesture {
+                        Task {
+                            generator.prepare()
+                            try await Task.sleep(nanoseconds: 100_000_000)
+                            generator.impactOccurred()
+                            authStateEnvObject.tabBarSelection = .monitorIssue
+                        }
+                        
+                    }
                 }
             }
             .contentShape(Rectangle())

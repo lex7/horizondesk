@@ -4,7 +4,13 @@ import UIKit
 import FirebaseMessaging
 import Combine
 
+protocol UIDataUpdatable {
+    func updateAllData()
+}
 
+protocol DataClearable {
+    func clearToken()
+}
 
 final class AuthStateEnvObject: ObservableObject {
     
@@ -18,6 +24,7 @@ final class AuthStateEnvObject: ObservableObject {
     @Published var issuesApproved: [RequestIssueModel] = []
     @Published var issuesInProgress: [RequestIssueModel] = []
     @Published var logsModel: [LogsModel] = []
+    @Published var notificationCount: Int = 0
     
     // MARK: - Private loaders
     @Published private(set) var masterIsLoading = false
@@ -366,6 +373,7 @@ final class AuthStateEnvObject: ObservableObject {
             } receiveValue: { [unowned self] data in
                 do {
                     let arrayReview = try RequestIssueModel.decode(from: data).filter { $0.status_id == 5 }.sorted { ($0.updated_at ?? Date()) > ($1.updated_at ?? Date()) }
+                    notificationCount = arrayReview.count
                     let restOfTasks = try RequestIssueModel.decode(from: data).filter { $0.status_id != 5 }.sorted { ($0.created_at ?? Date()) > ($1.created_at ?? Date()) }
                     self.issuesInWork = arrayReview + restOfTasks
                     debugPrint(issuesInWork.count)
@@ -426,7 +434,6 @@ final class AuthStateEnvObject: ObservableObject {
     }
         
     func requestDone(request_id: Int, reason: String = "", action: @escaping (()->Void)) {
-        
         var model = RequestDoneModel(user_id: 0, request_id: 0, reason: "")
         if !reason.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             model = RequestDoneModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, reason: reason)
@@ -587,7 +594,7 @@ final class AuthStateEnvObject: ObservableObject {
     }
 }
 
-extension AuthStateEnvObject {
+extension AuthStateEnvObject: DataClearable {
     func clearToken() {
         resetFirebaseFCMToken { [weak self] in
             self?.permissionIsDownloaded  = false
@@ -601,6 +608,28 @@ extension AuthStateEnvObject {
         }
     }
 }
+
+
+extension AuthStateEnvObject: UIDataUpdatable {
+    func updateAllData() {
+        //
+        Task {
+            try await Task.sleep(nanoseconds: 100_000_000)
+            getInProgressIssue()
+            getCompletedIssue()
+            getDeniedIssue()
+            try await Task.sleep(nanoseconds: 100_000_000)
+            // Master
+            getRequestsForMaster()
+            getRequestsForMasterMonitor()
+            try await Task.sleep(nanoseconds: 100_000_000)
+            // Executor
+            executorUnassignRequest()
+            executorMyTasksRequest()
+        }
+    }
+}
+
 
 private extension AuthStateEnvObject {
     private func resetFirebaseFCMToken(completion: @escaping () -> Void) {

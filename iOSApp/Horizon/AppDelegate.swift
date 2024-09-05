@@ -76,15 +76,19 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         willPresent _: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
-        UIApplication.shared.applicationIconBadgeNumber = 1
+        UIApplication.shared.applicationIconBadgeNumber = authStateEnvObject.notificationCount
         completionHandler([.banner, .sound, .badge, .list])
     }
-func userNotificationCenter(
+    
+    func userNotificationCenter(
         _: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
         let pushPayload = response.notification.request.content.userInfo
+        DispatchQueue.main.async { [unowned self] in
+            authStateEnvObject.updateAllData()
+        }
         completionHandler()
     }
     
