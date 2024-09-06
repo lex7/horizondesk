@@ -22,10 +22,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d/
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "db_worker_user"]
-      interval: 10s
-      retries: 5
 
 volumes:
   postgres_data:
