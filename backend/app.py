@@ -27,18 +27,18 @@ async def exception_handler(request: Request, exc: Exception):
     }
     return JSONResponse(error_response, status_code=500)
 
-@app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
-    error_response = {
-        "message": exc.detail,
-        "status_code": exc.status_code,
-        "error": {
-            "type": type(exc).__name__,
-            "message": exc.detail,
-            "traceback": format_exception(type(exc), exc, exc.__traceback__)
-        }
-    }
-    return JSONResponse(error_response, status_code=exc.status_code)
+# @app.exception_handler(HTTPException)
+# async def http_exception_handler(request: Request, exc: HTTPException):
+#     error_response = {
+#         "message": exc.detail,
+#         "status_code": exc.status_code,
+#         "error": {
+#             "type": type(exc).__name__,
+#             "message": exc.detail,
+#             "traceback": format_exception(type(exc), exc, exc.__traceback__)
+#         }
+#     }
+#     return JSONResponse(error_response, status_code=exc.status_code)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -180,21 +180,19 @@ def get_unassigned(user_id: int, db: Session = Depends(get_db)):
 
 @app.get("/requests-log", response_model=List[RequestStatusLogModel])
 def get_requests_log(db: Session = Depends(get_db)):
-    try:
-        logs = db.query(RequestStatusLog).all()
-        return [RequestStatusLogModel(
-            log_id=log.log_id,
-            request_id=log.request_id,
-            old_status_id=log.old_status_id if log.old_status_id is not None else 0,
-            new_status_id=log.new_status_id,
-            changed_at=log.changed_at,
-            changed_by=log.changed_by,
-            reason=log.reason,
-            changer_name=log.changer_name,  # Pass value or None
-            action_name=log.action_name     # Pass value or None
-        ) for log in logs]
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    logs = db.query(RequestStatusLog).all()
+    return [RequestStatusLogModel(
+        log_id=log.log_id,
+        request_id=log.request_id,
+        old_status_id=log.old_status_id if log.old_status_id is not None else 0,
+        new_status_id=log.new_status_id,
+        changed_at=log.changed_at,
+        changed_by=log.changed_by,
+        reason=log.reason,
+        changer_name=log.changer_name,  # Pass value or None
+        action_name=log.action_name     # Pass value or None
+    ) for log in logs]
+
 
 
 @app.get("/request-history", response_model=List[RequestStatusLogModel])
@@ -316,40 +314,34 @@ def add_fcm_token(user: User, fcm_token: str, db: Session):
 
 @app.post("/login", response_model=LoginResponse)
 def login(request: LoginRequest, db: Session = Depends(get_db)):
-    try:
-        user = get_user_by_username(db, request.username)
-        
-        if not user or not verify_password(request.password, user.password_hash):
-            raise HTTPException(status_code=401, detail="Invalid credentials")
-        
-        if request.fcm_token:
-            print(request.fcm_token)
-            device_id = extract_unique_device_id(request.fcm_token)
-            existing_user = get_user_by_device_id(db, device_id)
-
-            if existing_user and existing_user.user_id != user.user_id:
-                remove_device_from_other_users(db, device_id, user.user_id)
-            
-            add_fcm_token(user, request.fcm_token, db)
-        
-        return LoginResponse(user_id=user.user_id, role_id=user.role_id)
+    user = get_user_by_username(db, request.username)
     
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    if not user or not verify_password(request.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    if request.fcm_token:
+        print(request.fcm_token)
+        device_id = extract_unique_device_id(request.fcm_token)
+        existing_user = get_user_by_device_id(db, device_id)
+
+        if existing_user and existing_user.user_id != user.user_id:
+            remove_device_from_other_users(db, device_id, user.user_id)
+        
+        add_fcm_token(user, request.fcm_token, db)
+    
+    return LoginResponse(user_id=user.user_id, role_id=user.role_id)
+    
 
 
 @app.post("/refresh-user-token")
 def refresh_user_token(request: RefreshTokenRequest, db: Session = Depends(get_db)):
-    try:
-        user = db.query(User).filter(User.user_id == request.user_id).first()
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-        
-        add_fcm_token(user, request.new_fcm, db)
-        return {"message": "FCM token refreshed successfully"}
+    user = db.query(User).filter(User.user_id == request.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
     
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    add_fcm_token(user, request.new_fcm, db)
+    return {"message": "FCM token refreshed successfully"}
+
 
 
 def remove_fcm_token(user: User, old_fcm: str, db: Session):
@@ -361,74 +353,69 @@ def remove_fcm_token(user: User, old_fcm: str, db: Session):
 
 @app.post("/logout")
 def logout(request: LogoutRequest, db: Session = Depends(get_db)):
-    try:
-        user = db.query(User).filter(User.user_id == request.user_id).first()
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-        
-        remove_fcm_token(user, request.old_fcm, db)
-        return {"message": "FCM token removed successfully"}
+    user = db.query(User).filter(User.user_id == request.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
     
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    remove_fcm_token(user, request.old_fcm, db)
+    return {"message": "FCM token removed successfully"}
+
 
 
 @app.post("/create-request", response_model=dict)
 def create_request(request: RequestCreate, db: Session = Depends(get_db)):
-    try:
-        # Create a new request
-        new_request = Request(
-            request_type=request.request_type,
-            created_by=request.user_id,
-            area_id=request.area_id,
-            description=request.description
-        )
-        db.add(new_request)
+    # Create a new request
+    new_request = Request(
+        request_type=request.request_type,
+        created_by=request.user_id,
+        area_id=request.area_id,
+        description=request.description
+    )
+    db.add(new_request)
+    db.commit()
+    db.refresh(new_request)
+
+    # Update creator's request count
+    creator = db.query(User).filter(User.user_id == request.user_id).first()
+    if creator:
+        creator.num_created += 1
         db.commit()
-        db.refresh(new_request)
 
-        # Update creator's request count
-        creator = db.query(User).filter(User.user_id == request.user_id).first()
-        if creator:
-            creator.num_created += 1
-            db.commit()
+    # Log the creation of the request
+    log_entry = RequestStatusLog(
+        request_id=new_request.request_id,
+        old_status_id=None,
+        new_status_id=new_request.status_id,
+        changed_at=datetime.now(timezone.utc),
+        changed_by=request.user_id,
+        changer_name=f"{creator.surname} {creator.name}",
+        action_name='Запрос создан'
+    )
 
-        # Log the creation of the request
-        log_entry = RequestStatusLog(
-            request_id=new_request.request_id,
-            old_status_id=None,
-            new_status_id=new_request.status_id,
-            changed_at=datetime.now(timezone.utc),
-            changed_by=request.user_id,
-            changer_name=f"{creator.surname} {creator.name}",
-            action_name='Запрос создан'
-        )
+    db.add(log_entry)
+    db.commit()
+    db.refresh(log_entry)
 
-        db.add(log_entry)
-        db.commit()
-        db.refresh(log_entry)
+    # Find users with matching request_type and role_id=2
+    matching_users = db.query(User).filter(
+        User.request_type == request.request_type,
+        User.role_id == 2
+    ).all()
 
-        # Find users with matching request_type and role_id=2
-        matching_users = db.query(User).filter(
-            User.request_type == request.request_type,
-            User.role_id == 2
-        ).all()
+    # Extract FCM tokens and send push notifications
+    for user in matching_users:
+        if user.fcm_token:
+            resps = send_push(
+                tokens=user.fcm_token,
+                title="Новый запрос",
+                body=f"Поступил новый запрос (№ {new_request.request_id})",
+                type_of_request="4"
+            )
+            for resp in resps:
+                print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
 
-        # Extract FCM tokens and send push notifications
-        for user in matching_users:
-            if user.fcm_token:
-                resps = send_push(
-                    tokens=user.fcm_token,
-                    title="Новый запрос",
-                    body=f"Поступил новый запрос (№ {new_request.request_id})"
-                )
-                for resp in resps:
-                    print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
+    return {"message": "Request created successfully", "request_id": new_request.request_id}
 
-        return {"message": "Request created successfully", "request_id": new_request.request_id}
-    
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 def update_request(request_id: int, new_status: int, user_id: int, db: Session, action_name: str, **kwargs):
@@ -468,211 +455,195 @@ def update_request(request_id: int, new_status: int, user_id: int, db: Session, 
 
 @app.post("/master-approve", response_model=dict)
 def approve_request(request: UpdateRequest, db: Session = Depends(get_db)):
-    try:
-        existing_request = update_request(
-            request.request_id,
-            new_status=2,
-            user_id=request.user_id,
-            db=db,
-            reason=request.reason,
-            action_name='Согласовано мастером'
-        )
-        
-        # Send push notification to the request creator
-        creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
-        resps = send_push(
-            tokens=creator_user.fcm_token,
-            title="Запрос согласован",
-            body=f"Ваш запрос (№ {existing_request.request_id}) был согласован мастером"
-        )
-        for resp in resps:
-            print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
-
-        # Send push notification to all users with the same request_type and role_id=1
-        executor_users = db.query(User).filter(
-            User.request_type == existing_request.request_type,
-            User.role_id == 1
-        ).all()
-
-        resps = send_push(
-            tokens=[user.fcm_token for user in executor_users if user.fcm_token],
-            title="Запрос ожидает исполнения",
-            body=f"Запрос (№ {existing_request.request_id}) был согласован и ожидает выполнения"
-        )
-        for resp in resps:
-            print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
-
-        return {"message": "Request approved successfully", "request_id": existing_request.request_id}
+    existing_request = update_request(
+        request.request_id,
+        new_status=2,
+        user_id=request.user_id,
+        db=db,
+        reason=request.reason,
+        action_name='Согласовано мастером'
+    )
     
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    # Send push notification to the request creator
+    creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
+    resps = send_push(
+        tokens=creator_user.fcm_token,
+        title="Запрос согласован",
+        body=f"Ваш запрос (№ {existing_request.request_id}) был согласован мастером",
+        type_of_request="1"
+    )
+    for resp in resps:
+        print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
+
+    # Send push notification to all users with the same request_type and role_id=1
+    executor_users = db.query(User).filter(
+        User.request_type == existing_request.request_type,
+        User.role_id == 1
+    ).all()
+
+    resps = send_push(
+        tokens=[user.fcm_token for user in executor_users if user.fcm_token],
+        title="Запрос ожидает исполнения",
+        body=f"Запрос (№ {existing_request.request_id}) был согласован и ожидает выполнения",
+        type_of_request="5"
+    )
+    for resp in resps:
+        print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
+
+    return {"message": "Request approved successfully", "request_id": existing_request.request_id}
+
 
 
 @app.post("/master-deny", response_model=dict)
 def deny_request(request: UpdateRequest, db: Session = Depends(get_db)):
-    try:
-        existing_request = update_request(
-            request.request_id,
-            new_status=3,
-            user_id=request.user_id,
-            db=db,
-            reason=request.reason,
-            action_name='Отклонено мастером'
-        )
-        creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
-        resps = send_push(
-            tokens=creator_user.fcm_token,
-            title="Запрос отклонен",
-            body=f"Ваш запрос (№ {existing_request.request_id}) был отклонен мастером"
-        )
-        for resp in resps:
-            print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
-        
-        return {"message": "Request denied successfully", "request_id": existing_request.request_id}
+    existing_request = update_request(
+        request.request_id,
+        new_status=3,
+        user_id=request.user_id,
+        db=db,
+        reason=request.reason,
+        action_name='Отклонено мастером'
+    )
+    creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
+    resps = send_push(
+        tokens=creator_user.fcm_token,
+        title="Запрос отклонен",
+        body=f"Ваш запрос (№ {existing_request.request_id}) был отклонен мастером",
+        type_of_request="3"
+    )
+    for resp in resps:
+        print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
     
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return {"message": "Request denied successfully", "request_id": existing_request.request_id}
+    
 
 
 @app.post("/take-on-work", response_model=dict)
 def take_request(request: UpdateRequest, db: Session = Depends(get_db)):
-    try:
-        existing_request = update_request(
-            request.request_id,
-            new_status=4,
-            user_id=request.user_id,
-            db=db,
-            assigned_to=request.user_id,
-            action_name='Взято в работу'
-        )
-        creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
-        resps = send_push(
-            tokens=creator_user.fcm_token,
-            title="Запрос в работе",
-            body=f"Ваш запрос (№ {existing_request.request_id}) был взят в работу"
-        )
-        for resp in resps:
-            print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
-        
-        return {"message": "Request accepted into work successfully", "request_id": existing_request.request_id}
+    existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
+    if existing_request is None:
+        raise HTTPException(status_code=404, detail="Request not found")
+    if existing_request.created_by == request.user_id:
+        raise HTTPException(status_code=400, detail="Заявитель не может быть исполнителем")
+    existing_request = update_request(
+        request.request_id,
+        new_status=4,
+        user_id=request.user_id,
+        db=db,
+        assigned_to=request.user_id,
+        action_name='Взято в работу'
+    )
+    creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
+    resps = send_push(
+        tokens=creator_user.fcm_token,
+        title="Запрос в работе",
+        body=f"Ваш запрос (№ {existing_request.request_id}) был взят в работу"
+    )
+    for resp in resps:
+        print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
     
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return {"message": "Request accepted into work successfully", "request_id": existing_request.request_id}
+    
 
 
 @app.post("/executor-cancel", response_model=dict)
 def cancel_request(request: UpdateRequest, db: Session = Depends(get_db)):
-    try:
-        existing_request = update_request(
-            request.request_id,
-            new_status=2,
-            user_id=request.user_id,
-            db=db,
-            assigned_to=None,
-            reason=request.reason,
-            action_name='Исполнитель отказался'
-        )
-        creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
-        resps = send_push(
-            tokens=creator_user.fcm_token,
-            title="Запрос был отменен",
-            body=f"Ваш запрос (№ {existing_request.request_id}) был возвращен исполнителем"
-        )
-        for resp in resps:
-            print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
-        
-        return {"message": "Request canceled successfully", "request_id": existing_request.request_id}
+    existing_request = update_request(
+        request.request_id,
+        new_status=2,
+        user_id=request.user_id,
+        db=db,
+        assigned_to=None,
+        reason=request.reason,
+        action_name='Исполнитель отказался'
+    )
+    creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
+    resps = send_push(
+        tokens=creator_user.fcm_token,
+        title="Запрос был отменен",
+        body=f"Ваш запрос (№ {existing_request.request_id}) был возвращен исполнителем"
+    )
+    for resp in resps:
+        print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
     
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return {"message": "Request canceled successfully", "request_id": existing_request.request_id}
+    
 
 
 @app.post("/executor-complete", response_model=dict)
 def complete_request(request: UpdateRequest, db: Session = Depends(get_db)):
-    try:
-        existing_request = update_request(request.request_id, 5, request.user_id, db, reason=request.reason, action_name='Исполнено')
-        creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
-        resps = send_push(
-            tokens=creator_user.fcm_token,
-            title="Запрос исполнен",
-            body=f"Ваш запрос (№ {existing_request.request_id}) был исполнен и ожидает проверки"
-        )
-        for resp in resps:
-            print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
-        
-        return {"message": "Request completed successfully", "request_id": request.request_id}
+    existing_request = update_request(request.request_id, 5, request.user_id, db, reason=request.reason, action_name='Исполнено')
+    creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
+    resps = send_push(
+        tokens=creator_user.fcm_token,
+        title="Запрос исполнен",
+        body=f"Ваш запрос (№ {existing_request.request_id}) был исполнен и ожидает проверки"
+    )
+    for resp in resps:
+        print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
     
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return {"message": "Request completed successfully", "request_id": request.request_id}
 
 
 @app.post("/requestor-confirm", response_model=dict)
 def confirm_request(request: UpdateRequest, db: Session = Depends(get_db)):
-    try:
-        existing_request = update_request(request.request_id, 6, request.user_id, db, reason=request.reason, action_name='Принято')
-        creator = db.query(User).filter(User.user_id == request.user_id).first()
-        executor = db.query(User).filter(User.user_id == existing_request.assigned_to).first()
-        
-        if executor:
-            executor.num_completed += 1
-            executor.tokens += 200
-            executor.last_completed = datetime.now().date()
-
-        if creator:
-            creator.tokens += 100
-
-        resps = send_push(
-            tokens=executor.fcm_token if executor else None,
-            title="Работа принята",
-            body=f"Ваша работа (№ {existing_request.request_id}) была принята заявителем"
-        )
-        for resp in resps:
-            print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
-        
-        db.commit()
-        return {"message": "Request confirmed successfully", "request_id": request.request_id}
+    existing_request = update_request(request.request_id, 6, request.user_id, db, reason=request.reason, action_name='Принято')
+    creator = db.query(User).filter(User.user_id == request.user_id).first()
+    executor = db.query(User).filter(User.user_id == existing_request.assigned_to).first()
     
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    if executor:
+        executor.num_completed += 1
+        executor.tokens += 200
+        executor.last_completed = datetime.now().date()
+
+    if creator:
+        creator.tokens += 100
+
+    resps = send_push(
+        tokens=executor.fcm_token if executor else None,
+        title="Работа принята",
+        body=f"Ваша работа (№ {existing_request.request_id}) была принята заявителем",
+        type_of_request="2"
+    )
+    for resp in resps:
+        print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
+    
+    db.commit()
+    return {"message": "Request confirmed successfully", "request_id": request.request_id}
+
 
 
 @app.post("/requestor-deny", response_model=dict)
 def deny_request(request: UpdateRequest, db: Session = Depends(get_db)):
-    try:
-        existing_request = update_request(
-            request.request_id,
-            new_status=4,
-            user_id=request.user_id,
-            db=db,
-            reason=request.reason,
-            action_name='Отправлено на доработку'
-        )
-        executor_user = db.query(User).filter(User.user_id == existing_request.assigned_to).first()
-        resps = send_push(
-            tokens=executor_user.fcm_token,
-            title="Работа отклонена",
-            body=f"Ваша работа (№ {existing_request.request_id}) была отправлена на доработку заявителем"
-        )
-        for resp in resps:
-            print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
-        
-        return {"message": "Request denied successfully", "request_id": existing_request.request_id}
+    existing_request = update_request(
+        request.request_id,
+        new_status=4,
+        user_id=request.user_id,
+        db=db,
+        reason=request.reason,
+        action_name='Отправлено на доработку'
+    )
+    executor_user = db.query(User).filter(User.user_id == existing_request.assigned_to).first()
+    resps = send_push(
+        tokens=executor_user.fcm_token,
+        title="Работа отклонена",
+        body=f"Ваша работа (№ {existing_request.request_id}) была отправлена на доработку заявителем"
+    )
+    for resp in resps:
+        print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
     
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return {"message": "Request denied successfully", "request_id": existing_request.request_id}
+
 
 
 @app.post("/requestor-delete", response_model=dict)
 def soft_delete_request(request: UpdateRequest, db: Session = Depends(get_db)):
-    try:
-        existing_request = db.query(Request).filter(Request.request_id == request.request_id, Request.created_by == request.user_id).first()
 
-        if existing_request is None:
-            raise HTTPException(status_code=404, detail="Request not found")
+    existing_request = db.query(Request).filter(Request.request_id == request.request_id, Request.created_by == request.user_id).first()
 
-        update_request(request.request_id, new_status=7, user_id=request.user_id, db=db, reason=request.reason, action_name='Удалено')
+    if existing_request is None:
+        raise HTTPException(status_code=404, detail="Request not found")
 
-        return {"message": "Request marked as deleted successfully"}
-    
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    update_request(request.request_id, new_status=7, user_id=request.user_id, db=db, reason=request.reason, action_name='Удалено')
+
+    return {"message": "Request marked as deleted successfully"}
