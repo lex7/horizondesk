@@ -27,18 +27,6 @@ async def exception_handler(request: Request, exc: Exception):
     }
     return JSONResponse(error_response, status_code=500)
 
-# @app.exception_handler(HTTPException)
-# async def http_exception_handler(request: Request, exc: HTTPException):
-#     error_response = {
-#         "message": exc.detail,
-#         "status_code": exc.status_code,
-#         "error": {
-#             "type": type(exc).__name__,
-#             "message": exc.detail,
-#             "traceback": format_exception(type(exc), exc, exc.__traceback__)
-#         }
-#     }
-#     return JSONResponse(error_response, status_code=exc.status_code)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -403,19 +391,18 @@ def create_request(request: RequestCreate, db: Session = Depends(get_db)):
     ).all()
 
     # Extract FCM tokens and send push notifications
+    badge = db.query(Request).filter(Request.request_type == request.request_type, Request.status_id == 1).count()
     for user in matching_users:
         if user.fcm_token:
-            resps = send_push(
+            send_push(
                 tokens=user.fcm_token,
                 title="Новый запрос",
                 body=f"Поступил новый запрос (№ {new_request.request_id})",
-                type_of_request="4"
+                type_of_request="4",
+                badge=badge
             )
-            for resp in resps:
-                print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
 
     return {"message": "Request created successfully", "request_id": new_request.request_id}
-
 
 
 def update_request(request_id: int, new_status: int, user_id: int, db: Session, action_name: str, **kwargs):
@@ -466,14 +453,12 @@ def approve_request(request: UpdateRequest, db: Session = Depends(get_db)):
     
     # Send push notification to the request creator
     creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
-    resps = send_push(
+    send_push(
         tokens=creator_user.fcm_token,
         title="Запрос согласован",
         body=f"Ваш запрос (№ {existing_request.request_id}) был согласован мастером",
         type_of_request="1"
     )
-    for resp in resps:
-        print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
 
     # Send push notification to all users with the same request_type and role_id=1
     executor_users = db.query(User).filter(
@@ -481,14 +466,14 @@ def approve_request(request: UpdateRequest, db: Session = Depends(get_db)):
         User.role_id == 1
     ).all()
 
-    resps = send_push(
+    badge = db.query(Request).filter(Request.request_type == request.request_type, Request.status_id == 2).count()
+    send_push(
         tokens=[user.fcm_token for user in executor_users if user.fcm_token],
         title="Запрос ожидает исполнения",
         body=f"Запрос (№ {existing_request.request_id}) был согласован и ожидает выполнения",
-        type_of_request="5"
+        type_of_request="5",
+        badge=badge
     )
-    for resp in resps:
-        print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
 
     return {"message": "Request approved successfully", "request_id": existing_request.request_id}
 
@@ -505,14 +490,12 @@ def deny_request(request: UpdateRequest, db: Session = Depends(get_db)):
         action_name='Отклонено мастером'
     )
     creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
-    resps = send_push(
+    send_push(
         tokens=creator_user.fcm_token,
         title="Запрос отклонен",
         body=f"Ваш запрос (№ {existing_request.request_id}) был отклонен мастером",
         type_of_request="3"
     )
-    for resp in resps:
-        print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
     
     return {"message": "Request denied successfully", "request_id": existing_request.request_id}
     
@@ -534,13 +517,11 @@ def take_request(request: UpdateRequest, db: Session = Depends(get_db)):
         action_name='Взято в работу'
     )
     creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
-    resps = send_push(
+    send_push(
         tokens=creator_user.fcm_token,
         title="Запрос в работе",
         body=f"Ваш запрос (№ {existing_request.request_id}) был взят в работу"
     )
-    for resp in resps:
-        print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
     
     return {"message": "Request accepted into work successfully", "request_id": existing_request.request_id}
     
@@ -558,13 +539,11 @@ def cancel_request(request: UpdateRequest, db: Session = Depends(get_db)):
         action_name='Исполнитель отказался'
     )
     creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
-    resps = send_push(
+    send_push(
         tokens=creator_user.fcm_token,
         title="Запрос был отменен",
         body=f"Ваш запрос (№ {existing_request.request_id}) был возвращен исполнителем"
     )
-    for resp in resps:
-        print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
     
     return {"message": "Request canceled successfully", "request_id": existing_request.request_id}
     
@@ -574,13 +553,14 @@ def cancel_request(request: UpdateRequest, db: Session = Depends(get_db)):
 def complete_request(request: UpdateRequest, db: Session = Depends(get_db)):
     existing_request = update_request(request.request_id, 5, request.user_id, db, reason=request.reason, action_name='Исполнено')
     creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
-    resps = send_push(
+    badge = db.query(Request).filter(Request.request_type == request.request_type, Request.status_id == 5).count()
+    send_push(
         tokens=creator_user.fcm_token,
         title="Запрос исполнен",
-        body=f"Ваш запрос (№ {existing_request.request_id}) был исполнен и ожидает проверки"
+        body=f"Ваш запрос (№ {existing_request.request_id}) был исполнен и ожидает проверки",
+        type_of_request="1",
+        badge=badge
     )
-    for resp in resps:
-        print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
     
     return {"message": "Request completed successfully", "request_id": request.request_id}
 
@@ -599,14 +579,12 @@ def confirm_request(request: UpdateRequest, db: Session = Depends(get_db)):
     if creator:
         creator.tokens += 100
 
-    resps = send_push(
+    send_push(
         tokens=executor.fcm_token if executor else None,
         title="Работа принята",
         body=f"Ваша работа (№ {existing_request.request_id}) была принята заявителем",
         type_of_request="2"
     )
-    for resp in resps:
-        print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
     
     db.commit()
     return {"message": "Request confirmed successfully", "request_id": request.request_id}
@@ -624,13 +602,11 @@ def deny_request(request: UpdateRequest, db: Session = Depends(get_db)):
         action_name='Отправлено на доработку'
     )
     executor_user = db.query(User).filter(User.user_id == existing_request.assigned_to).first()
-    resps = send_push(
+    send_push(
         tokens=executor_user.fcm_token,
         title="Работа отклонена",
         body=f"Ваша работа (№ {existing_request.request_id}) была отправлена на доработку заявителем"
     )
-    for resp in resps:
-        print(f"Token: {resp['token']}, Status: {resp['status']}, Response/Error: {resp.get('response') or resp.get('error')}")
     
     return {"message": "Request denied successfully", "request_id": existing_request.request_id}
 
