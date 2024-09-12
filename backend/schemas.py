@@ -128,3 +128,10 @@ class RefreshTokenRequest(BaseModel):
 class LogoutRequest(BaseModel):
     user_id: int
     old_fcm: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    username: str | None = None
