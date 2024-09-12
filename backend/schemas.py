@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime, date
+from fastapi.security import OAuth2PasswordRequestForm
 
 
 class UserModel(BaseModel):
@@ -29,14 +30,13 @@ class StatusModel(BaseModel):
     class Config:
         from_attributes = True
 
-class LoginRequest(BaseModel):
-    username: str
-    password: str
+class LoginRequest(OAuth2PasswordRequestForm):
     fcm_token: Optional[str] = None
 
 class LoginResponse(BaseModel):
     user_id: int
     role_id: int
+    access_token: str
 
 class RegisterRequest(BaseModel):
     username: str

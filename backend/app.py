@@ -12,12 +12,12 @@ from backend.models import engine, Request, RequestType, Role, User, Status, Req
 from traceback import format_exception
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer
 from backend.schemas import TokenData
 
 SECRET_KEY = "your-secret-key"  # Replace with a strong key
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 300
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -100,51 +100,38 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     return user
 
 
-
-@app.post("/token")
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == form_data.username).first()
-    if not user or not verify_password(form_data.password, user.password_hash):
-        raise HTTPException(status_code=400, detail="Invalid credentials")
-    
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": user.username}, expires_delta=access_token_expires)
-    
-    return {"access_token": access_token, "token_type": "bearer"}
-
-
 @app.get("/requests", response_model=List[RequestModel])
-def get_requests(db: Session = Depends(get_db)):
+def get_requests(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     requests = db.query(Request).all()
     return requests
 
 
 @app.get("/request-types", response_model=List[RequestTypeModel])
-def get_request_types(db: Session = Depends(get_db)):
+def get_request_types(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     request_types = db.query(RequestType).all()
     return request_types
 
 
 @app.get("/roles", response_model=List[RoleModel])
-def get_roles(db: Session = Depends(get_db)):
+def get_roles(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     roles = db.query(Role).all()
     return roles
 
 
 @app.get("/users", response_model=List[UserModel])
-def get_users(db: Session = Depends(get_db)):
+def get_users(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     users = db.query(User).all()
     return users
 
 
 @app.get("/statuses", response_model=List[StatusModel])
-def get_statuses(db: Session = Depends(get_db)):
+def get_statuses(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     statuses = db.query(Status).all()
     return statuses
 
 
 @app.get("/under-master-approval", response_model=List[RequestModel])
-def get_under_master_approval_requests(user_id: int, db: Session = Depends(get_db)):
+def get_under_master_approval_requests(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     # Find the user
     user = db.query(User).filter(User.user_id == user_id).first()
     if user is None:
@@ -163,7 +150,7 @@ def get_under_master_approval_requests(user_id: int, db: Session = Depends(get_d
 
 
 @app.get("/under-master-monitor", response_model=List[RequestModel])
-def get_under_master_monitor_requests(user_id: int, db: Session = Depends(get_db)):
+def get_under_master_monitor_requests(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     # Find the user
     user = db.query(User).filter(User.user_id == user_id).first()
     if user is None:
@@ -182,16 +169,7 @@ def get_under_master_monitor_requests(user_id: int, db: Session = Depends(get_db
 
 
 @app.get("/in-progress", response_model=List[RequestModel])
-def get_in_progress_requests(user_id: int, db: Session = Depends(get_db)):
-    requests = db.query(Request).filter(
-        Request.status_id.in_([1, 2, 4, 5]), 
-        Request.created_by == user_id
-    ).all()
-    return requests
-
-
-@app.get("/in-progress-locked", response_model=List[RequestModel])
-def get_in_progress_requests_locked(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def get_in_progress_requests(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     requests = db.query(Request).filter(
         Request.status_id.in_([1, 2, 4, 5]), 
         Request.created_by == user_id
@@ -200,31 +178,31 @@ def get_in_progress_requests_locked(user_id: int, db: Session = Depends(get_db),
 
 
 @app.get("/denied", response_model=List[RequestModel])
-def get_denied_requests(user_id: int, db: Session = Depends(get_db)):
+def get_denied_requests(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     requests = db.query(Request).filter(Request.status_id == 3, Request.created_by == user_id).all()
     return requests
 
 
 @app.get("/under-requestor-approval", response_model=List[RequestModel])
-def get_under_requestor_approval_requests(user_id: int, db: Session = Depends(get_db)):
+def get_under_requestor_approval_requests(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     requests = db.query(Request).filter(Request.status_id == 5, Request.created_by == user_id).all()
     return requests
 
 
 @app.get("/completed", response_model=List[RequestModel])
-def get_completed_requests(user_id: int, db: Session = Depends(get_db)):
+def get_completed_requests(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     requests = db.query(Request).filter(Request.status_id == 6, Request.created_by == user_id).all()
     return requests
 
 
 @app.get("/executor-assigned", response_model=List[RequestModel])
-def get_my_tasks(user_id: int, db: Session = Depends(get_db)):
+def get_my_tasks(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     tasks = db.query(Request).filter(Request.assigned_to == user_id).all()
     return tasks
 
 
 @app.get("/executor-unassigned", response_model=List[RequestModel])
-def get_unassigned(user_id: int, db: Session = Depends(get_db)):
+def get_unassigned(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     # Find the user
     user = db.query(User).filter(User.user_id == user_id).first()
     if user is None:
@@ -244,7 +222,7 @@ def get_unassigned(user_id: int, db: Session = Depends(get_db)):
 
 
 @app.get("/requests-log", response_model=List[RequestStatusLogModel])
-def get_requests_log(db: Session = Depends(get_db)):
+def get_requests_log(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     logs = db.query(RequestStatusLog).all()
     return [RequestStatusLogModel(
         log_id=log.log_id,
@@ -261,7 +239,7 @@ def get_requests_log(db: Session = Depends(get_db)):
 
 
 @app.get("/request-history", response_model=List[RequestStatusLogModel])
-def get_request_history(request_id: int, db: Session = Depends(get_db)):
+def get_request_history(request_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     history = db.query(RequestStatusLog).filter(RequestStatusLog.request_id == request_id).order_by(RequestStatusLog.log_id.asc()).all()
     if not history:
         raise HTTPException(status_code=404, detail="No history found for the specified request_id")
@@ -269,7 +247,7 @@ def get_request_history(request_id: int, db: Session = Depends(get_db)):
 
 
 @app.get("/my-data", response_model=UserModel)
-def get_user_data(user_id: int, db: Session = Depends(get_db)):
+def get_user_data(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     user = db.query(User).filter(User.user_id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -277,7 +255,7 @@ def get_user_data(user_id: int, db: Session = Depends(get_db)):
 
 
 @app.get("/rewards", response_model=RewardsResponse)
-def get_rewards(user_id: int, db: Session = Depends(get_db)):
+def get_rewards(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     user = db.query(User).filter(User.user_id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -300,7 +278,7 @@ def hash_password(password):
     return pwd_context.hash(password)
 
 @app.post("/register")
-def register(request: RegisterRequest, db: Session = Depends(get_db)):
+def register(request: RegisterRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     try:
         hashed_password = hash_password(request.password)
         user = User(
@@ -378,28 +356,32 @@ def add_fcm_token(user: User, fcm_token: str, db: Session):
 
 
 @app.post("/login", response_model=LoginResponse)
-def login(request: LoginRequest, db: Session = Depends(get_db)):
-    user = get_user_by_username(db, request.username)
+async def login(form_data: LoginRequest = Depends(), db: Session = Depends(get_db)):
+    user = get_user_by_username(db, form_data.username)
     
-    if not user or not verify_password(request.password, user.password_hash):
+    if not user or not verify_password(form_data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
-    if request.fcm_token:
-        print(request.fcm_token)
-        device_id = extract_unique_device_id(request.fcm_token)
+    # Handle FCM token
+    if form_data.fcm_token:
+        device_id = extract_unique_device_id(form_data.fcm_token)
         existing_user = get_user_by_device_id(db, device_id)
 
         if existing_user and existing_user.user_id != user.user_id:
             remove_device_from_other_users(db, device_id, user.user_id)
         
-        add_fcm_token(user, request.fcm_token, db)
+        add_fcm_token(user, form_data.fcm_token, db)
     
-    return LoginResponse(user_id=user.user_id, role_id=user.role_id)
+    # Create access token
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(data={"sub": user.username}, expires_delta=access_token_expires)
     
+    # Return user_id, role_id, and access token
+    return LoginResponse(user_id=user.user_id, role_id=user.role_id, access_token=access_token)
 
 
 @app.post("/refresh-user-token")
-def refresh_user_token(request: RefreshTokenRequest, db: Session = Depends(get_db)):
+def refresh_user_token(request: RefreshTokenRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     user = db.query(User).filter(User.user_id == request.user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -417,7 +399,7 @@ def remove_fcm_token(user: User, old_fcm: str, db: Session):
 
 
 @app.post("/logout")
-def logout(request: LogoutRequest, db: Session = Depends(get_db)):
+def logout(request: LogoutRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     user = db.query(User).filter(User.user_id == request.user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -428,7 +410,7 @@ def logout(request: LogoutRequest, db: Session = Depends(get_db)):
 
 
 @app.post("/create-request", response_model=dict)
-def create_request(request: RequestCreate, db: Session = Depends(get_db)):
+def create_request(request: RequestCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     # Create a new request
     new_request = Request(
         request_type=request.request_type,
@@ -518,7 +500,7 @@ def update_request(request_id: int, new_status: int, user_id: int, db: Session, 
 
 
 @app.post("/master-approve", response_model=dict)
-def approve_request(request: UpdateRequest, db: Session = Depends(get_db)):
+def approve_request(request: UpdateRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     existing_request = update_request(
         request.request_id,
         new_status=2,
@@ -557,7 +539,7 @@ def approve_request(request: UpdateRequest, db: Session = Depends(get_db)):
 
 
 @app.post("/master-deny", response_model=dict)
-def deny_request(request: UpdateRequest, db: Session = Depends(get_db)):
+def deny_request(request: UpdateRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     existing_request = update_request(
         request.request_id,
         new_status=3,
@@ -579,7 +561,7 @@ def deny_request(request: UpdateRequest, db: Session = Depends(get_db)):
 
 
 @app.post("/take-on-work", response_model=dict)
-def take_request(request: UpdateRequest, db: Session = Depends(get_db)):
+def take_request(request: UpdateRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
     if existing_request is None:
         raise HTTPException(status_code=404, detail="Request not found")
@@ -605,7 +587,7 @@ def take_request(request: UpdateRequest, db: Session = Depends(get_db)):
 
 
 @app.post("/executor-cancel", response_model=dict)
-def cancel_request(request: UpdateRequest, db: Session = Depends(get_db)):
+def cancel_request(request: UpdateRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     existing_request = update_request(
         request.request_id,
         new_status=2,
@@ -627,7 +609,7 @@ def cancel_request(request: UpdateRequest, db: Session = Depends(get_db)):
 
 
 @app.post("/executor-complete", response_model=dict)
-def complete_request(request: UpdateRequest, db: Session = Depends(get_db)):
+def complete_request(request: UpdateRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     existing_request = update_request(request.request_id, 5, request.user_id, db, reason=request.reason, action_name='Исполнено')
     creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
     badge = db.query(Request).filter(Request.request_type == request.request_type, Request.status_id == 5).count()
@@ -643,7 +625,7 @@ def complete_request(request: UpdateRequest, db: Session = Depends(get_db)):
 
 
 @app.post("/requestor-confirm", response_model=dict)
-def confirm_request(request: UpdateRequest, db: Session = Depends(get_db)):
+def confirm_request(request: UpdateRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     existing_request = update_request(request.request_id, 6, request.user_id, db, reason=request.reason, action_name='Принято')
     creator = db.query(User).filter(User.user_id == request.user_id).first()
     executor = db.query(User).filter(User.user_id == existing_request.assigned_to).first()
@@ -669,7 +651,7 @@ def confirm_request(request: UpdateRequest, db: Session = Depends(get_db)):
 
 
 @app.post("/requestor-deny", response_model=dict)
-def deny_request(request: UpdateRequest, db: Session = Depends(get_db)):
+def deny_request(request: UpdateRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     existing_request = update_request(
         request.request_id,
         new_status=4,
@@ -690,7 +672,7 @@ def deny_request(request: UpdateRequest, db: Session = Depends(get_db)):
 
 
 @app.post("/requestor-delete", response_model=dict)
-def soft_delete_request(request: UpdateRequest, db: Session = Depends(get_db)):
+def soft_delete_request(request: UpdateRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
 
     existing_request = db.query(Request).filter(Request.request_id == request.request_id, Request.created_by == request.user_id).first()
 
