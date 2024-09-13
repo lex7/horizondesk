@@ -42,11 +42,18 @@ enum EndPointsDolly {
         }
     }
     
-    var baseHeaders: [String: String]? {
+    var headers: [String : String]? {
+        Self.lock.lock()
+        defer { Self.lock.unlock() }
+        
         switch self {
+        case .login:
+            return ["accept": "application/json",
+                    "Content-Type": "application/json"]
         default:
-            return ["*/*": "Accept", "application/json": "Content-Type"]
+            return baseHeaders
         }
+        
     }
 }
 
@@ -76,6 +83,7 @@ extension EndPointsDolly: Moya.TargetType {
         switch self {
         case .login(let model):
             return .requestJSONEncodable(model)
+            
         case .createRequest(let message):
             return .requestJSONEncodable(message)
         case .requests:
@@ -114,11 +122,14 @@ extension EndPointsDolly: Moya.TargetType {
     }
 
     
-    var headers: [String: String]? {
-        return [
-            "accept": "application/json",
-            "Content-Type": "application/json"
-        ]
+    var baseHeaders: [String: String]? {
+        guard let token = CredentialService.standard.getAuthToken() else {
+            return ["accept": "application/json",
+                    "Content-Type": "application/x-www-form-urlencoded"]
+        }
+        return ["accept": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded",
+                "Authorization": "Bearer \(token)"]
     }
     
     var path: String {

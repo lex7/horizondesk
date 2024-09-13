@@ -95,6 +95,7 @@ final class AuthStateEnvObject: ObservableObject {
                     guard let self = self else { return }
                     self.credentialService.saveUserId(userModel.user_id)
                     self.credentialService.saveUserRole(userModel.role_id)
+                    self.credentialService.saveAuthToken(userModel.access_token)
                     self.tabBarSelection = .createIssue
                     debugPrint("USER ID: \(userModel.user_id) 🆔")
                     debugPrint("ROLE ID: \(userModel.role_id) 🏌️‍♂️")

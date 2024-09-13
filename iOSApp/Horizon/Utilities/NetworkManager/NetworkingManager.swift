@@ -6,15 +6,12 @@ import Moya
 
 final class NetworkManager {
     
+    private static let lock = NSLock()
+    
     static let standard = NetworkManager()
     static var cancelable = Set<AnyCancellable>()
     private init() {}
     
-    private let headers = [
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-    ]
-
     func requestMoyaData(apis: EndPointsDolly) -> AnyPublisher<Data, APIError> {
         Future<Data, APIError> { promise in
             let provider = MoyaProvider<EndPointsDolly>()

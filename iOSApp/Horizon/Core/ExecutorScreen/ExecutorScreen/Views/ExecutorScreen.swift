@@ -137,7 +137,7 @@ private extension ExecutorScreen {
                         logId = issue.request_id
                         showLogsForRequest.toggle()
                     }
-                    Button("Отмена") {
+                    Button("Закрыть окно") {
                         generator.impactOccurred()
                         authStateEnvObject.executorUnassignRequest()
                     }
@@ -180,7 +180,7 @@ private extension ExecutorScreen {
                         logId = issue.request_id
                         showLogsForRequest.toggle()
                     }
-                    Button("Отмена") {
+                    Button("Отказаться от выполнения") {
                         generator.impactOccurred()
                         switch IssueStatus(rawValue: issue.status_id) {
                         case .inprogress, .review:

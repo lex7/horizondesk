@@ -10,6 +10,7 @@ import Foundation
 struct LoginData: Decodable {
     let user_id: Int
     let role_id: Int
+    let access_token: String
 }
 
 extension LoginData {
