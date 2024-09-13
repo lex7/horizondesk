@@ -356,21 +356,21 @@ def add_fcm_token(user: User, fcm_token: str, db: Session):
 
 
 @app.post("/login", response_model=LoginResponse)
-async def login(form_data: LoginRequest = Depends(), db: Session = Depends(get_db)):
-    user = get_user_by_username(db, form_data.username)
+async def login(login_data: LoginRequest, db: Session = Depends(get_db)):
+    user = get_user_by_username(db, login_data.username)
     
-    if not user or not verify_password(form_data.password, user.password_hash):
+    if not user or not verify_password(login_data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     # Handle FCM token
-    if form_data.fcm_token:
-        device_id = extract_unique_device_id(form_data.fcm_token)
+    if login_data.fcm_token:
+        device_id = extract_unique_device_id(login_data.fcm_token)
         existing_user = get_user_by_device_id(db, device_id)
 
         if existing_user and existing_user.user_id != user.user_id:
             remove_device_from_other_users(db, device_id, user.user_id)
         
-        add_fcm_token(user, form_data.fcm_token, db)
+        add_fcm_token(user, login_data.fcm_token, db)
     
     # Create access token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
