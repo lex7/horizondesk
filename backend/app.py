@@ -14,13 +14,14 @@ from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from fastapi.security import OAuth2PasswordBearer
 from backend.schemas import TokenData
+from fastapi.security import OAuth2PasswordRequestForm
 
 SECRET_KEY = "your-secret-key"  # Replace with a strong key
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 300
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
 app = FastAPI()
 
@@ -378,6 +379,20 @@ async def login(login_data: LoginRequest, db: Session = Depends(get_db)):
     
     # Return user_id, role_id, and access token
     return LoginResponse(user_id=user.user_id, role_id=user.role_id, access_token=access_token)
+
+
+@app.post("/token")
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == form_data.username).first()
+    
+    if not user or not verify_password(form_data.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    # Create access token
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(data={"sub": user.username}, expires_delta=access_token_expires)
+    
+    return {"access_token": access_token, "token_type": "bearer"}
 
 
 
