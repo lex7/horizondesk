@@ -541,7 +541,7 @@ def approve_request(request: UpdateRequest, db: Session = Depends(get_db), curre
         User.role_id == 1
     ).all()
 
-    badge = db.query(Request).filter(Request.request_type == request.request_type, Request.status_id == 2).count()
+    badge = db.query(Request).filter(Request.request_type == existing_request.request_type, Request.status_id == 2).count()
     send_push(
         tokens=[user.fcm_token for user in executor_users if user.fcm_token],
         title="Запрос ожидает исполнения",
@@ -551,7 +551,6 @@ def approve_request(request: UpdateRequest, db: Session = Depends(get_db), curre
     )
 
     return {"message": "Request approved successfully", "request_id": existing_request.request_id}
-
 
 
 @app.post("/master-deny", response_model=dict)
