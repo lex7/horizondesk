@@ -627,7 +627,7 @@ def cancel_request(request: UpdateRequest, db: Session = Depends(get_db), curren
 def complete_request(request: UpdateRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     existing_request = update_request(request.request_id, 5, request.user_id, db, reason=request.reason, action_name='Исполнено')
     creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
-    badge = db.query(Request).filter(Request.request_type == request.request_type, Request.status_id == 5).count()
+    badge = db.query(Request).filter(Request.request_type == existing_request.request_type, Request.status_id == 5).count()
     send_push(
         tokens=creator_user.fcm_token,
         title="Запрос исполнен",
