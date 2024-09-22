@@ -8,7 +8,7 @@ services:
       - db
     environment:
       DATABASE_URL: "postgresql+psycopg2://db_worker_user:5v592r4QmsyD@db:5432/hdb01-p"
-    command: ["uvicorn", "backend.app:app", "--host", "0.0.0.0", "--port", "443", "--ssl-keyfile", "/etc/ssl/private/selfsigned.key", "--ssl-certfile", "/etc/ssl/certs/selfsigned.crt"]
+    command: ["uvicorn", "backend.app:app", "--host", "0.0.0.0", "--port", "443"]
 
   db:
     image: postgres:13
