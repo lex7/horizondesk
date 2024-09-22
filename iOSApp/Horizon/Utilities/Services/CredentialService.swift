@@ -40,6 +40,10 @@ final class CredentialService {
         keychain["_saveAuthToken"] = token
     }
     
+    func saveAuthStatus(_ status: String) {
+        keychain["_authStatus"] = status
+    }
+    
     func getUserId() -> Int? {
         return Int(keychain["_saveUserId"] ?? "0")
     }
@@ -54,6 +58,10 @@ final class CredentialService {
     
     func getAuthToken() -> String? {
         return keychain["_saveAuthToken"]
+    }
+    
+    func getAuthStatus() -> String? {
+        return keychain["_authStatus"]
     }
     
     func saveFcm(_ fcm: String) {
@@ -113,6 +121,15 @@ final class CredentialService {
         do {
             try keychain.remove("_saveAuthToken")
             debugPrint("AuthToken deleted ⭐️🔑❌")
+        } catch (let error) {
+            debugPrint(error.localizedDescription)
+        }
+    }
+    
+    func deleteAuthStatus() {
+        do {
+            try keychain.remove("_authStatus")
+            debugPrint("_authStatus deleted ⭐️🔑❌")
         } catch (let error) {
             debugPrint(error.localizedDescription)
         }

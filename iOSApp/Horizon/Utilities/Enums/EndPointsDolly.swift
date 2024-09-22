@@ -130,20 +130,7 @@ extension EndPointsDolly: Moya.TargetType {
                 "Content-Type": "application/json",
                 "Authorization": "Bearer \(token)"]
     }
-    
-//    curl -X 'POST' \
-//      'https://timofmax1.fvds.ru/create-request' \
-//      -H 'accept: application/json' \
-//      -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJUTUstMTAwNSIsImV4cCI6MTcyNzAyOTI2MX0.1E36lx20kFPDRpc0p9hdKSDIHOOsnmzye1fy8XPS56Q' \
-//      -H 'Content-Type: application/json' \
-//      -d '{
-//      "request_type": 3,
-//      "user_id": 3,
-//      "area_id": 3,
-//      "description": "privet boys"
-//    }
-//    '
-    
+        
     var path: String {
         switch self {
         case .login:

@@ -69,12 +69,15 @@ final class AuthStateEnvObject: ObservableObject {
     
     // MARK: - Static constants
     static let shared = AuthStateEnvObject()
-    
+      
     private init() {
-        
+        if let status = credentialService.getAuthStatus() {
+            if status == "authorized" {
+                authState = .authorized
+            }
+        }
     }
-    
-    
+        
     func userLogin() {
         showProgress = true
         let token = credentialService.getFcm() ?? "EmptyFCM"
@@ -99,6 +102,7 @@ final class AuthStateEnvObject: ObservableObject {
                     self.tabBarSelection = .createIssue
                     debugPrint("USER ID: \(userModel.user_id) 🆔")
                     debugPrint("ROLE ID: \(userModel.role_id) 🏌️‍♂️")
+                    self.credentialService.saveAuthStatus("authorized")
                     self.authState = .authorized
                 }
             }
@@ -605,6 +609,8 @@ extension AuthStateEnvObject: DataClearable {
             self?.credentialService.deleteUserId()
             self?.credentialService.deleteFcmToken()
             self?.credentialService.deleteUserRole()
+            self?.credentialService.deleteAuthStatus()
+            self?.credentialService.deleteAuthToken()
             debugPrint("[AuthStateEnvObject: Token is cleared]")
         }
     }
@@ -615,6 +621,7 @@ extension AuthStateEnvObject: UIDataUpdatable {
     func updateAllData() {
         //
         Task {
+            // Requestor
             getInProgressIssue()
             getCompletedIssue()
             getDeniedIssue()
