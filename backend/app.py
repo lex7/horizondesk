@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Depends, status
 from typing import List
-from sqlalchemy import and_
+from sqlalchemy import func
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.exc import IntegrityError
 from passlib.context import CryptContext
@@ -331,10 +331,8 @@ def extract_unique_device_id(fcm_token: str) -> str:
 
 def get_user_by_device_id(db: Session, device_id: str):
     return db.query(User).filter(
-        User.fcm_token.any(and_(
-            User.fcm_token.like(f"{device_id}:%"),
-            User.fcm_token.notlike("%\%%")  # Ensures device_id doesn't contain %
-        ))
+        func.array_to_string(User.fcm_token, ',').like(f"{device_id}:%"),  # Convert array to string for LIKE check
+        func.array_to_string(User.fcm_token, ',').notlike("%\%%")  # Avoid device_id containing %
     ).first()
 
 
