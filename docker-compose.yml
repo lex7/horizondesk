@@ -10,6 +10,7 @@ services:
     command: ["uvicorn", "backend.app:app", "--host", "0.0.0.0", "--port", "8000"]
     networks:
       - internal_network
+    restart: on-failure
 
   db:
     image: postgres:13
@@ -23,6 +24,7 @@ services:
       - ./init-scripts:/docker-entrypoint-initdb.d/
     networks:
       - internal_network
+    restart: on-failure
 
   nginx:
     image: nginx:latest
@@ -30,11 +32,12 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
     ports:
-      - "80:80"  # Expose only Nginx on port 80
+      - "80:80"
     depends_on:
       - web
     networks:
       - internal_network
+    restart: on-failure
 
 volumes:
   postgres_data:
@@ -42,3 +45,4 @@ volumes:
 networks:
   internal_network:
     driver: bridge
+
