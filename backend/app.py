@@ -429,7 +429,6 @@ def logout(request: LogoutRequest, db: Session = Depends(get_db), current_user: 
     return {"message": "FCM token removed successfully"}
 
 
-
 @app.post("/create-request", response_model=dict)
 def create_request(request: RequestCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     # Create a new request
