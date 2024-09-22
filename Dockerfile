@@ -15,8 +15,7 @@ COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Expose the ports for HTTP (80) and HTTPS (443)
-EXPOSE 80
-EXPOSE 443
+EXPOSE 8000
 
 # Command to run the application
-CMD ["uvicorn", "backend.app:app", "--host", "0.0.0.0", "--port", "443"]
+CMD ["uvicorn", "backend.app:app", "--host", "0.0.0.0", "--port", "8000"]
