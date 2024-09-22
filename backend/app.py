@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Depends, status
 from typing import List
-from sqlalchemy import func
+from sqlalchemy import and_
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.exc import IntegrityError
 from passlib.context import CryptContext
@@ -15,12 +15,15 @@ from jose import JWTError, jwt
 from fastapi.security import OAuth2PasswordBearer
 from backend.schemas import TokenData
 from fastapi.security import OAuth2PasswordRequestForm
+import os
 
-SECRET_KEY = "your-secret-key"  # Replace with a strong key
+SECRET_KEY = os.environ.get("SECRET_KEY")
+if not SECRET_KEY:
+    raise ValueError("No SECRET_KEY set for JWT")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 300
+ACCESS_TOKEN_EXPIRE_MINUTES = 3000
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
 app = FastAPI()
@@ -327,9 +330,11 @@ def extract_unique_device_id(fcm_token: str) -> str:
 
 
 def get_user_by_device_id(db: Session, device_id: str):
-    pattern = f"{device_id}:%"
     return db.query(User).filter(
-        func.array_to_string(User.fcm_token, ',').contains(pattern)
+        User.fcm_token.any(and_(
+            User.fcm_token.like(f"{device_id}:%"),
+            User.fcm_token.notlike("%\%%")  # Ensures device_id doesn't contain %
+        ))
     ).first()
 
 

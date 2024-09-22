@@ -7,16 +7,17 @@ services:
     depends_on:
       - db
     environment:
-      DATABASE_URL: "postgresql+psycopg2://db_worker_user:5v592r4QmsyD@db:5432/hdb01-p"
+      SECRET_KEY: ${JWT_SECRET_KEY}
+      DATABASE_URL: ${DATABASE_URL}
     command: ["uvicorn", "backend.app:app", "--host", "0.0.0.0", "--port", "8000"]
 
   db:
     image: postgres:13
     container_name: postgres_db
     environment:
-      POSTGRES_USER: db_worker_user
-      POSTGRES_PASSWORD: 5v592r4QmsyD
-      POSTGRES_DB: hdb01-p
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d/
