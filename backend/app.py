@@ -5,12 +5,11 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.exc import IntegrityError
 from passlib.context import CryptContext
 from starlette.responses import JSONResponse
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from backend.utils import send_push
 from backend.schemas import *
 from backend.models import engine, Request, RequestType, Role, User, Status, RequestStatusLog
 from traceback import format_exception
-from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from fastapi.security import OAuth2PasswordBearer
 from backend.schemas import TokenData
@@ -272,6 +271,44 @@ def get_rewards(user_id: int, db: Session = Depends(get_db), current_user: User 
     )
 
     return rewards_data
+
+
+@app.get("/boss-requests", response_model=List[RequestModel])
+def get_boss_requests(
+    from_date: date,
+    until_date: date,
+    status: str,
+    request_type: int,
+    area_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    # Map status to status_id
+    status_mapping = {
+        "done": 6,
+        "denied": 3,
+        "in-progress": [1, 2, 4, 5]  # List for multiple status IDs
+    }
+
+    # Default query with date range
+    query = db.query(Request).filter(
+        Request.created_at >= from_date,
+        Request.created_at <= until_date,
+        Request.request_type == request_type,
+        Request.area_id == area_id
+    )
+
+    # Apply status filter
+    if status in status_mapping:
+        if isinstance(status_mapping[status], list):
+            query = query.filter(Request.status_id.in_(status_mapping[status]))
+        else:
+            query = query.filter(Request.status_id == status_mapping[status])
+    else:
+        raise HTTPException(status_code=400, detail="Invalid status value")
+
+    # Execute the query and return the results
+    return query.all()
 
 
 # Post endpoints
