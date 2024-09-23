@@ -7,10 +7,10 @@ RUN apt-get update && apt-get install -y libpq-dev gcc
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy dir
+# Copy project files
 COPY . .
 
-# Install the dependencies
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Command to run the application
