@@ -273,7 +273,7 @@ def get_rewards(user_id: int, db: Session = Depends(get_db), current_user: User 
     return rewards_data
 
 
-@app.post("/boss-requests", response_model=List[RequestModel])
+@app.get("/boss-requests", response_model=List[RequestModel])
 def get_boss_requests(
     filter_data: BossRequestsFilter,
     db: Session = Depends(get_db),
