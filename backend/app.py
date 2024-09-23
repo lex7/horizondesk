@@ -275,8 +275,8 @@ def get_rewards(user_id: int, db: Session = Depends(get_db), current_user: User 
 
 @app.get("/boss-requests", response_model=List[RequestModel])
 def get_boss_requests(
-    from_date: datetime,
-    until_date: datetime,
+    from_date: date,
+    until_date: date,
     status: str,
     request_type: int,
     area_id: int,
