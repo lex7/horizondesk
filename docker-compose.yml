@@ -10,11 +10,12 @@ services:
       INITIAL_USER_USERNAME: ${INITIAL_USER_USERNAME}
       INITIAL_USER_PASSWORD: ${INITIAL_USER_PASSWORD}
     command: >
-      bash -c "python /backend/create_initial_user.py &&
+      bash -c "python /app/backend/create_initial_user.py &&
                uvicorn backend.app:app --host 0.0.0.0 --port 8000"
     networks:
       - internal_network
     restart: on-failure
+
 
   db:
     image: postgres:13
