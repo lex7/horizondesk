@@ -282,7 +282,7 @@ def hash_password(password):
     return pwd_context.hash(password)
 
 @app.post("/register")
-def register(request: RegisterRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def register(request: RegisterRequest, db: Session = Depends(get_db)):
     try:
         hashed_password = hash_password(request.password)
         user = User(
