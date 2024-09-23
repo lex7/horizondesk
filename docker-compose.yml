@@ -1,3 +1,4 @@
+#docker-compose.yml
 services:
   web:
     build: .
@@ -7,14 +8,10 @@ services:
     environment:
       SECRET_KEY: ${JWT_SECRET_KEY}
       DATABASE_URL: ${DATABASE_URL}
-      INITIAL_USER_USERNAME: ${INITIAL_USER_USERNAME}
-      INITIAL_USER_PASSWORD: ${INITIAL_USER_PASSWORD}
-    command: >
-               uvicorn backend.app:app --host 0.0.0.0 --port 8000"
+    command: ["uvicorn", "backend.app:app", "--host", "0.0.0.0", "--port", "8000"]
     networks:
       - internal_network
     restart: on-failure
-
 
   db:
     image: postgres:13
@@ -39,12 +36,13 @@ services:
       - ./selfsigned.key:/etc/nginx/ssl/selfsigned.key
     ports:
       - "80:80"
-      - "443:443"
+      - "443:443"  # Expose HTTPS port
     depends_on:
       - web
     networks:
       - internal_network
     restart: on-failure
+
 
 volumes:
   postgres_data:
@@ -52,3 +50,4 @@ volumes:
 networks:
   internal_network:
     driver: bridge
+
