@@ -137,15 +137,3 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str | None = None
-
-class BossRequestsFilter(BaseModel):
-    from_date: datetime = Field(..., description="Start date in format YYYY-MM-DDTHH:MM:SS")
-    until_date: datetime = Field(..., description="End date in format YYYY-MM-DDTHH:MM:SS")
-    status: str = Field(..., description="Request status ('done', 'denied', 'in-progress')")
-    request_type: int = Field(..., description="ID of the request type")
-    area_id: int = Field(..., description="ID of the area")
-
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.strftime("%Y-%m-%dT%H:%M:%S")
-        }
