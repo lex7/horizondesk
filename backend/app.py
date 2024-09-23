@@ -273,13 +273,9 @@ def get_rewards(user_id: int, db: Session = Depends(get_db), current_user: User 
     return rewards_data
 
 
-@app.get("/boss-requests", response_model=List[RequestModel])
+@app.post("/boss-requests", response_model=List[RequestModel])
 def get_boss_requests(
-    from_date: date,
-    until_date: date,
-    status: str,
-    request_type: int,
-    area_id: int,
+    filter_data: BossRequestsFilter,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -287,23 +283,23 @@ def get_boss_requests(
     status_mapping = {
         "done": 6,
         "denied": 3,
-        "in-progress": [1, 2, 4, 5]  # List for multiple status IDs
+        "in-progress": [1, 2, 4, 5]
     }
 
     # Default query with date range
     query = db.query(Request).filter(
-        Request.created_at >= from_date,
-        Request.created_at <= until_date,
-        Request.request_type == request_type,
-        Request.area_id == area_id
+        Request.created_at >= filter_data.from_date,
+        Request.created_at <= filter_data.until_date,
+        Request.request_type == filter_data.request_type,
+        Request.area_id == filter_data.area_id
     )
 
     # Apply status filter
-    if status in status_mapping:
-        if isinstance(status_mapping[status], list):
-            query = query.filter(Request.status_id.in_(status_mapping[status]))
+    if filter_data.status in status_mapping:
+        if isinstance(status_mapping[filter_data.status], list):
+            query = query.filter(Request.status_id.in_(status_mapping[filter_data.status]))
         else:
-            query = query.filter(Request.status_id == status_mapping[status])
+            query = query.filter(Request.status_id == status_mapping[filter_data.status])
     else:
         raise HTTPException(status_code=400, detail="Invalid status value")
 
