@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.exc import IntegrityError
 from passlib.context import CryptContext
 from starlette.responses import JSONResponse
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, date
 from backend.utils import send_push
 from backend.schemas import *
 from backend.models import engine, Request, RequestType, Role, User, Status, RequestStatusLog
@@ -275,7 +275,7 @@ def get_rewards(user_id: int, db: Session = Depends(get_db), current_user: User 
 
 @app.get("/boss-requests", response_model=List[RequestModel])
 def get_boss_requests(
-    from_date: date,
+    from_date: date, 
     until_date: date,
     status: str,
     request_type: int,
