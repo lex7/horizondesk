@@ -165,7 +165,7 @@ def get_under_master_monitor_requests(user_id: int, db: Session = Depends(get_db
 
     # Query for requests where request_type matches the user's request_type
     requests = db.query(Request).filter(
-        Request.status_id != 1,
+        Request.status_id.not_in([1, 7]),
         Request.request_type == user.request_type  # Ensure request_type matches user's request_type
     ).all()
 
