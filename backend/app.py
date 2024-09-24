@@ -501,6 +501,8 @@ def logout(request: LogoutRequest, db: Session = Depends(get_db), current_user: 
 
 @app.post("/create-request", response_model=dict)
 def create_request(request: RequestCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    # Use provided `created_at` or fallback to the current time
+    created_at = request.created_at if request.created_at else datetime.now(timezone.utc)
 
     # Create a new request
     new_request = Request(
@@ -508,7 +510,7 @@ def create_request(request: RequestCreate, db: Session = Depends(get_db), curren
         created_by=request.user_id,
         area_id=request.area_id,
         description=request.description,
-        created_at=request.created_at
+        created_at=created_at
     )
     db.add(new_request)
     db.commit()
