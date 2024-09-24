@@ -1,11 +1,8 @@
 #docker-compose.yml
 services:
   web:
-    build: .
-    environment:
-      SECRET_KEY: ${JWT_SECRET_KEY}
-      DATABASE_URL: ${DATABASE_URL}
-    command: ["uvicorn", "backend.app:app", "--host", "0.0.0.0", "--port", "8000"]
+    build: .  
+    command: ["uvicorn", "backend.app:app", "--host", "0.0.0.0"]
     deploy:
       replicas: 3  # 3 replicas of the FastAPI app
     networks:
