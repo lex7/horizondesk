@@ -55,10 +55,6 @@ def get_db():
 
 # Get Endpoints
 
-@app.get("/")
-def read_root():
-    return {"message": "home page"}
-
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -313,7 +309,7 @@ def get_boss_requests(
 
 
 @app.get("/get-all-stats")
-def generate_random_stats():
+def generate_random_stats(current_user: User = Depends(get_current_user)):
     # Set the date range
     start_date = datetime(2023, 9, 24)
     end_date = datetime(2024, 9, 24)
@@ -339,6 +335,23 @@ def generate_random_stats():
     return stats
 
 
+@app.get("/get-rating", response_model=List[RatingResponse])
+def get_rating(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    # Query to get all users and the required fields
+    users = db.query(
+        User.user_id,
+        User.surname,
+        User.name,
+        User.middle_name,
+        User.tokens,
+        User.num_created,
+        User.num_completed
+    ).all()
+
+    # Create and return the list of users with the required fields
+    return users
+
+
 # Post endpoints
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -347,7 +360,7 @@ def hash_password(password):
     return pwd_context.hash(password)
 
 @app.post("/register")
-def register(request: RegisterRequest, db: Session = Depends(get_db)):
+def register(request: RegisterRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     try:
         hashed_password = hash_password(request.password)
         user = User(

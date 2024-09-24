@@ -138,3 +138,15 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str | None = None
+
+class RatingResponse(BaseModel):
+    user_id: int
+    surname: Optional[str]
+    name: Optional[str]
+    middle_name: Optional[str]
+    tokens: int
+    num_created: int
+    num_completed: int
+
+    class Config:
+        from_attributes = True
