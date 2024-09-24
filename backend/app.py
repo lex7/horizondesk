@@ -15,6 +15,7 @@ from fastapi.security import OAuth2PasswordBearer
 from backend.schemas import TokenData
 from fastapi.security import OAuth2PasswordRequestForm
 import os
+import random
 
 JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY")
 if not JWT_SECRET_KEY:
@@ -312,38 +313,30 @@ def get_boss_requests(
 
 
 @app.get("/get-all-stats")
-def get_all_stats(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    # Get the earliest and latest dates
-    min_date = db.query(func.min(cast(Request.created_at, Date))).scalar()
-    max_date = db.query(func.max(cast(Request.created_at, Date))).scalar()
+def generate_random_stats():
+    # Set the date range
+    start_date = datetime(2023, 9, 24)
+    end_date = datetime(2024, 9, 24)
 
-    if not min_date or not max_date:
-        return []  # No requests in the database
+    # Initialize an empty list to store the result
+    stats = []
 
-    # Fetch request counts grouped by date
-    results = db.query(
-        cast(Request.created_at, Date).label('date'),
-        func.count(Request.request_id).label('events')
-    ).group_by(cast(Request.created_at, Date)).all()
-
-    # Create a dict with dates as keys and event counts as values
-    event_dict = {str(result.date): result.events for result in results}
-
-    # Generate all dates between min_date and max_date
-    all_dates = []
-    current_date = min_date
-    while current_date <= max_date:
+    # Generate all dates between start_date and end_date
+    current_date = start_date
+    while current_date <= end_date:
         date_str = current_date.strftime("%d-%m-%Y")
-        all_dates.append({
+        events = random.randint(0, 23)  # Random count of events from 0 to 23
+
+        # Append the result as a dict
+        stats.append({
             "date": date_str,
-            "events": event_dict.get(str(current_date), 0)  # Default to 0 if no events
+            "events": events
         })
+
+        # Move to the next date
         current_date += timedelta(days=1)
 
-    return all_dates
+    return stats
 
 
 # Post endpoints
