@@ -15,8 +15,8 @@ struct LoginScreen: View {
     // MARK: - Private Variables
 
     #if DEBUG
-    @State private var username: String = "TMK-1005"
-    @State private var password: String = "1234"
+    @State private var username: String = "TMK-1010"
+    @State private var password: String = "1234golive"
     #else
         @State private var username: String = ""
         @State private var password: String = ""

@@ -3,7 +3,7 @@ import Foundation
 import SwiftUI
 
 enum TabBarItem: Hashable, Equatable {
-    case createIssue, monitorIssue, executeIssue, masterReviewIssue, account
+    case createIssue, monitorIssue, executeIssue, masterReviewIssue, account, manager
     var iconName: String {
         switch self {
         case .createIssue: return "paperplane.circle"
@@ -11,6 +11,7 @@ enum TabBarItem: Hashable, Equatable {
         case .executeIssue: return "arrow.up.arrow.down"
         case .masterReviewIssue: return "doc.text"
         case .account: return "person.text.rectangle"
+        case .manager: return "square.3.layers.3d.down.left"
         }
     }
     
@@ -21,6 +22,7 @@ enum TabBarItem: Hashable, Equatable {
         case .executeIssue: return Color.blue
         case .masterReviewIssue: return Color.positivePrimary
         case .account: return Color.orange
+        case .manager: return Color.orange
         }
     }
 }

@@ -10,7 +10,9 @@ struct AppTabBarView: View {
     @State private var selection: String = "home"
     
     // Access Level for Roles
+    @State private var isManager: Bool = false
     @State private var masterIsVisible: Bool = false
+    
     
     // MARK: - Services
     private var credentialService = CredentialService.standard
@@ -18,19 +20,23 @@ struct AppTabBarView: View {
     
     var body: some View {
         CustomTabBarContainer(selection: $authStateEnvObject.tabBarSelection) {
-            CreateIssueScreen(tabSelection: $authStateEnvObject.tabBarSelection)
-                .tabBarItem(tab: .createIssue, selection: $authStateEnvObject.tabBarSelection)
-            MonitorIssueScreen(tabSelection: $authStateEnvObject.tabBarSelection)
-                .tabBarItem(tab: .monitorIssue, selection: $authStateEnvObject.tabBarSelection)
-            ExecutorScreen()
-                .tabBarItem(tab: .executeIssue, selection: $authStateEnvObject.tabBarSelection)
-            if masterIsVisible {
-                MasterScreen(tabSelection: $authStateEnvObject.tabBarSelection)
-                    .tabBarItem(tab: .masterReviewIssue, selection: $authStateEnvObject.tabBarSelection)
-                
+            if !isManager {
+                CreateIssueScreen(tabSelection: $authStateEnvObject.tabBarSelection)
+                    .tabBarItem(tab: .createIssue, selection: $authStateEnvObject.tabBarSelection)
+                MonitorIssueScreen(tabSelection: $authStateEnvObject.tabBarSelection)
+                    .tabBarItem(tab: .monitorIssue, selection: $authStateEnvObject.tabBarSelection)
+                ExecutorScreen()
+                    .tabBarItem(tab: .executeIssue, selection: $authStateEnvObject.tabBarSelection)
+                if masterIsVisible {
+                    MasterScreen(tabSelection: $authStateEnvObject.tabBarSelection)
+                        .tabBarItem(tab: .masterReviewIssue, selection: $authStateEnvObject.tabBarSelection)
+                }
+                MyAccountScreen(tabSelection: $authStateEnvObject.tabBarSelection)
+                    .tabBarItem(tab: .account, selection: $authStateEnvObject.tabBarSelection)
+            } else {
+                ManagerView(tabSelection: $authStateEnvObject.tabBarSelection)
+                    .tabBarItem(tab: .manager, selection: $authStateEnvObject.tabBarSelection)
             }
-            MyAccountScreen(tabSelection: $authStateEnvObject.tabBarSelection)
-                .tabBarItem(tab: .account, selection: $authStateEnvObject.tabBarSelection)
         }
         .onAppear {
             if let role = credentialService.getUserRole() {
@@ -40,6 +46,18 @@ struct AppTabBarView: View {
                 } else {
                     masterIsVisible = false
                 }
+                checkIfManager()
+            }
+        }
+    }
+    
+    private func checkIfManager() {
+        if let role = credentialService.getUserRole() {
+            guard let isManagerVisible = RoleEnum(rawValue: 3) else { return }
+            if role == isManagerVisible.rawValue {
+                isManager = true
+            } else {
+                isManager = false
             }
         }
     }

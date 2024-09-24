@@ -29,3 +29,21 @@ enum RegionIssue: Int {
         }
     }
 }
+
+
+enum StatusIssue: String {
+    case done = "done"
+    case inProgress = "in-progress"
+    case denied = "denied"
+    
+    var name: String {
+        switch self {
+        case .done:
+            return "Выполнены"
+        case .inProgress:
+            return "В Работе"
+        case .denied:
+            return "Отклонены"
+        }
+    }
+}

@@ -28,7 +28,9 @@ struct CustomTabBarContainerContainer_Previews: PreviewProvider {
         .monitorIssue,
         .executeIssue,
         .masterReviewIssue,
-        .account
+        .account,
+        .manager
+        
     ]
     
     static var previews: some View { CustomTabBarContainer(selection: .constant(tabs.first!)) {

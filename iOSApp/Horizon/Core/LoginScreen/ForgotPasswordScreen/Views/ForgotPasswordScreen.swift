@@ -12,26 +12,26 @@ struct ForgotPasswordScreen: View {
     @State private var screenHeight = UIScreen.main.bounds.height
     
     // MARK: - Private Variables
-    #if DEBUG
+#if DEBUG
     @State private var userId: String = "TMK-300124"
     @State private var email: String = "ivanov.amt@sinara.ru"
-    #else
+#else
     @State private var userId: String = ""
     @State private var email: String = ""
-    #endif
+#endif
     @State private var selectedDob: String = ""
-@State private var selectedDate: Date
+    @State private var selectedDate: Date
     @State private var showingDatePicker = false
-init() {
+    init() {
         // Initialize date as before
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "dd-MM-yyyy"
         if let initialDate = dateFormatter.date(from: "13-04-1973") {
-            #if DEBUG
+#if DEBUG
             _selectedDate = State(initialValue: initialDate)
-            #else
+#else
             _selectedDate = State(initialValue: Date())
-            #endif
+#endif
         } else {
             _selectedDate = State(initialValue: Date())
         }
@@ -53,7 +53,7 @@ init() {
                     } 
                     Group {
                         titleView(text: "Введите ваши данные")
-                            
+                        
                             .padding(.top, screenHeight/25)
                             .padding(.horizontal, 10)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -134,7 +134,7 @@ private extension ForgotPasswordScreen {
     private func showNext() -> Bool {
         return !userId.isEmpty && !selectedDob.isEmpty && !email.isEmpty
     }
-@ViewBuilder
+    @ViewBuilder
     var datePicker: some View {
         Group {
             if showingDatePicker {
@@ -151,7 +151,7 @@ private extension ForgotPasswordScreen {
                         in: ...Date(),
                         displayedComponents: [.date]
                     )
-//                    .datePickerStyle(WheelDatePickerStyle())
+                    //                    .datePickerStyle(WheelDatePickerStyle())
                     .datePickerStyle(.graphical)
                     .padding()
                     

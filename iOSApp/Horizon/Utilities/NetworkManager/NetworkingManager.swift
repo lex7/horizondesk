@@ -15,7 +15,8 @@ final class NetworkManager {
     private init() {
         // 1. Set up the configuration and evaluator directly here.
         let configuration = URLSessionConfiguration.af.default
-        let manager = ServerTrustManager(evaluators: ["timofmax1.fvds.ru": DisabledEvaluator()])
+        let manager = ServerTrustManager(evaluators: ["corp3.cybertrain4security.ru": DisabledEvaluator(),
+                                                      "timofmax1.fvds.ru": DisabledEvaluator()])
         let session = Session(configuration: configuration, serverTrustManager: manager)
 
         // 2. Initialize the `provider` property with the session.

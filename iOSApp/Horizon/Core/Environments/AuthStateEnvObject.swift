@@ -29,6 +29,7 @@ final class AuthStateEnvObject: ObservableObject {
     // MARK: - Private loaders
     @Published private(set) var masterIsLoading = false
     @Published private(set) var logsIsLoading = false
+    @Published private(set) var statsIsLoading = false
     // Auth data
     @Published var username: String = ""
     @Published var password: String = ""
@@ -45,12 +46,12 @@ final class AuthStateEnvObject: ObservableObject {
     @Published var errorToGetPermission: Bool = false
     @Published private(set) var errorDescription = ""
     
-    
-    
     // TABBAR MENU
     @Published var tabBarSelection: TabBarItem = .createIssue
     
     // SUPPORT SCREEN
+    @Published var allStatsFragments: [(day: Date, events: Int)] = []
+    
     
     // MASTER SCREEN
     @Published var issueRequestSegment: IssuesMontitorSwitcher = .masterReview
@@ -74,9 +75,23 @@ final class AuthStateEnvObject: ObservableObject {
         if let status = credentialService.getAuthStatus() {
             if status == "authorized" {
                 authState = .authorized
+                if isManager() {
+                    tabBarSelection = .manager
+                }
             }
         }
     }
+    
+    private func isManager() -> Bool {
+        if let role = credentialService.getUserRole() {
+            if role == 3 {
+                return true
+            }
+        }
+        return false
+    }
+    
+    
         
     func userLogin() {
         showProgress = true
@@ -104,6 +119,9 @@ final class AuthStateEnvObject: ObservableObject {
                     debugPrint("ROLE ID: \(userModel.role_id) 🏌️‍♂️")
                     self.credentialService.saveAuthStatus("authorized")
                     self.authState = .authorized
+                    if isManager() {
+                        tabBarSelection = .manager
+                    }
                 }
             }
             .store(in: &cancellables)
@@ -148,7 +166,10 @@ final class AuthStateEnvObject: ObservableObject {
     
     private func sendUserLogout(_ action: @escaping () -> Void) {
         guard let userId = credentialService.getUserId(),
-              let fcm = credentialService.getFcm() else { return }
+              let fcm = credentialService.getFcm() else {
+            action()
+            return
+        }
         let model = FcmOldModel(user_id: userId, old_fcm: fcm)
         networkManager.requestMoyaData(apis: .logout(model: model))
             .receive(on: DispatchQueue.main)
@@ -216,6 +237,7 @@ final class AuthStateEnvObject: ObservableObject {
             } receiveValue: { [unowned self] data in
                 do {
                     self.requestsForMasterMonitor = try RequestIssueModel.decode(from: data).sorted { ($0.created_at ?? Date()) > ($1.created_at ?? Date()) }
+                    debugPrint(self.requestsForMasterMonitor)
                 } catch {
                     print(error)
                 }
@@ -576,14 +598,58 @@ final class AuthStateEnvObject: ObservableObject {
             .store(in: &cancellables)
     }
     
-    // MARK: - Other Methods
-    
-    private func makeDateStamp() -> String {
-        let outputFormatter = DateFormatter()
-        outputFormatter.dateFormat = "dd-MMM-yyyy'T'HH:mm'Z'"
-        let timeCreate = outputFormatter.string(from: Date())
-        return timeCreate
+    // MARK: - Requests by filter
+    func filterRequests(_ model: BossFilterModel) {
+        networkManager.requestMoyaData(apis: .bossRequests(model: model))
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] completion in
+                switch completion {
+                case .finished:
+                    debugPrint(String(describing: "[vm: ✅ filterRequests successfully]"))
+                    break
+                case .failure(let error):
+                    debugPrint(String(describing: "[vm: \(error) - ❌ filterRequests]"))
+                }
+                self.logsIsLoading = false
+            } receiveValue: { [unowned self] data in
+                do {
+                    debugPrint("OK")
+                } catch (let error) {
+                    debugPrint(error)
+                }
+            }
+            .store(in: &cancellables)
     }
+    
+    func getAllStats() {
+        statsIsLoading = true
+        networkManager.requestMoyaData(apis: .getAllStats)
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] completion in
+                switch completion {
+                case .finished:
+                    debugPrint(String(describing: "[vm: ✅ getAllStats successfully]"))
+                    break
+                case .failure(let error):
+                    debugPrint(String(describing: "[vm: \(error) - ❌ getAllStats]"))
+                }
+                self.statsIsLoading = false
+            } receiveValue: { [unowned self] data in
+                do {
+                    let dataArray = try FragmentModel.decodeFrom(data: data)
+                    debugPrint("OK")
+                    // [(day: Date, events: Int)]
+                    self.allStatsFragments = dataArray.map { (day: $0.date.makeDateFrom(), events: $0.events) }
+                    // po String(decoding: data, as: UTF8.self)
+                } catch (let error) {
+                    debugPrint(error)
+                }
+            }
+            .store(in: &cancellables)
+    }
+
+    
+    // MARK: - Other Methods
     
     func logout(action: @escaping () -> ()) {
         isStatistic = false
@@ -615,7 +681,6 @@ extension AuthStateEnvObject: DataClearable {
         }
     }
 }
-
 
 extension AuthStateEnvObject: UIDataUpdatable {
     func updateAllData() {

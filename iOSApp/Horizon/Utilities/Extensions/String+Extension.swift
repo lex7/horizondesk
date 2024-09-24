@@ -22,4 +22,11 @@ extension String {
         let voiceOverFormattedDate = voiceOverFormatter.string(from: dateObj)
         return "\(voiceOverFormattedDate)"
     }
+    
+    func makeDateFrom() -> Date {
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "dd-MM-yyyy" // "24-09-2023"
+        return inputFormatter.date(from: self) ?? Date()
+    }
+    
 }
