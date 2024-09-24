@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Depends, status
 from typing import List
-from sqlalchemy import func
+from sqlalchemy import func, cast, Date
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.exc import IntegrityError
 from passlib.context import CryptContext
@@ -309,6 +309,41 @@ def get_boss_requests(
 
     # Execute the query and return the results
     return query.all()
+
+
+@app.get("/get-all-stats")
+def get_all_stats(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    # Get the earliest and latest dates
+    min_date = db.query(func.min(cast(Request.created_at, Date))).scalar()
+    max_date = db.query(func.max(cast(Request.created_at, Date))).scalar()
+
+    if not min_date or not max_date:
+        return []  # No requests in the database
+
+    # Fetch request counts grouped by date
+    results = db.query(
+        cast(Request.created_at, Date).label('date'),
+        func.count(Request.request_id).label('events')
+    ).group_by(cast(Request.created_at, Date)).all()
+
+    # Create a dict with dates as keys and event counts as values
+    event_dict = {str(result.date): result.events for result in results}
+
+    # Generate all dates between min_date and max_date
+    all_dates = []
+    current_date = min_date
+    while current_date <= max_date:
+        date_str = current_date.strftime("%d-%m-%Y")
+        all_dates.append({
+            "date": date_str,
+            "events": event_dict.get(str(current_date), 0)  # Default to 0 if no events
+        })
+        current_date += timedelta(days=1)
+
+    return all_dates
 
 
 # Post endpoints
