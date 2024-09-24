@@ -2,7 +2,6 @@
 services:
   web:
     build: .
-    container_name: fastapi_app
     environment:
       SECRET_KEY: ${JWT_SECRET_KEY}
       DATABASE_URL: ${DATABASE_URL}
