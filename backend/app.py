@@ -501,12 +501,14 @@ def logout(request: LogoutRequest, db: Session = Depends(get_db), current_user: 
 
 @app.post("/create-request", response_model=dict)
 def create_request(request: RequestCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+
     # Create a new request
     new_request = Request(
         request_type=request.request_type,
         created_by=request.user_id,
         area_id=request.area_id,
-        description=request.description
+        description=request.description,
+        created_at=request.created_at
     )
     db.add(new_request)
     db.commit()
@@ -552,6 +554,7 @@ def create_request(request: RequestCreate, db: Session = Depends(get_db), curren
             )
 
     return {"message": "Request created successfully", "request_id": new_request.request_id}
+
 
 
 def update_request(request_id: int, new_status: int, user_id: int, db: Session, action_name: str, **kwargs):

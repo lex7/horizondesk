@@ -77,6 +77,7 @@ class RequestCreate(BaseModel):
     user_id: int
     area_id: int
     description: str
+    created_at: Optional[datetime] = None
 
 class UpdateRequest(BaseModel):
     user_id: int
