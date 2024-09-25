@@ -293,7 +293,8 @@ def get_boss_requests(
     if from_date:
         query = query.filter(Request.created_at >= from_date)
     if until_date:
-        query = query.filter(Request.created_at <= until_date)
+        until_date += timedelta(days=1)
+        query = query.filter(Request.created_at < until_date)
     if request_type:
         query = query.filter(Request.request_type == request_type)
     if area_id:
