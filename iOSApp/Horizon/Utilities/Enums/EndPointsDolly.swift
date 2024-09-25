@@ -37,6 +37,7 @@ enum EndPointsDolly {
     /// Boss Requests
     case bossRequests(model: BossFilterModel)
     case getAllStats
+    case getRating
     
     var baseStrUrl: String {
         switch self {
@@ -76,7 +77,7 @@ extension EndPointsDolly: Moya.TargetType {
                 .refreshUserToken, .logout:
             return .post
         case .requests, .inprogress, .completed, .denied, .underMasterApproval, .underMasterMonitor, .executorUnassigned, .executorAssigned,
-                .userData, .rewards, .requestLogsOfTask, .bossRequests, .getAllStats:
+                .userData, .rewards, .requestLogsOfTask, .bossRequests, .getAllStats, .getRating:
             return .get
         }
     }
@@ -127,6 +128,8 @@ extension EndPointsDolly: Moya.TargetType {
                                                    "request_type": model.request_type,
                                                    "area_id": model.area_id], encoding: URLEncoding.queryString)
         case .getAllStats:
+            return .requestPlain
+        case .getRating:
             return .requestPlain
         }
     }
@@ -193,6 +196,8 @@ extension EndPointsDolly: Moya.TargetType {
             return "boss-requests"
         case .getAllStats:
             return "get-all-stats"
+        case .getRating:
+            return "get-rating"
         }
     }
     

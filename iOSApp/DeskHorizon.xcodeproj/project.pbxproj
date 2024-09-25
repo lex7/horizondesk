@@ -47,6 +47,9 @@
 		0550F8142CA2B0C2009C170B /* ChartAllTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0550F8132CA2B0C2009C170B /* ChartAllTime.swift */; };
 		0550F8172CA2C2A4009C170B /* BossFilterModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0550F8162CA2C2A4009C170B /* BossFilterModel.swift */; };
 		0550F8192CA2EC60009C170B /* AllStatsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0550F8182CA2EC60009C170B /* AllStatsModel.swift */; };
+		0550F81B2CA35C89009C170B /* FilteredDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0550F81A2CA35C89009C170B /* FilteredDetailsView.swift */; };
+		0550F81E2CA38540009C170B /* PickerManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0550F81D2CA38540009C170B /* PickerManagerView.swift */; };
+		0550F8202CA38BEA009C170B /* UserRatingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0550F81F2CA38BEA009C170B /* UserRatingModel.swift */; };
 		0554D85D2BB180F5008E5563 /* EnvSupportObj.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0554D85C2BB180F5008E5563 /* EnvSupportObj.swift */; };
 		05597B562C640BFC007B96A0 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 05597B552C640BFC007B96A0 /* GoogleService-Info.plist */; };
 		05597B592C641D36007B96A0 /* LoginData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B582C641D36007B96A0 /* LoginData.swift */; };
@@ -133,6 +136,9 @@
 		0550F8132CA2B0C2009C170B /* ChartAllTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartAllTime.swift; sourceTree = "<group>"; };
 		0550F8162CA2C2A4009C170B /* BossFilterModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BossFilterModel.swift; sourceTree = "<group>"; };
 		0550F8182CA2EC60009C170B /* AllStatsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllStatsModel.swift; sourceTree = "<group>"; };
+		0550F81A2CA35C89009C170B /* FilteredDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilteredDetailsView.swift; sourceTree = "<group>"; };
+		0550F81D2CA38540009C170B /* PickerManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerManagerView.swift; sourceTree = "<group>"; };
+		0550F81F2CA38BEA009C170B /* UserRatingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRatingModel.swift; sourceTree = "<group>"; };
 		0554D85C2BB180F5008E5563 /* EnvSupportObj.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvSupportObj.swift; sourceTree = "<group>"; };
 		05597B552C640BFC007B96A0 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		05597B582C641D36007B96A0 /* LoginData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginData.swift; sourceTree = "<group>"; };
@@ -228,7 +234,7 @@
 			isa = PBXGroup;
 			children = (
 				0503CB782CA1B5AB00C81580 /* ManagerView.swift */,
-				0550F8132CA2B0C2009C170B /* ChartAllTime.swift */,
+				0550F81C2CA38506009C170B /* Components */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -442,8 +448,19 @@
 			children = (
 				0550F8162CA2C2A4009C170B /* BossFilterModel.swift */,
 				0550F8182CA2EC60009C170B /* AllStatsModel.swift */,
+				0550F81F2CA38BEA009C170B /* UserRatingModel.swift */,
 			);
 			path = BossModels;
+			sourceTree = "<group>";
+		};
+		0550F81C2CA38506009C170B /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				0550F8132CA2B0C2009C170B /* ChartAllTime.swift */,
+				0550F81A2CA35C89009C170B /* FilteredDetailsView.swift */,
+				0550F81D2CA38540009C170B /* PickerManagerView.swift */,
+			);
+			path = Components;
 			sourceTree = "<group>";
 		};
 		05597B572C641D1E007B96A0 /* User */ = {
@@ -1039,11 +1056,14 @@
 				0550F8172CA2C2A4009C170B /* BossFilterModel.swift in Sources */,
 				05597B682C65822D007B96A0 /* LogsModel.swift in Sources */,
 				0591187D2B4DAE68006073C3 /* DeskHorizonApp.swift in Sources */,
+				0550F81E2CA38540009C170B /* PickerManagerView.swift in Sources */,
 				052A98DD2B72D8F6002249C5 /* NetworkEnums.swift in Sources */,
 				0517DCC22B837E4D009F6979 /* MyAccountPickerView.swift in Sources */,
 				05F2D9602B94A52300BDDD36 /* MonitorPickerView.swift in Sources */,
+				0550F81B2CA35C89009C170B /* FilteredDetailsView.swift in Sources */,
 				054969C82B9F87F800A5B3F3 /* CreateIssueScreen.swift in Sources */,
 				05D7A65B2C5EE4B700275E9D /* StatisticScreen.swift in Sources */,
+				0550F8202CA38BEA009C170B /* UserRatingModel.swift in Sources */,
 				0509CBF72BFC939300FBCEF1 /* IssueModel.swift in Sources */,
 				0503CB792CA1B5AB00C81580 /* ManagerView.swift in Sources */,
 				054870CD2BBB3E1F002A8406 /* AppDelegate.swift in Sources */,

@@ -8,9 +8,9 @@
 import Foundation
 
 struct BossFilterModel: Encodable {
-    let from_date: String
-    let until_date: String
-    let status: String
-    let request_type: Int
-    let area_id: Int
+    let from_date: String?
+    let until_date: String?
+    let status: String?
+    let request_type: Int?
+    let area_id: Int?
 }

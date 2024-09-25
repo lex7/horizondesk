@@ -23,7 +23,6 @@ struct ManagerView: View {
     @State private var screenHeight = UIScreen.main.bounds.height
     
     // MARK: - Private State Variables
-    @State var scrollPositionStart = EventsMockData.last365Days.last!.day.addingTimeInterval(-1 * 3600 * 24 * 30)
     @State private var selectedSegment: MyAccountSwitcher = .information
     private let generator = UIImpactFeedbackGenerator(style: .light)
     
@@ -50,15 +49,18 @@ struct ManagerView: View {
     @State private var areaIdFilter: Int = 99
     @State private var statusFilter: String = "in-progress"
     
+    // Picker
+    @State private var managerSegment: ManagerSwitcher = .allStats
+    
     // FOCUS
     @FocusState private var focusedField: textFieldFocus?
     
     var scrollPositionEnd: Date {
-        scrollPositionStart.addingTimeInterval(3600 * 24 * 30)
+        authStateEnvObject.scrollPositionStart.addingTimeInterval(3600 * 24 * 30)
     }
     
     var scrollPositionString: String {
-        scrollPositionStart.formatted(.dateTime.month().day())
+        authStateEnvObject.scrollPositionStart.formatted(.dateTime.month().day())
     }
     
     var scrollPositionEndString: String {
@@ -86,46 +88,50 @@ struct ManagerView: View {
                     }
             }
             .offset(y: -5)
-            ScrollView {
-                VStack {
-                    Text("Все заявки")
-                        .withDefaultTextModifier(font: "NexaRegular", size: 20, relativeTextStyle: .headline, color: Color.theme.highContrast)
-                    Text("\(scrollPositionString) – \(scrollPositionEndString)")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                    if authStateEnvObject.statsIsLoading {
-                        ProgressView()
-                            .frame(height: 190)
-                    } else {
-                        DailySalesChart(scrollPosition: $scrollPositionStart)
-                            .frame(height: 190)
-                    }
-                    HStack {
-                        createListPickedTypes(text: selectedDateFrom.isEmpty ? "дата от" : selectedDateFrom,
-                                              butPressed: selectedDateFrom.isEmpty,
-                                              size: 17,
-                                              fontSize: .body) {
-                            showingDatePickerFrom = true
+            pickerContainer
+                .padding(.horizontal, 10)
+            switch managerSegment {
+            case .allStats:
+                ScrollView(showsIndicators: false) {
+                    VStack {
+                        Text("\(scrollPositionString) – \(scrollPositionEndString)")
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                            .padding(.top, 20)
+                        if authStateEnvObject.statsIsLoading {
+                            ProgressView()
+                                .frame(height: 190)
+                        } else {
+                            DailySalesChart(scrollPosition: $authStateEnvObject.scrollPositionStart,
+                                            dataForChart: $authStateEnvObject.allStatsFragments,
+                                            visibleDomain: .constant(30))
+                                .frame(height: 190)
                         }
-                        
-                        createListPickedTypes(text: selectedDateTo.isEmpty ? "дата до" : selectedDateTo,
-                                              butPressed: selectedDateTo.isEmpty,
-                                              size: 17,
-                                              fontSize: .body) {
+                        HStack {
+                            createListPickedTypes(text: selectedDateFrom.isEmpty ? "дата от" : selectedDateFrom,
+                                                  butPressed: selectedDateFrom.isEmpty,
+                                                  size: 17,
+                                                  fontSize: .body) {
+                                showingDatePickerFrom = true
+                            }
                             
-                            showingDatePickerTo = true
+                            createListPickedTypes(text: selectedDateTo.isEmpty ? "дата до" : selectedDateTo,
+                                                  butPressed: selectedDateTo.isEmpty,
+                                                  size: 17,
+                                                  fontSize: .body) {
+                                
+                                showingDatePickerTo = true
+                            }
                         }
-                    }
-                    .padding(.top, 10)
-                    menuIssueTheme
                         .padding(.top, 10)
-                    areaIssue
-                        .padding(.top, 10)
-                    statusIssue
-                        .padding(.top, 10)
-                    HStack {
-                        Spacer()
-                        if !selectedDateFrom.isEmpty && !selectedDateTo.isEmpty && !titleOfIssue.isEmpty && !areaOfIssueNumber.isEmpty && !statusOfIssue.isEmpty {
+                        menuIssueTheme
+                            .padding(.top, 10)
+                        areaIssue
+                            .padding(.top, 10)
+                        statusIssue
+                            .padding(.top, 10)
+                        HStack {
+                            Spacer()
                             makeMediumContrastView(text: "Отфильтровать", image: "paperplane", imageFirst: false)
                                 .padding(.top, 20)
                                 .onTapGesture {
@@ -138,12 +144,42 @@ struct ManagerView: View {
                                     authStateEnvObject.filterRequests(model)
                                 }
                         }
+                    } /// End of VStack Scroll
+                    .padding(.horizontal, 20)
+                } /// End of ScrollView
+            case .filteredStats:
+                HStack {
+                    Spacer()
+                    filterBottom
+                }
+                VStack {
+                    ScrollView(showsIndicators: false) {
+                        ForEach(authStateEnvObject.usersRating, id: \.self) { user in
+                            makeRatingCell(user)
+                        }
                     }
+                    .padding(.top, 10)
                 }
             }
             Spacer()
         } /// End of VStack
-        .padding(.horizontal)
+        .alert("Уведомление", isPresented: $authStateEnvObject.showAlertOfFilter) {
+            // Buttons as actions for the alert
+            Button("Ok", role: .cancel) {
+                generator.impactOccurred()
+            }
+        } message: {
+            Text("Нет заявок, соответствующих указанным фильтрам!")
+        }
+        .fullScreenCover(isPresented: $authStateEnvObject.isPresentFiltered, onDismiss: {
+//            authStateEnvObject.executorUnassignRequest()
+        }, content: {
+//            FilteredDetailsView(currentChart: $authStateEnvObject.filteredChartFragments)
+            FilteredDetailsView(currentChart: $authStateEnvObject.filteredChartFragments,
+                                scrollPosition: $authStateEnvObject.filtereScrollPositionStart,
+                                visibleDomain: $authStateEnvObject.visibleDomain,
+                                issues: $authStateEnvObject.issuesFilteredBoss)
+        })
         .overlay {
             datePickerFrom
         }
@@ -152,6 +188,10 @@ struct ManagerView: View {
         }
         .onAppear {
             authStateEnvObject.getAllStats()
+            Task {
+                try await Task.sleep(nanoseconds: 200_000_000)
+                authStateEnvObject.getRating()
+            }
         }
     }
 }
@@ -205,7 +245,7 @@ private extension ManagerView {
                     DatePicker(
                         "Select Date",
                         selection: $selectedDateFromDate,
-                        in: Date().addingTimeInterval(-365*24*60*60)...Date(),
+                        in: Date().addingTimeInterval(-3650*24*60*60)...Date(),
                         displayedComponents: [.date]
                     )
                     .onChange(of: selectedDateFromDate) { _ in
@@ -434,5 +474,85 @@ private extension ManagerView {
             Spacer()
         }
     }
+    
+    // Picker
+    var pickerContainer: some View {
+        HStack(alignment: .center, spacing: 4) {
+            ManagerLeftSegmentView(sectionSelected: $managerSegment, label: "Все заявки")
+                .onTapGesture {
+                    managerSegment.toggle()
+                    generator.prepare()
+                    generator.impactOccurred()
+                }
+                .allowsHitTesting(managerSegment != .allStats)
+            ManagerRightSegmentView(sectionSelected: $managerSegment, label: "Рейтинг")
+                .onTapGesture {
+                    managerSegment.toggle()
+                    generator.prepare()
+                    generator.impactOccurred()
+                }
+                .allowsHitTesting(managerSegment != .filteredStats)
+        }
+        .padding(8)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .overlay(
+            RoundedRectangle(cornerRadius: 28)
+                .inset(by: 0.5)
+                .stroke(Color.theme.extraLowContrast, lineWidth: 1)
+        )
+        .background(Color.theme.surface)
+        .cornerRadius(28)
+    }
+    
+    /// USER RATING
+    
+    func makeRatingCell(_ user: UserRatingModel) -> some View {
+        VStack {
+            HStack {
+                descriptionOfField("ФИО:", color: Color.theme.secondary)
+                Spacer()
+                descriptionOfField("\(user.name) \(user.middle_name) \(user.surname)")
+            }
+            HStack {
+                descriptionOfField("Должность:", color: Color.theme.secondary)
+                Spacer()
+                descriptionOfField("Сварщик")
+            }
+            HStack {
+                descriptionOfField("Заявок создано:", color: Color.theme.secondary)
+                Spacer()
+                descriptionOfField("\(user.num_created)")
+            }
+            HStack {
+                descriptionOfField("Заявок выполнено:", color: Color.theme.secondary)
+                Spacer()
+                descriptionOfField("\(user.num_completed)")
+            }
+            HStack {
+                descriptionOfField("Токены:", color: Color.theme.secondary)
+                Spacer()
+                descriptionOfField("\(user.tokens)")
+            }
+            
+        } /// End of VStack cell
+        .padding(.horizontal, 20)
+        .padding(.top, 10)
+    }
+    
+    var filterBottom: some View {
+        createSysImageTitle(title: "Сортировка", systemName: "line.3.horizontal.decrease.circle", imageFirst: false)
+            .padding(.horizontal, 24)
+            .padding(.top, 10)
+            .cornerRadius(40)
+    }
 }
 
+/*
+ user_id: Int
+ surname: String
+ name: String
+ middle_name: String
+ tokens: Int
+ num_created: Int
+ num_completed: Int
+ */

@@ -23,6 +23,7 @@ final class AuthStateEnvObject: ObservableObject {
     @Published var issuesDeclined: [RequestIssueModel] = []
     @Published var issuesApproved: [RequestIssueModel] = []
     @Published var issuesInProgress: [RequestIssueModel] = []
+    @Published var issuesFilteredBoss: [RequestIssueModel] = []
     @Published var logsModel: [LogsModel] = []
     @Published var notificationCount: Int = 0
     
@@ -49,9 +50,20 @@ final class AuthStateEnvObject: ObservableObject {
     // TABBAR MENU
     @Published var tabBarSelection: TabBarItem = .createIssue
     
-    // SUPPORT SCREEN
+    // Average Stats
+    @Published var scrollPositionStart: Date = Date()
     @Published var allStatsFragments: [(day: Date, events: Int)] = []
     
+    // Filtered Stats
+    @Published var filteredChartFragments: [(day: Date, events: Int)] = []
+    @Published var filtereScrollPositionStart: Date = Date()
+    @Published var visibleDomain: Int = 30
+    @Published var filteredIsLoading: Bool = false
+    @Published var isPresentFiltered: Bool = false
+    @Published var showAlertOfFilter: Bool = false
+    
+    // USER Rating Filtered Stats
+    @Published var usersRating: [UserRatingModel] = []
     
     // MASTER SCREEN
     @Published var issueRequestSegment: IssuesMontitorSwitcher = .masterReview
@@ -600,6 +612,7 @@ final class AuthStateEnvObject: ObservableObject {
     
     // MARK: - Requests by filter
     func filterRequests(_ model: BossFilterModel) {
+        filteredIsLoading = true
         networkManager.requestMoyaData(apis: .bossRequests(model: model))
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] completion in
@@ -610,17 +623,74 @@ final class AuthStateEnvObject: ObservableObject {
                 case .failure(let error):
                     debugPrint(String(describing: "[vm: \(error) - ❌ filterRequests]"))
                 }
-                self.logsIsLoading = false
+                self.filteredIsLoading = false
+                
             } receiveValue: { [unowned self] data in
                 do {
-                    debugPrint("OK")
-                } catch (let error) {
-                    debugPrint(error)
+                    self.issuesFilteredBoss = try RequestIssueModel.decode(from: data).sorted { ($0.created_at ?? Date()) > ($1.created_at ?? Date()) }
+                    let fragmentModels = createFragmentModels(from: issuesFilteredBoss).sorted { $0.date.makeDateFrom() < $1.date.makeDateFrom() }
+                    self.filteredChartFragments = fragmentModels.map { (day: $0.date.makeDateFrom(), events: $0.events) }
+                    if let last = self.filteredChartFragments.last {
+                        self.filtereScrollPositionStart = last.day.addingTimeInterval(-1 * 3600 * 24 * 30)
+                        self.isPresentFiltered = true
+                    } else {
+                        self.showAlertOfFilter = true
+                    }
+                    
+                    let firstDate = fragmentModels.first?.date.makeDateFrom()
+                    let lastDate = fragmentModels.last?.date.makeDateFrom()
+                    let daysDifferentBetweenRequests = getDaysDifferent(firstDate, lastDate)
+                    
+                    if daysDifferentBetweenRequests > 30 {
+                        self.visibleDomain = 30
+                    } else if daysDifferentBetweenRequests > 14 {
+                        self.visibleDomain = 14
+                    } else if daysDifferentBetweenRequests > 7 {
+                        self.visibleDomain = 7
+                    } else if daysDifferentBetweenRequests > 3 {
+                        self.visibleDomain = 3
+                    } else {
+                        self.visibleDomain = 2
+                    }
+                    // po String(decoding: data, as: UTF8.self)
+                } catch {
+                    print(error)
                 }
             }
             .store(in: &cancellables)
     }
     
+    private func createFragmentModels(from requestModels: [RequestIssueModel]) -> [FragmentModel] {
+        let grouped = Dictionary(grouping: requestModels, by: { model -> String in
+            if let createdAt = model.created_at {
+                return dateString(from: createdAt)
+            } else {
+                return "Unknown date"
+            }
+        })
+        return grouped.map { (key, value) in
+            FragmentModel(date: key, events: value.count)
+        }.sorted(by: { $0.date > $1.date }) // Sorted descending by date
+    }
+    
+    private func dateString(from date: Date) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd-MM-yyyy"
+        return dateFormatter.string(from: date)
+    }
+    
+    private func getDaysDifferent(_ firstDate: Date?, _ lastDate: Date?) -> Int {
+        // Check if either date is nil
+        if let startDate = firstDate, let endDate = lastDate {
+            let calendar = Calendar.current
+            let dateComponents = calendar.dateComponents([.day], from: startDate, to: endDate)
+            if let days = dateComponents.day {
+                return days
+            }
+        }
+        return 0
+    }
+
     func getAllStats() {
         statsIsLoading = true
         networkManager.requestMoyaData(apis: .getAllStats)
@@ -640,6 +710,32 @@ final class AuthStateEnvObject: ObservableObject {
                     debugPrint("OK")
                     // [(day: Date, events: Int)]
                     self.allStatsFragments = dataArray.map { (day: $0.date.makeDateFrom(), events: $0.events) }
+                    self.scrollPositionStart = self.allStatsFragments.last!.day.addingTimeInterval(-1 * 3600 * 24 * 30)
+                    // po String(decoding: data, as: UTF8.self)
+                } catch (let error) {
+                    debugPrint(error)
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    func getRating() {
+        statsIsLoading = true
+        networkManager.requestMoyaData(apis: .getRating)
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] completion in
+                switch completion {
+                case .finished:
+                    debugPrint(String(describing: "[vm: ✅ getRating successfully]"))
+                    break
+                case .failure(let error):
+                    debugPrint(String(describing: "[vm: \(error) - ❌ getRating]"))
+                }
+                self.statsIsLoading = false
+            } receiveValue: { [unowned self] data in
+                do {
+                    self.usersRating = try UserRatingModel.decodeFrom(data: data)
+//                    debugPrint("OK - \(dataArray)")
                     // po String(decoding: data, as: UTF8.self)
                 } catch (let error) {
                     debugPrint(error)
@@ -650,7 +746,6 @@ final class AuthStateEnvObject: ObservableObject {
 
     
     // MARK: - Other Methods
-    
     func logout(action: @escaping () -> ()) {
         isStatistic = false
         sendUserLogout {
