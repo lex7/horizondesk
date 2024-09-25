@@ -309,6 +309,7 @@ def get_boss_requests(
     return query.all()
 
 
+@app.get("/get-all-stats", response_model=List[StatsModel])
 def get_all_stats(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -341,7 +342,6 @@ def get_all_stats(
         current_date += timedelta(days=1)
 
     return all_dates
-
 
 @app.get("/get-rating", response_model=List[RatingResponse])
 def get_rating(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

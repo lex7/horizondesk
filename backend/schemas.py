@@ -150,3 +150,16 @@ class RatingResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class StatsModel(BaseModel):
+    date: str
+    events: int
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "date": "24-09-2024",
+                "events": 5
+            }
+        }
