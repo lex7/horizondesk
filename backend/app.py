@@ -27,6 +27,10 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
 app = FastAPI()
 
+@app.get("/")
+async def read_root():
+    return {"message": "ok"}
+
 @app.exception_handler(Exception)
 async def exception_handler(request: Request, exc: Exception):
     error_response = {
