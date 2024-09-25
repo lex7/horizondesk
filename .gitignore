@@ -3,3 +3,5 @@
 .env
 accKey.json
 nginx.conf
+create_requests.py
+/data
