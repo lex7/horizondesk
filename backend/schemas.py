@@ -144,6 +144,7 @@ class RatingResponse(BaseModel):
     surname: Optional[str]
     name: Optional[str]
     middle_name: Optional[str]
+    specialization: Optional[str]
     tokens: int
     num_created: int
     num_completed: int
