@@ -58,6 +58,11 @@ struct ManagerView: View {
     // Picker
     @State private var managerSegment: ManagerSwitcher = .allStats
     
+    // Sorting
+    @State private var sortUpName: Bool = false
+    @State private var sortUpRate: Bool = false
+    @State private var sortUpSpec: Bool = false
+    
     // FOCUS
     @FocusState private var focusedField: textFieldFocus?
     
@@ -174,7 +179,8 @@ struct ManagerView: View {
             case .filteredStats:
                 HStack {
                     Spacer()
-                    filterBottom
+                    sortingRating
+//                    filterBottom
                 }
                 VStack {
                     ScrollView(showsIndicators: false) {
@@ -503,6 +509,40 @@ private extension ManagerView {
         }
     }
     
+    // Sorting
+    var sortingRating: some View {
+        HStack {
+            Spacer()
+            // Wrapping Text inside Menu to show options on tap
+            Menu {
+                Button("По рэйтингу") {
+                    generator.impactOccurred()
+                    authStateEnvObject.makeSortingRating(sortUpRate)
+                    sortUpSpec = false
+                    sortUpName = false
+                    sortUpRate.toggle()
+                }
+                Button("По фамилии") {
+                    generator.impactOccurred()
+                    authStateEnvObject.makeSortingName(sortUpName)
+                    sortUpRate = false
+                    sortUpSpec = false
+                    sortUpName.toggle()
+                }
+                Button("По должности") {
+                    generator.impactOccurred()
+                    authStateEnvObject.makeSortingSpec(sortUpSpec)
+                    sortUpRate = false
+                    sortUpName = false
+                    sortUpSpec.toggle()
+                }
+            } label: {
+                filterBottom
+//                textViewOnBoard($statusOfIssue, placeHolder: "Выберите Статус", focusField: .statusType)
+            }
+        }
+    }
+    
     // Picker
     var pickerContainer: some View {
         HStack(alignment: .center, spacing: 4) {
@@ -537,14 +577,16 @@ private extension ManagerView {
     func makeRatingCell(_ user: UserRatingModel) -> some View {
         VStack {
             HStack {
-                descriptionOfField("ФИО:", color: Color.theme.secondary)
+                descriptionOfField("ФИО:", color: sortUpName ? Color.theme.primary : Color.theme.secondary)
                 Spacer()
-                descriptionOfField("\(user.name) \(user.middle_name) \(user.surname)")
+                descriptionOfField("\(user.surname) \(user.name) \(user.middle_name)")
             }
             HStack {
-                descriptionOfField("Должность:", color: Color.theme.secondary)
-                Spacer()
-                descriptionOfField("Сварщик")
+                if let spec = user.specialization {
+                    descriptionOfField("Должность:", color: sortUpSpec ? Color.theme.primary : Color.theme.secondary)
+                    Spacer()
+                    descriptionOfField(spec)
+                }
             }
             HStack {
                 descriptionOfField("Заявок создано:", color: Color.theme.secondary)
@@ -557,7 +599,7 @@ private extension ManagerView {
                 descriptionOfField("\(user.num_completed)")
             }
             HStack {
-                descriptionOfField("Токены:", color: Color.theme.secondary)
+                descriptionOfField("Токены:", color: sortUpRate ? Color.theme.primary : Color.theme.secondary)
                 Spacer()
                 descriptionOfField("\(user.tokens)")
             }

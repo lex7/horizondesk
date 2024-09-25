@@ -18,6 +18,10 @@ func date(year: Int, month: Int, day: Int = 1) -> Date {
 
 
 struct DailySalesChart: View {
+    // MARK: - Private properties
+    private let generator = UIImpactFeedbackGenerator(style: .light)
+    
+    // MARK: - Binding
     @Binding var scrollPosition: Date
     @Binding var dataForChart: [(day: Date, events: Int)]
     @Binding var visibleDomain: Int
@@ -40,6 +44,9 @@ struct DailySalesChart: View {
                 matching: .init(hour: 0),
                 majorAlignment: .matching(.init(day: 1))))
         .chartScrollPosition(x: $scrollPosition)
+        .onChange(of: scrollPosition) { _ in
+                    generator.impactOccurred()
+                }
         .chartXAxis {
             AxisMarks(values: .stride(by: .day, count: 7)) {
                 AxisTick()

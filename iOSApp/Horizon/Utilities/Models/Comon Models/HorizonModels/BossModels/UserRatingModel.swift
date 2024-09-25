@@ -14,6 +14,7 @@ struct UserRatingModel: Decodable, Hashable {
     let middle_name: String
     let tokens: Int
     let num_created: Int
+    let specialization: String?
     let num_completed: Int
 }
 

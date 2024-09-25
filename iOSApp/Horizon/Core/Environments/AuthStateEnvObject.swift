@@ -730,6 +730,38 @@ final class AuthStateEnvObject: ObservableObject {
             .store(in: &cancellables)
     }
     
+    func makeSortingName(_ up: Bool) {
+        if up {
+            usersRating = usersRating.sorted { $0.surname > $1.surname }
+            return
+        }
+        usersRating = usersRating.sorted { $0.surname < $1.surname }
+    }
+    
+    func makeSortingRating(_ up: Bool) {
+        if up {
+            usersRating = usersRating.sorted { $0.tokens < $1.tokens }
+            return
+        }
+        usersRating = usersRating.sorted { $0.tokens > $1.tokens }
+    }
+    
+    func makeSortingSpec(_ up: Bool) {
+        if up {
+            let usersWithSpecialization = usersRating
+                .filter { $0.specialization != nil }
+                .sorted { $0.specialization! > $1.specialization! }
+            let usersWithoutSpecialization = usersRating.filter { $0.specialization == nil }
+            usersRating = usersWithSpecialization + usersWithoutSpecialization
+            return
+        }
+        let usersWithSpecialization = usersRating
+            .filter { $0.specialization != nil }
+            .sorted { $0.specialization! < $1.specialization! }
+        let usersWithoutSpecialization = usersRating.filter { $0.specialization == nil }
+        usersRating = usersWithSpecialization + usersWithoutSpecialization
+    }
+    
     func getRating() {
         statsIsLoading = true
         networkManager.requestMoyaData(apis: .getRating)
