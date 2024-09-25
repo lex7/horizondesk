@@ -353,11 +353,25 @@ def get_rating(db: Session = Depends(get_db), current_user: User = Depends(get_c
         User.middle_name,
         User.tokens,
         User.num_created,
-        User.num_completed
+        User.num_completed,
+        User.specialization  # Include specialization in the query
     ).all()
 
     # Create and return the list of users with the required fields
-    return users
+    return [
+        {
+            "user_id": user.user_id,
+            "surname": user.surname,
+            "name": user.name,
+            "middle_name": user.middle_name,
+            "specialization": user.specialization if user.specialization else None,
+            "tokens": user.tokens,
+            "num_created": user.num_created,
+            "num_completed": user.num_completed
+        }
+        for user in users
+    ]
+
 
 
 # Post endpoints
