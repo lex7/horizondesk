@@ -30,12 +30,14 @@ struct ManagerView: View {
     @State private var dateFrom = Date.now
     @State private var showingDatePickerFrom: Bool = false
     @State private var selectedDateFromDate: Date = Date()
-    @State private var selectedDateFrom: String = ""
+//    @State private var selectedDateFrom: String = ""
+    @State private var selectedDateFrom: String?
     
     // MARK: - Date To /// selectedDateFrom
     @State private var showingDatePickerTo: Bool = false
     @State private var selectedDateToDate: Date = Date()
-    @State private var selectedDateTo: String = ""
+//    @State private var selectedDateTo: String = ""
+    @State private var selectedDateTo: String?
     
     // Area and Specialization titles
     @State private var titleOfIssue: String = ""
@@ -44,10 +46,14 @@ struct ManagerView: View {
     
     // Filter
     @State private var filterIsVisible: Bool = false
+    
     /// Filter Fields
-    @State private var specializationTypeFilter: Int = 99
-    @State private var areaIdFilter: Int = 99
-    @State private var statusFilter: String = "in-progress"
+//    @State private var specializationTypeFilter: Int = 99
+    @State private var specializationTypeFilter: Int?
+    @State private var areaIdFilter: Int?
+//    @State private var areaIdFilter: Int = 99
+    @State private var statusFilter: String?
+//    @State private var statusFilter: String = "drom-filter"
     
     // Picker
     @State private var managerSegment: ManagerSwitcher = .allStats
@@ -108,19 +114,35 @@ struct ManagerView: View {
                                 .frame(height: 190)
                         }
                         HStack {
-                            createListPickedTypes(text: selectedDateFrom.isEmpty ? "дата от" : selectedDateFrom,
-                                                  butPressed: selectedDateFrom.isEmpty,
-                                                  size: 17,
-                                                  fontSize: .body) {
-                                showingDatePickerFrom = true
+                            if let selectedDateFrom = selectedDateFrom {
+                                createListPickedTypes(text: selectedDateFrom.isEmpty ? "дата от" : selectedDateFrom,
+                                                      butPressed: selectedDateFrom.isEmpty,
+                                                      size: 17,
+                                                      fontSize: .body) {
+                                    showingDatePickerFrom = true
+                                }
+                            } else {
+                                createListPickedTypes(text: "дата от",
+                                                      butPressed: false,
+                                                      size: 17,
+                                                      fontSize: .body) {
+                                    showingDatePickerFrom = true
+                                }
                             }
-                            
-                            createListPickedTypes(text: selectedDateTo.isEmpty ? "дата до" : selectedDateTo,
-                                                  butPressed: selectedDateTo.isEmpty,
-                                                  size: 17,
-                                                  fontSize: .body) {
-                                
-                                showingDatePickerTo = true
+                            if let selectedDateTo = selectedDateTo {
+                                createListPickedTypes(text: selectedDateTo.isEmpty ? "дата до" : selectedDateTo,
+                                                      butPressed: selectedDateTo.isEmpty,
+                                                      size: 17,
+                                                      fontSize: .body) {
+                                    showingDatePickerTo = true
+                                }
+                            } else {
+                                createListPickedTypes(text: "дата до",
+                                                      butPressed: false,
+                                                      size: 17,
+                                                      fontSize: .body) {
+                                    showingDatePickerTo = true
+                                }
                             }
                         }
                         .padding(.top, 10)

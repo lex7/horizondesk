@@ -122,11 +122,30 @@ extension EndPointsDolly: Moya.TargetType {
         case .requestLogsOfTask(let model):
             return .requestParameters(parameters: ["request_id": model.request_id], encoding: URLEncoding.queryString)
         case .bossRequests(model: let model):
-            return .requestParameters(parameters: ["from_date": model.from_date,
-                                                   "until_date": model.until_date,
-                                                   "status": model.status,
-                                                   "request_type": model.request_type,
-                                                   "area_id": model.area_id], encoding: URLEncoding.queryString)
+//            return .requestParameters(parameters: ["from_date": model.from_date ?? "",
+//                                                   "until_date": model.until_date ?? "",
+//                                                   "status": model.status ?? "",
+//                                                   "request_type": model.request_type ?? "",
+//                                                   "area_id": (model.area_id ?? "")], encoding: URLEncoding.queryString)
+            var parameters = [String: Any]()
+
+            if let fromDate = model.from_date {
+                parameters["from_date"] = fromDate
+            }
+            if let untilDate = model.until_date {
+                parameters["until_date"] = untilDate
+            }
+            if let status = model.status {
+                parameters["status"] = status
+            }
+            if let requestType = model.request_type {
+                parameters["request_type"] = requestType
+            }
+            if let areaId = model.area_id {
+                parameters["area_id"] = areaId
+            }
+
+            return .requestParameters(parameters: parameters, encoding: URLEncoding.queryString)
         case .getAllStats:
             return .requestPlain
         case .getRating:

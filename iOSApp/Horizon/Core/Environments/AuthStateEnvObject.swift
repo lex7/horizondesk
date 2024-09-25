@@ -624,7 +624,6 @@ final class AuthStateEnvObject: ObservableObject {
                     debugPrint(String(describing: "[vm: \(error) - ❌ filterRequests]"))
                 }
                 self.filteredIsLoading = false
-                
             } receiveValue: { [unowned self] data in
                 do {
                     self.issuesFilteredBoss = try RequestIssueModel.decode(from: data).sorted { ($0.created_at ?? Date()) > ($1.created_at ?? Date()) }
@@ -709,9 +708,8 @@ final class AuthStateEnvObject: ObservableObject {
                     let dataArray = try FragmentModel.decodeFrom(data: data)
                     debugPrint("OK")
                     // [(day: Date, events: Int)]
-                    self.allStatsFragments = dataArray.map { (day: $0.date.makeDateFrom(), events: $0.events) }
+                    self.allStatsFragments = dataArray.map { (day: $0.date.makeDateFrom(), events: $0.events) }.sorted { $0.day > $1.day }
                     self.scrollPositionStart = self.allStatsFragments.last!.day.addingTimeInterval(-1 * 3600 * 24 * 30)
-                    // po String(decoding: data, as: UTF8.self)
                 } catch (let error) {
                     debugPrint(error)
                 }
