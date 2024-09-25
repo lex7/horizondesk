@@ -13,7 +13,7 @@ struct MasterScreen: View {
     @State private var showIssueMonitor: Bool?
     @State private var screenHeight = UIScreen.main.bounds.height
     @State private var currentNode: RequestIssueModel = RequestIssueModel(request_id: 1, request_type: 2, created_by: 99, assigned_to: nil, area_id: 3, description: nil, status_id: 99, created_at: nil, updated_at: nil, reason: nil)
-    @State private var logId: Int  = 10000000
+    @State private var logId: Int = 10000000
     
     // MARK: - Private Constants
     private let generator = UIImpactFeedbackGenerator(style: .light)
@@ -73,7 +73,9 @@ struct MasterScreen: View {
         }, content: { _ in
             MasterMonitorScreen(currentNode: $currentNode, logId: $logId)
         })
-        .background(Color.theme.background)
+        .background {
+            Color.theme.background.ignoresSafeArea(.all)
+        }
         .onChange(of: tabSelection) {
             if tabSelection == .masterReviewIssue {
                 authStateEnvObject.getRequestsForMaster()

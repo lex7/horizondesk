@@ -202,6 +202,9 @@ final class AuthStateEnvObject: ObservableObject {
         
     // MARK: - Requests for Master
     func getRequestsForMaster() {
+        if isManager() {
+            return
+        }
         if requestsForMaster.isEmpty {
             masterIsLoading = true
         }
@@ -211,10 +214,10 @@ final class AuthStateEnvObject: ObservableObject {
             .sink { [unowned self] completion in
                 switch completion {
                 case .finished:
-                    debugPrint(String(describing: "[vm: ✅ inProgressIssue successfully]"))
+                    debugPrint(String(describing: "[vm: ✅ getRequestsForMaster successfully]"))
                     break
                 case .failure(let error):
-                    debugPrint(String(describing: "[vm: \(error) - ❌ inProgressIssue]"))
+                    debugPrint(String(describing: "[vm: \(error) - ❌ getRequestsForMaster]"))
                 }
                 self.masterIsLoading = false
             } receiveValue: { [unowned self] data in
@@ -240,10 +243,10 @@ final class AuthStateEnvObject: ObservableObject {
             .sink { [unowned self] completion in
                 switch completion {
                 case .finished:
-                    debugPrint(String(describing: "[vm: ✅ inProgressIssue successfully]"))
+                    debugPrint(String(describing: "[vm: ✅ getRequestsForMasterMonitor successfully]"))
                     break
                 case .failure(let error):
-                    debugPrint(String(describing: "[vm: \(error) - ❌ inProgressIssue]"))
+                    debugPrint(String(describing: "[vm: \(error) - ❌ getRequestsForMasterMonitor]"))
                 }
                 self.masterIsLoading = false
             } receiveValue: { [unowned self] data in
@@ -321,6 +324,9 @@ final class AuthStateEnvObject: ObservableObject {
     }
     
     func executorMyTasksRequest() {
+        if isManager() {
+            return
+        }
         let model = UserIdModel(user_id: credentialService.getUserId() ?? 777)
         networkManager.requestMoyaData(apis: .executorAssigned(model: model))
             .receive(on: DispatchQueue.main)
@@ -398,6 +404,9 @@ final class AuthStateEnvObject: ObservableObject {
     
     // MARK: - Creator of Requests:
     func getInProgressIssue() {
+        if isManager() {
+            return
+        }
         let model = UserIdModel(user_id: credentialService.getUserId() ?? 777)
         networkManager.requestMoyaData(apis: .inprogress(model: model))
             .receive(on: DispatchQueue.main)
@@ -424,6 +433,7 @@ final class AuthStateEnvObject: ObservableObject {
     }
     
     func getCompletedIssue() {
+        if isManager() { return }
         let model = UserIdModel(user_id: credentialService.getUserId() ?? 777)
         networkManager.requestMoyaData(apis: .completed(model: model))
             .receive(on: DispatchQueue.main)
@@ -449,6 +459,7 @@ final class AuthStateEnvObject: ObservableObject {
     }
     
     func getDeniedIssue() {
+        if isManager() { return }
         let model = UserIdModel(user_id: credentialService.getUserId() ?? 777)
         networkManager.requestMoyaData(apis: .denied(model: model))
             .receive(on: DispatchQueue.main)
@@ -707,9 +718,11 @@ final class AuthStateEnvObject: ObservableObject {
                 do {
                     let dataArray = try FragmentModel.decodeFrom(data: data)
                     debugPrint("OK")
-                    // [(day: Date, events: Int)]
+//                    self.scrollPositionStart = self.allStatsFragments.last!.day.addingTimeInterval(-1 * 3600 * 24 * 30)
                     self.allStatsFragments = dataArray.map { (day: $0.date.makeDateFrom(), events: $0.events) }.sorted { $0.day > $1.day }
-                    self.scrollPositionStart = self.allStatsFragments.last!.day.addingTimeInterval(-1 * 3600 * 24 * 30)
+                    if let last = self.filteredChartFragments.last {
+                        self.scrollPositionStart = last.day.addingTimeInterval(-1 * 3600 * 24 * 30)
+                    }
                 } catch (let error) {
                     debugPrint(error)
                 }
@@ -732,7 +745,7 @@ final class AuthStateEnvObject: ObservableObject {
                 self.statsIsLoading = false
             } receiveValue: { [unowned self] data in
                 do {
-                    self.usersRating = try UserRatingModel.decodeFrom(data: data)
+                    self.usersRating = try UserRatingModel.decodeFrom(data: data).sorted { $0.tokens > $1.tokens }
 //                    debugPrint("OK - \(dataArray)")
                     // po String(decoding: data, as: UTF8.self)
                 } catch (let error) {

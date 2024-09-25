@@ -19,9 +19,16 @@ struct FilteredDetailsView: View {
     @Binding var visibleDomain: Int
     @Binding var issues: [RequestIssueModel]
     
-    // MARK: - State
+    // MARK: - Private State
+    @State private var isShowDetails: Bool?
     @State private var screenHeight = UIScreen.main.bounds.height
     @State private var screenWidth = UIScreen.main.bounds.width
+    @State private var currentNode: RequestIssueModel = RequestIssueModel(request_id: 1, request_type: 2,
+                                                                          created_by: 99, assigned_to: nil,
+                                                                          area_id: 3, description: nil,
+                                                                          status_id: 99, created_at: nil,
+                                                                          updated_at: nil, reason: nil)
+    @State private var logId: Int  = 10000000
     
     // MARK: - Private Constants
     private let generator = UIImpactFeedbackGenerator(style: .light)
@@ -43,15 +50,27 @@ struct FilteredDetailsView: View {
                                     dataForChart: $currentChart,
                                     visibleDomain: $visibleDomain)
                     .frame(height: 190)
-                    ForEach(authStateEnvObject.issuesFilteredBoss,
-                            id: \.self) { issue in
+                    ForEach(authStateEnvObject.issuesFilteredBoss, id: \.self) { issue in
                         issueCellFor(issue)
+                            .onTapGesture {
+                                currentNode = issue
+                                logId = issue.request_id
+                                isShowDetails = true
+                            }
                     }
                             .padding(.top, 10)
                 }
                 .padding(.horizontal, 20)
             } /// End Of ScrollView
         } /// End of VStack
+        .onAppear {
+            authStateEnvObject.allStatsFragments = []
+        }
+        .sheet(item: $isShowDetails, onDismiss: {
+            authStateEnvObject.logsModel = []
+        }, content: { _ in
+            ManagerRequestDetailLogView(currentNode: $currentNode, logId: $logId)
+        })
     }
 }
 

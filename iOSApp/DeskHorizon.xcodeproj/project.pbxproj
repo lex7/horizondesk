@@ -50,6 +50,7 @@
 		0550F81B2CA35C89009C170B /* FilteredDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0550F81A2CA35C89009C170B /* FilteredDetailsView.swift */; };
 		0550F81E2CA38540009C170B /* PickerManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0550F81D2CA38540009C170B /* PickerManagerView.swift */; };
 		0550F8202CA38BEA009C170B /* UserRatingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0550F81F2CA38BEA009C170B /* UserRatingModel.swift */; };
+		0550F8222CA44CC3009C170B /* ManagerRequestDetailLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0550F8212CA44CC3009C170B /* ManagerRequestDetailLogView.swift */; };
 		0554D85D2BB180F5008E5563 /* EnvSupportObj.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0554D85C2BB180F5008E5563 /* EnvSupportObj.swift */; };
 		05597B562C640BFC007B96A0 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 05597B552C640BFC007B96A0 /* GoogleService-Info.plist */; };
 		05597B592C641D36007B96A0 /* LoginData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05597B582C641D36007B96A0 /* LoginData.swift */; };
@@ -139,6 +140,7 @@
 		0550F81A2CA35C89009C170B /* FilteredDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilteredDetailsView.swift; sourceTree = "<group>"; };
 		0550F81D2CA38540009C170B /* PickerManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerManagerView.swift; sourceTree = "<group>"; };
 		0550F81F2CA38BEA009C170B /* UserRatingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRatingModel.swift; sourceTree = "<group>"; };
+		0550F8212CA44CC3009C170B /* ManagerRequestDetailLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagerRequestDetailLogView.swift; sourceTree = "<group>"; };
 		0554D85C2BB180F5008E5563 /* EnvSupportObj.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvSupportObj.swift; sourceTree = "<group>"; };
 		05597B552C640BFC007B96A0 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		05597B582C641D36007B96A0 /* LoginData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginData.swift; sourceTree = "<group>"; };
@@ -458,6 +460,7 @@
 			children = (
 				0550F8132CA2B0C2009C170B /* ChartAllTime.swift */,
 				0550F81A2CA35C89009C170B /* FilteredDetailsView.swift */,
+				0550F8212CA44CC3009C170B /* ManagerRequestDetailLogView.swift */,
 				0550F81D2CA38540009C170B /* PickerManagerView.swift */,
 			);
 			path = Components;
@@ -1013,6 +1016,7 @@
 				05597B612C642A0C007B96A0 /* UserRewardsModel.swift in Sources */,
 				05F591DC2BB1E85E005F5D6E /* SendMessageView.swift in Sources */,
 				053088512B6AC86100E6772D /* TabBarItemsPreferenceKey.swift in Sources */,
+				0550F8222CA44CC3009C170B /* ManagerRequestDetailLogView.swift in Sources */,
 				0550F8142CA2B0C2009C170B /* ChartAllTime.swift in Sources */,
 				05597B592C641D36007B96A0 /* LoginData.swift in Sources */,
 				05D7A66D2C618A6C00275E9D /* ExecutorActionModel.swift in Sources */,

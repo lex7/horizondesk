@@ -19,23 +19,27 @@ struct AppTabBarView: View {
     
     
     var body: some View {
-        CustomTabBarContainer(selection: $authStateEnvObject.tabBarSelection) {
-            if !isManager {
-                CreateIssueScreen(tabSelection: $authStateEnvObject.tabBarSelection)
-                    .tabBarItem(tab: .createIssue, selection: $authStateEnvObject.tabBarSelection)
-                MonitorIssueScreen(tabSelection: $authStateEnvObject.tabBarSelection)
-                    .tabBarItem(tab: .monitorIssue, selection: $authStateEnvObject.tabBarSelection)
-                ExecutorScreen()
-                    .tabBarItem(tab: .executeIssue, selection: $authStateEnvObject.tabBarSelection)
-                if masterIsVisible {
-                    MasterScreen(tabSelection: $authStateEnvObject.tabBarSelection)
-                        .tabBarItem(tab: .masterReviewIssue, selection: $authStateEnvObject.tabBarSelection)
-                }
-                MyAccountScreen(tabSelection: $authStateEnvObject.tabBarSelection)
-                    .tabBarItem(tab: .account, selection: $authStateEnvObject.tabBarSelection)
-            } else {
+        Group {
+            if isManager {
                 ManagerView(tabSelection: $authStateEnvObject.tabBarSelection)
                     .tabBarItem(tab: .manager, selection: $authStateEnvObject.tabBarSelection)
+            } else {
+                CustomTabBarContainer(selection: $authStateEnvObject.tabBarSelection) {
+                    if !isManager {
+                        CreateIssueScreen(tabSelection: $authStateEnvObject.tabBarSelection)
+                            .tabBarItem(tab: .createIssue, selection: $authStateEnvObject.tabBarSelection)
+                        MonitorIssueScreen(tabSelection: $authStateEnvObject.tabBarSelection)
+                            .tabBarItem(tab: .monitorIssue, selection: $authStateEnvObject.tabBarSelection)
+                        ExecutorScreen()
+                            .tabBarItem(tab: .executeIssue, selection: $authStateEnvObject.tabBarSelection)
+                        if masterIsVisible {
+                            MasterScreen(tabSelection: $authStateEnvObject.tabBarSelection)
+                                .tabBarItem(tab: .masterReviewIssue, selection: $authStateEnvObject.tabBarSelection)
+                        }
+                        MyAccountScreen(tabSelection: $authStateEnvObject.tabBarSelection)
+                            .tabBarItem(tab: .account, selection: $authStateEnvObject.tabBarSelection)
+                    }
+                }
             }
         }
         .onAppear {

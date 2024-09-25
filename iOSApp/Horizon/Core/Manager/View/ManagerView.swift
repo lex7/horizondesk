@@ -83,8 +83,10 @@ struct ManagerView: View {
                 Spacer()
                 topRightHeaderAccount()
                     .onTapGesture {
+                        generator.impactOccurred()
+                        authStateEnvObject.usersRating = []
+                        authStateEnvObject.allStatsFragments = []
                         authStateEnvObject.logout {
-                            self.generator.impactOccurred()
                             authStateEnvObject.clearToken()
                             if authStateEnvObject.authState == .authorized {
                                 authStateEnvObject.tabBarSelection = .createIssue
@@ -194,9 +196,9 @@ struct ManagerView: View {
             Text("Нет заявок, соответствующих указанным фильтрам!")
         }
         .fullScreenCover(isPresented: $authStateEnvObject.isPresentFiltered, onDismiss: {
-//            authStateEnvObject.executorUnassignRequest()
+            authStateEnvObject.filteredChartFragments = []
+            authStateEnvObject.getAllStats()
         }, content: {
-//            FilteredDetailsView(currentChart: $authStateEnvObject.filteredChartFragments)
             FilteredDetailsView(currentChart: $authStateEnvObject.filteredChartFragments,
                                 scrollPosition: $authStateEnvObject.filtereScrollPositionStart,
                                 visibleDomain: $authStateEnvObject.visibleDomain,
@@ -209,8 +211,8 @@ struct ManagerView: View {
             datePickerTo
         }
         .onAppear {
-            authStateEnvObject.getAllStats()
             Task {
+                authStateEnvObject.getAllStats()
                 try await Task.sleep(nanoseconds: 200_000_000)
                 authStateEnvObject.getRating()
             }
@@ -431,7 +433,7 @@ private extension ManagerView {
                     titleOfIssue = RequestTypeEnum.safety.name
                 }
                 Button(RequestTypeEnum.empty.name) {
-                    specializationTypeFilter = RequestTypeEnum.empty.rawValue
+                    specializationTypeFilter = nil
                     titleOfIssue = RequestTypeEnum.empty.name
                 }
             } label: {
@@ -463,7 +465,7 @@ private extension ManagerView {
                     areaOfIssueNumber = RegionIssue.areaFour.name
                 }
                 Button(RegionIssue.empty.name) {
-                    areaIdFilter = RegionIssue.empty.rawValue
+                    areaIdFilter = nil
                     areaOfIssueNumber = RegionIssue.empty.name
                 }
             } label: {
@@ -490,6 +492,10 @@ private extension ManagerView {
                     statusFilter = StatusIssue.denied.rawValue
                     statusOfIssue = StatusIssue.denied.name
                 }
+                Button("") {
+                    statusFilter = nil
+                    statusOfIssue = "Выберите Статус"
+                }
             } label: {
                 textViewOnBoard($statusOfIssue, placeHolder: "Выберите Статус", focusField: .statusType)
             }
@@ -502,16 +508,16 @@ private extension ManagerView {
         HStack(alignment: .center, spacing: 4) {
             ManagerLeftSegmentView(sectionSelected: $managerSegment, label: "Все заявки")
                 .onTapGesture {
-                    managerSegment.toggle()
                     generator.prepare()
                     generator.impactOccurred()
+                    managerSegment.toggle()
                 }
                 .allowsHitTesting(managerSegment != .allStats)
             ManagerRightSegmentView(sectionSelected: $managerSegment, label: "Рейтинг")
                 .onTapGesture {
-                    managerSegment.toggle()
                     generator.prepare()
                     generator.impactOccurred()
+                    managerSegment.toggle()
                 }
                 .allowsHitTesting(managerSegment != .filteredStats)
         }

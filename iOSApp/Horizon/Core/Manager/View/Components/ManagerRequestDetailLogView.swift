@@ -1,13 +1,12 @@
 //
-//  MasterMonitorScreen.swift
+//  ManagerRequestDetailLog.swift
 //  DeskHorizon
 //
-//  Created by Timofey Privalov on 16.08.2024.
+//  Created by Timofey Privalov on 25.09.2024.
 //
-
 import SwiftUI
 
-struct MasterMonitorScreen: View {
+struct ManagerRequestDetailLogView: View {
     
     // MARK: - Environment variables
     @Environment(\.colorScheme) private var colorScheme
@@ -27,11 +26,19 @@ struct MasterMonitorScreen: View {
     @Binding var logId: Int
     
     var body: some View {
-        VStack {
-            VStack {
+        VStack(spacing: 0) {
+            VStack(spacing: 0) {
                 Group {
                     // 1. Amount - Status - Sub Status
                     defaultSpacer
+                    HStack {
+                        Spacer()
+                        topRightHeaderAccount(title: "Закрыть")
+                            .onTapGesture {
+                                generator.impactOccurred()
+                                presentationMode.wrappedValue.dismiss()
+                            }
+                    }
                     Divider()
                     defaultSpacer
                     // 2. Date Block
@@ -47,7 +54,14 @@ struct MasterMonitorScreen: View {
                     defaultSpacer
                     titleAndValueMultiLines(title: "Текст заявки", value: currentNode.description ?? "", lines: 20, maxWidth: 1)
                         .padding(.horizontal, 28)
-                        .padding(.bottom, 20)
+                    Divider()
+                        .padding(.vertical, 10)
+                    HStack {
+                        makeMediumContrastView(text: "История", image: "doc.plaintext", imageFirst: false)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 28)
+                    .padding(.top, 10)
                     listOfLogs
                 }
             } /// end of Vstack
@@ -61,9 +75,9 @@ struct MasterMonitorScreen: View {
     }
 }
 
-private extension MasterMonitorScreen {
+private extension ManagerRequestDetailLogView {
     var listOfLogs: some View {
-        VStack {
+        VStack(spacing: 0) {
             if authStateEnvObject.logsIsLoading {
                 Spacer()
                 ProgressView()
@@ -89,18 +103,15 @@ private extension MasterMonitorScreen {
                 authStateEnvObject.getLogs(logId)
             }
         }
-//        .background()
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden()
     }
 }
 
-private extension MasterMonitorScreen {
+private extension ManagerRequestDetailLogView {
     @ViewBuilder
     private func logCell(_ log: LogsModel) -> some View {
-        VStack {
+        VStack(spacing: 0) {
             HStack(spacing: 0) {
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 0) {
                     HStack(spacing: 0) {
                         descriptionOfField("cтатус:", color: Color.theme.lowContrast)
                     }
@@ -157,7 +168,7 @@ private extension MasterMonitorScreen {
 }
 
 
-private extension MasterMonitorScreen {
+private extension ManagerRequestDetailLogView {
     @ViewBuilder
     private var messageForEmptyList: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -175,10 +186,13 @@ private extension MasterMonitorScreen {
     }
 }
 
-private extension MasterMonitorScreen {
+
+
+private extension ManagerRequestDetailLogView {
     var defaultSpacer: some View {
         Spacer()
-            .frame(width: 10, height: 28)
+            .frame(width: 10, height: 24)
             .background(Color.clear)
     }
 }
+
