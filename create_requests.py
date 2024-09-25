@@ -7,17 +7,17 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # File path to the JSON file
-json_file = 'data/issues.json'
+json_file = 'data/issues2.json'
 
 # Authorization token
-auth_token = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGV4IiwiZXhwIjoxNzI3MzU2ODgxfQ.N_6HcEr5hzeELuCS6KoUpBgPxTckNClBu8v2pPNxeC8'
+auth_token = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGV4IiwiZXhwIjoxNzI3NDU0NDU3fQ.M6EWE551cQe3xzoCu0BSLxQq3YF4hiM2wEFoqUM2PY4'
 
 # API endpoint
 url = 'https://timofmax1.fvds.ru/create-request'
 
 def random_datetime():
-    start_date = datetime(2024, 7, 30)
-    end_date = datetime(2024, 9, 24)
+    start_date = datetime(2024, 6, 15)
+    end_date = datetime(2024, 9, 5)
     delta = end_date - start_date
     random_days = random.randrange(delta.days + 1)
     random_time = timedelta(seconds=random.randrange(86400))  # random time within a day

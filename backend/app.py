@@ -271,8 +271,8 @@ def get_rewards(user_id: int, db: Session = Depends(get_db), current_user: User 
 
 @app.get("/boss-requests", response_model=List[RequestModel])
 def get_boss_requests(
-    from_date: Optional[date] = None, 
-    until_date: Optional[date] = None,
+    from_date: Optional[str] = None, 
+    until_date: Optional[str] = None,
     status: Optional[str] = None,
     request_type: Optional[int] = None,
     area_id: Optional[int] = None,
@@ -291,10 +291,12 @@ def get_boss_requests(
 
     # Apply filters
     if from_date:
-        query = query.filter(Request.created_at >= from_date)
+        from_date_obj = datetime.strptime(from_date, "%d-%m-%Y").date()
+        query = query.filter(Request.created_at >= from_date_obj)
     if until_date:
-        until_date += timedelta(days=1)
-        query = query.filter(Request.created_at < until_date)
+        until_date_obj = datetime.strptime(until_date, "%d-%m-%Y").date() + timedelta(days=1)
+        until_date_obj += timedelta(days=1)
+        query = query.filter(Request.created_at < until_date_obj)
     if request_type:
         query = query.filter(Request.request_type == request_type)
     if area_id:
