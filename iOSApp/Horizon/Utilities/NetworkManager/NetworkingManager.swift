@@ -37,9 +37,10 @@ final class NetworkManager {
                     switch response.statusCode {
                     case 200...299:
                         promise(.success(response.data))
+                        response.data
                     default:
                         promise(.failure(.apiResponseCode(code: response.statusCode)))
-                        // po String(decoding: response.request.data, as: UTF8.self)
+                        // po String(decoding: response.data, as: UTF8.self)
                     }
                 })
                 .store(in: &NetworkManager.cancelable)

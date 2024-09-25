@@ -1,7 +1,7 @@
 //  Created by Timofey Privalov on 25.03.2024.
 import SwiftUI
 
-enum SendMessageFocus: Hashable {
+private enum SendMessageFocus: Hashable {
     case title
     case area
     case message

@@ -11,7 +11,7 @@ struct UserRewardsModel: Decodable {
     let tokens: Int
     let num_created: Int
     let num_completed: Int
-    let last_completed: String
+    let last_completed: String?
 }
 
 extension UserRewardsModel {

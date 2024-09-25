@@ -9,7 +9,7 @@ import SwiftUI
 import Charts
 import GameplayKit
 
-enum textFieldFocus: Hashable {
+private enum textFieldFocus: Hashable {
     case statusType
     case area
 }
@@ -30,13 +30,11 @@ struct ManagerView: View {
     @State private var dateFrom = Date.now
     @State private var showingDatePickerFrom: Bool = false
     @State private var selectedDateFromDate: Date = Date()
-//    @State private var selectedDateFrom: String = ""
     @State private var selectedDateFrom: String?
     
     // MARK: - Date To /// selectedDateFrom
     @State private var showingDatePickerTo: Bool = false
     @State private var selectedDateToDate: Date = Date()
-//    @State private var selectedDateTo: String = ""
     @State private var selectedDateTo: String?
     
     // Area and Specialization titles
@@ -48,12 +46,9 @@ struct ManagerView: View {
     @State private var filterIsVisible: Bool = false
     
     /// Filter Fields
-//    @State private var specializationTypeFilter: Int = 99
     @State private var specializationTypeFilter: Int?
     @State private var areaIdFilter: Int?
-//    @State private var areaIdFilter: Int = 99
     @State private var statusFilter: String?
-//    @State private var statusFilter: String = "drom-filter"
     
     // Picker
     @State private var managerSegment: ManagerSwitcher = .allStats
@@ -70,12 +65,22 @@ struct ManagerView: View {
         authStateEnvObject.scrollPositionStart.addingTimeInterval(3600 * 24 * 30)
     }
     
+//    var scrollPositionString: String {
+//        authStateEnvObject.scrollPositionStart.formatted(.dateTime.month().day())
+//    }
+    
     var scrollPositionString: String {
-        authStateEnvObject.scrollPositionStart.formatted(.dateTime.month().day())
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ru_RU")
+        formatter.dateFormat = "d MMM" // Example: "31 декабря", adjust format as needed
+        return formatter.string(from: authStateEnvObject.scrollPositionStart)
     }
     
     var scrollPositionEndString: String {
-        scrollPositionEnd.formatted(.dateTime.month().day().year())
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ru_RU")
+        formatter.dateFormat = "d MMM" // Example: "31 декабря", adjust format as needed
+        return formatter.string(from: scrollPositionEnd)
     }
     
     // MARK: - Binding
@@ -216,6 +221,11 @@ struct ManagerView: View {
         .overlay {
             datePickerTo
         }
+        .overlay {
+            if authStateEnvObject.filteredIsLoading {
+                ProgressView()
+            }
+        }
         .onAppear {
             Task {
                 authStateEnvObject.getAllStats()
@@ -278,6 +288,7 @@ private extension ManagerView {
                         in: Date().addingTimeInterval(-3650*24*60*60)...Date(),
                         displayedComponents: [.date]
                     )
+                    .environment(\.locale, Locale.init(identifier: "Ru_ru"))
                     .onChange(of: selectedDateFromDate) { _ in
                         updateSelectedTimeFrom()
                     }
@@ -329,6 +340,7 @@ private extension ManagerView {
                         in: Date().addingTimeInterval(-365*24*60*60)...Date(),
                         displayedComponents: [.date]
                     )
+                    .environment(\.locale, Locale.init(identifier: "Ru_ru"))
                     .onChange(of: selectedDateToDate) { _ in
                         updateSelectedTimeTo()
                     }
@@ -368,7 +380,7 @@ private extension ManagerView {
     private var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_us")
-        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.dateFormat = "dd-MM-yyyy"
         return formatter
     }
     

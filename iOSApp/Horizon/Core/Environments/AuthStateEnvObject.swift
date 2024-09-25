@@ -590,6 +590,7 @@ final class AuthStateEnvObject: ObservableObject {
                     self.userRewardsDataModel = try UserRewardsModel(data: data)
                 } catch (let error) {
                     debugPrint(error)
+                    // po String(decoding: data, as: UTF8.self)
                 }
             }
             .store(in: &cancellables)
