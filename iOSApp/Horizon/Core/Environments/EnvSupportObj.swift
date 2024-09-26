@@ -27,11 +27,11 @@ final class EnvSupportObj: ObservableObject {
     }
     
     func createRequestIssue() {
-        isIssueCreated = false
-        buttonIssueInProgress = true
         guard !issueMessage.isEmpty else { return }
         guard areaOfIssueNumber != 999 else { return }
         guard requestType != 0 else { return }
+        isIssueCreated = false
+        buttonIssueInProgress = true
         let model = CreateRequestModelIssue(request_type: requestType,
                                       user_id: credentialService.getUserId() ?? 777,
                                       area_id: areaOfIssueNumber,

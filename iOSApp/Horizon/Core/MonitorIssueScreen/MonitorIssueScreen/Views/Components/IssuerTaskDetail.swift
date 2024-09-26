@@ -130,7 +130,7 @@ private extension IssuerTaskDetail {
         default:
             Group {
                 HStack {
-                    makeMediumContrastView(text: "Не выполнено", image: "xmark", imageFirst: true, color: .negativePrimary)
+                    makeMediumContrastView(text: "Вернуть", image: "xmark", imageFirst: true, color: .negativePrimary)
                         .padding(.horizontal, 30)
                         .onTapGesture {
                             generator.impactOccurred()
@@ -144,6 +144,8 @@ private extension IssuerTaskDetail {
                                 }
                             }
                         }
+                        .contentShape(Rectangle())
+                        .allowsHitTesting(!authStateEnvObject.isRequesterDeniedProgress)
                     Spacer()
                     makeMediumContrastView(text: "Подтвердить", image: "xmark", imageFirst: true, color: .positivePrimary)
                         .padding(.horizontal, 30)
@@ -159,6 +161,8 @@ private extension IssuerTaskDetail {
                                 }
                             }
                         }
+                        .contentShape(Rectangle())
+                        .allowsHitTesting(!authStateEnvObject.isRequesterDeniedProgress)
                 }
                 .padding(.bottom, screenHeight/25)
             }

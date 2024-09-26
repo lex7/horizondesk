@@ -154,7 +154,7 @@ private extension ExecutorScreen {
             ForEach(authStateEnvObject.issuesInProgress, id: \.self) { issue in
                 Menu {
                     if IssueStatus(rawValue: issue.status_id) == .inprogress {
-                        Button("Отправить на проверку.") {
+                        Button("Отправить на проверку") {
                             generator.impactOccurred()
                             Task {
                                 authStateEnvObject.executerCompleteSendReview(issue.request_id, reason: nil) {

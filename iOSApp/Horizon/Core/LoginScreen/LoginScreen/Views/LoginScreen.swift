@@ -48,6 +48,19 @@ struct LoginScreen: View {
                         }
                 } 
                 .padding(.top, 120)
+            } // End of VStack
+            .alert("Ошибка", isPresented: $authStateEnvObject.isErrorLogin) {
+                // Buttons as actions for the alert
+                Button("Ok", role: .cancel) {
+                    generator.impactOccurred()
+                }
+            } message: {
+                if authStateEnvObject.isErrorCodeLogin.contains("401") {
+                    Text("Не верный логин/пароль.")
+                } else {
+                    Text("Что-то пошло не так.")
+                }
+                
             }
             .padding(.horizontal, 12)
             .frame(maxWidth: .infinity)
@@ -55,6 +68,9 @@ struct LoginScreen: View {
             .background(
                 colorScheme == .dark ? Color.gradient.bkGradientDarkToExtraLowContrast : Color.gradient.bkGradientLightToExtraLowContrast
             )
+            .onTapGesture {
+                hideKeyboard()
+            }
             .overlay {
                 if authStateEnvObject.showProgress {
                     ProgressView()

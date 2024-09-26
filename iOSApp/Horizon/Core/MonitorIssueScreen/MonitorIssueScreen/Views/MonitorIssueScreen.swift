@@ -105,6 +105,11 @@ struct MonitorIssueScreen: View {
                 authStateEnvObject.getDeniedIssue()
             }
             .padding(.horizontal, 12)
+        } /// End of VStack
+        .overlay {
+            if authStateEnvObject.getInProgressIssueLoading {
+                ProgressView()
+            }
         }
         .fullScreenCover(isPresented: $showLogsForRequest) {
             LogsScreen(logId: $logId)

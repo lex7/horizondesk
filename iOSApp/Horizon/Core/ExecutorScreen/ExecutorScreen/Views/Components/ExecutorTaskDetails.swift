@@ -68,6 +68,8 @@ struct ExecutorTaskDetails: View {
                             presentationMode.wrappedValue.dismiss()
                         }
                     }
+                    .contentShape(Rectangle())
+                    .allowsHitTesting(!authStateEnvObject.isExecuterTakeOnWork)
             }
             .padding(.bottom, screenHeight/20)
         }

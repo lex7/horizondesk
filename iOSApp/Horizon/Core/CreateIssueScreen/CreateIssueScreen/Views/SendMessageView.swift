@@ -26,6 +26,12 @@ struct SendMessageView: View {
     @State private var titleOfIssue: String = ""
     @State private var areaOfIssueNumber: String = ""
     @State private var inputTextIssue: String = ""
+    
+    // MARK: - validate fields
+    @State private var specCheckFailed: Bool = false
+    @State private var areaCheckFailed: Bool = false
+    @State private var textCheckFailed: Bool = false
+    
     var body: some View {
         ZStack {
             Color.theme.background.ignoresSafeArea()
@@ -44,6 +50,11 @@ struct SendMessageView: View {
                 Spacer()
                 sendMessage
                     .padding(.vertical, screenHeight/12)
+            }
+            .overlay {
+                if vm.buttonIssueInProgress {
+                    ProgressView()
+                }
             }
             .alert("Заявка успешно создана", isPresented: $vm.isIssueCreated) {
                 // Buttons as actions for the alert
@@ -74,6 +85,7 @@ private extension SendMessageView {
                 .padding(.horizontal, 10)
                 .contentShape(Rectangle())
                 .onTapGesture {
+                    validateFields()
                     vm.issueMessage = inputTextIssue
                     generator.impactOccurred()
                     vm.createRequestIssue()
@@ -81,6 +93,7 @@ private extension SendMessageView {
                 .allowsHitTesting(!vm.buttonIssueInProgress)
         }
     }
+    
     var customTextEditor: some View {
         GeometryReader { geometry in
             ZStack {
@@ -110,7 +123,7 @@ private extension SendMessageView {
                 }
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.theme.extraLowContrast, lineWidth: 2)
+                        .stroke(textCheckFailed ? Color.theme.negativePrimary : Color.theme.extraLowContrast, lineWidth: 2)
                 )
                 .overlay {
                     if inputTextIssue.isEmpty {
@@ -136,31 +149,37 @@ private extension SendMessageView {
             // Wrapping Text inside Menu to show options on tap
             Menu {
                 Button(RequestTypeEnum.electricity.name) {
+                    specCheckFailed = false
                     vm.requestType = RequestTypeEnum.electricity.requestType
                     titleOfIssue = RequestTypeEnum.electricity.name
                 }
                 Button(RequestTypeEnum.tools.name) {
+                    specCheckFailed = false
                     vm.requestType = RequestTypeEnum.tools.requestType
                     titleOfIssue = RequestTypeEnum.tools.name
                 }
                 Button(RequestTypeEnum.docs.name) {
+                    specCheckFailed = false
                     vm.requestType = RequestTypeEnum.docs.requestType
                     titleOfIssue = RequestTypeEnum.docs.name
                 }
                 Button(RequestTypeEnum.sanpin.name) {
+                    specCheckFailed = false
                     vm.requestType = RequestTypeEnum.sanpin.requestType
                     titleOfIssue = RequestTypeEnum.sanpin.name
                 }
                 Button(RequestTypeEnum.safety.name) {
+                    specCheckFailed = false
                     vm.requestType = RequestTypeEnum.safety.requestType
                     titleOfIssue = RequestTypeEnum.safety.name
                 }
                 Button(RequestTypeEnum.empty.name) {
+                    specCheckFailed = false
                     vm.requestType = RequestTypeEnum.empty.requestType
                     titleOfIssue = RequestTypeEnum.empty.name
                 }
             } label: {
-                textViewOnBoard($titleOfIssue, focusField: .title)
+                textViewOnBoard($titleOfIssue, focusField: .title, $textCheckFailed)
             }
             Spacer()
         }
@@ -170,27 +189,32 @@ private extension SendMessageView {
             // Wrapping Text inside Menu to show options on tap
             Menu {
                 Button(RegionIssue.areaOne.name) {
+                    areaCheckFailed = false
                     vm.areaOfIssueNumber = RegionIssue.areaOne.rawValue
                     areaOfIssueNumber = RegionIssue.areaOne.name
                 }
                 Button(RegionIssue.areaTwo.name) {
+                    areaCheckFailed = false
                     vm.areaOfIssueNumber = RegionIssue.areaTwo.rawValue
                     areaOfIssueNumber = RegionIssue.areaTwo.name
                 }
                 Button(RegionIssue.areaThree.name) {
+                    areaCheckFailed = false
                     vm.areaOfIssueNumber = RegionIssue.areaThree.rawValue
                     areaOfIssueNumber = RegionIssue.areaThree.name
                 }
                 Button(RegionIssue.areaFour.name) {
+                    areaCheckFailed = false
                     vm.areaOfIssueNumber = RegionIssue.areaFour.rawValue
                     areaOfIssueNumber = RegionIssue.areaFour.name
                 }
                 Button(RegionIssue.empty.name) {
+                    areaCheckFailed = false
                     vm.areaOfIssueNumber = RegionIssue.empty.rawValue
                     areaOfIssueNumber = RegionIssue.empty.name
                 }
             } label: {
-                textViewOnBoard($areaOfIssueNumber, placeHolder: "Выберите участок", focusField: .area)
+                textViewOnBoard($areaOfIssueNumber, placeHolder: "Выберите участок", focusField: .area, $areaCheckFailed)
             }
             Spacer()
         }
@@ -211,13 +235,26 @@ private extension SendMessageView {
             Spacer()
         }
     }
+    
+    func validateFields() {
+        if titleOfIssue.isEmpty {
+            specCheckFailed = true
+        }
+        if areaOfIssueNumber.isEmpty {
+            areaCheckFailed = true
+        }
+        if inputTextIssue.isEmpty {
+            textCheckFailed = true
+        }
+    }
+    
     @ViewBuilder
     func textViewOnBoard(
         _ txt: Binding<String>,
         secure: Bool = false,
         placeHolder: String = "Cпециализация",
         focusField: SendMessageFocus,
-        numPad: Bool = false
+        _ check: Binding<Bool>
     ) -> some View {
         ZStack(alignment: .leading) {
             if txt.wrappedValue.isEmpty {
@@ -228,31 +265,27 @@ private extension SendMessageView {
                     .zIndex(1)
             }
             HStack {
-                Group {
-                    if secure {
-                        SecureField("", text: txt)
-                    } else {
-                        TextField("", text: txt)
+                TextField("", text: txt)
+                    .keyboardType(.default)
+                    .focused($focusedField, equals: focusedField)
+                    .accentColor(Color.theme.secondary)
+                    .submitLabel(.done)
+                    .onChange(of: $titleOfIssue.wrappedValue) { newValue in
+                        if !newValue.isEmpty {
+                            textCheckFailed = false
+                        }
                     }
-                }
-                .keyboardType(numPad ? .numberPad : .default)
-                .focused($focusedField, equals: focusedField)
-                .accentColor(Color.theme.secondary)
-                .submitLabel(.done)
-                .onSubmit {
-                    debugPrint("\(txt)")
-                }
-                .foregroundColor(Color.theme.selected)
-                .textFieldStyle(.plain)
-                .padding([.top, .leading, .bottom], 15)
-                .textInputAutocapitalization(.never)
-                .disableAutocorrection(true)
+                    .foregroundColor(Color.theme.selected)
+                    .textFieldStyle(.plain)
+                    .padding([.top, .leading, .bottom], 15)
+                    .textInputAutocapitalization(.never)
+                    .disableAutocorrection(true)
             }
             .background(Color.theme.surface)
             .clipShape(RoundedRectangle(cornerRadius: 10))
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
-                    .stroke(Color.theme.extraLowContrast, lineWidth: 2)
+                    .stroke(check.wrappedValue ? Color.theme.negativePrimary : Color.theme.extraLowContrast, lineWidth: 2)
             )
         }
     }

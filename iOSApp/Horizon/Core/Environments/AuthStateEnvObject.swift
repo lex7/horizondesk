@@ -31,12 +31,17 @@ final class AuthStateEnvObject: ObservableObject {
     @Published private(set) var masterIsLoading = false
     @Published private(set) var logsIsLoading = false
     @Published private(set) var statsIsLoading = false
+    @Published private(set) var getInProgressIssueLoading = false
+    
+    
     // Auth data
     @Published var username: String = ""
     @Published var password: String = ""
     
     // MARK: - Published variables
     @Published private (set) var showProgress: Bool = false
+    @Published private (set) var isErrorCodeLogin: String = ""
+    @Published var isErrorLogin: Bool = false
     @Published var authState: AuthState = .unauthorized
     @Published var isStatistic: Bool = false
     @Published var goingFromLogin: Bool = false
@@ -57,6 +62,9 @@ final class AuthStateEnvObject: ObservableObject {
     
     // Filtered Stats
     @Published var filteredChartFragments: [(day: Date, events: Int)] = []
+    @Published var filteredSpecialFragments: [(name: String, sales: Int)] = []
+    @Published var filteredStatusFragments: [(name: String, sales: Int)] = []
+    
     @Published var filtereScrollPositionStart: Date = Date()
     @Published var visibleDomain: Int = 30
     @Published var filteredIsLoading: Bool = false
@@ -74,7 +82,8 @@ final class AuthStateEnvObject: ObservableObject {
     @Published var updateNeeded: Bool = false
     // masterAproveInWork
     @Published var masterAproveInWork: Bool = false
-    
+    @Published var isExecuterTakeOnWork: Bool = false
+    @Published var isRequesterDeniedProgress: Bool = false
     // MARK: - Private constants
     private var credentialService = CredentialService.standard
     private let fcmTokenManager = FCMTokenManager.shared
@@ -121,6 +130,8 @@ final class AuthStateEnvObject: ObservableObject {
                     break
                 case .failure(let error):
                     debugPrint(String(describing: "[vm: \(error) - ❌ userLogin]"))
+                    isErrorCodeLogin = error.localizedDescription
+                    isErrorLogin = true
                 }
                 self.showProgress = false
             } receiveValue: { [weak self] data in
@@ -360,7 +371,7 @@ final class AuthStateEnvObject: ObservableObject {
     }
 
     func executerTakeOnWork(_ request_id: Int, action: @escaping ()->Void) {
-//        masterError
+        isExecuterTakeOnWork = true
         let model = ExecutorActionModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, reason: "")
         networkManager.requestMoyaData(apis: .takeOnWork(model: model))
             .receive(on: DispatchQueue.main)
@@ -375,6 +386,7 @@ final class AuthStateEnvObject: ObservableObject {
                         self.isMasterErrorTakeRequest = true
                     }
                 }
+                self.isExecuterTakeOnWork = false
             } receiveValue: { _ in
                 action()
             }
@@ -419,13 +431,14 @@ final class AuthStateEnvObject: ObservableObject {
     
     // MARK: - Creator of Requests:
     func getInProgressIssue() {
+        getInProgressIssueLoading = true
         if isManager() {
             return
         }
         let model = UserIdModel(user_id: credentialService.getUserId() ?? 777)
         networkManager.requestMoyaData(apis: .inprogress(model: model))
             .receive(on: DispatchQueue.main)
-            .sink { completion in
+            .sink { [unowned self] completion in
                 switch completion {
                 case .finished:
                     debugPrint(String(describing: "[vm: ✅ inProgressIssue successfully]"))
@@ -433,6 +446,7 @@ final class AuthStateEnvObject: ObservableObject {
                 case .failure(let error):
                     debugPrint(String(describing: "[vm: \(error) - ❌ inProgressIssue]"))
                 }
+                self.getInProgressIssueLoading = false
             } receiveValue: { [unowned self] data in
                 do {
                     let arrayReview = try RequestIssueModel.decode(from: data).filter { $0.status_id == 5 }.sorted { ($0.updated_at ?? Date()) > ($1.updated_at ?? Date()) }
@@ -499,6 +513,7 @@ final class AuthStateEnvObject: ObservableObject {
     }
         
     func requestDone(request_id: Int, reason: String = "", action: @escaping (()->Void)) {
+        isRequesterDeniedProgress = true
         var model = RequestDoneModel(user_id: 0, request_id: 0, reason: "")
         if !reason.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             model = RequestDoneModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, reason: reason)
@@ -508,7 +523,7 @@ final class AuthStateEnvObject: ObservableObject {
 
         networkManager.requestMoyaData(apis: .requestorConfirm(model: model))
             .receive(on: DispatchQueue.main)
-            .sink { completion in
+            .sink { [unowned self] completion in
                 switch completion {
                 case .finished:
                     debugPrint(String(describing: "[vm: ✅ requestDone successfully]"))
@@ -516,6 +531,7 @@ final class AuthStateEnvObject: ObservableObject {
                 case .failure(let error):
                     debugPrint(String(describing: "[vm: \(error) - ❌ requestDone]"))
                 }
+                self.isRequesterDeniedProgress = false
             } receiveValue: { _ in
                 action()
             }
@@ -523,6 +539,7 @@ final class AuthStateEnvObject: ObservableObject {
     }
     
     func requesterDeniedCompletion(request_id: Int, reason: String = "", action: @escaping (()->Void)) {
+        isRequesterDeniedProgress = true
         var model = RequesterDeniedModel(user_id: 0, request_id: 0, reason: "")
         if !reason.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             model = RequesterDeniedModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, reason: reason)
@@ -532,7 +549,7 @@ final class AuthStateEnvObject: ObservableObject {
 //        let model = RequesterDeniedModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, reason: clearReason)
         networkManager.requestMoyaData(apis: .requesterDeniedCompletion(model: model))
             .receive(on: DispatchQueue.main)
-            .sink { completion in
+            .sink { [unowned self] completion in
                 switch completion {
                 case .finished:
                     debugPrint(String(describing: "[vm: ✅ requesterDeniedCompletion successfully]"))
@@ -540,6 +557,7 @@ final class AuthStateEnvObject: ObservableObject {
                 case .failure(let error):
                     debugPrint(String(describing: "[vm: \(error) - ❌ requesterDeniedCompletion]"))
                 }
+                self.isRequesterDeniedProgress = false
             } receiveValue: { _ in
                 action()
             }
@@ -656,7 +674,13 @@ final class AuthStateEnvObject: ObservableObject {
                     let fragmentModels = createFragmentModels(from: issuesFilteredBoss).sorted { makeDateFrom($0.date) < makeDateFrom($1.date) }
                     self.filteredChartFragments = fragmentModels.map { (day: makeDateFrom($0.date), events: $0.events) }
                     if let last = self.filteredChartFragments.last {
-                        self.filtereScrollPositionStart = last.day.addingTimeInterval(-1 * 3600 * 24 * 30)
+                        self.filtereScrollPositionStart = last.day.addingTimeInterval(-1 * 3600 * 24 * 31)
+                        Task {
+                            try await Task.sleep(nanoseconds: 50_000_000) // Sleep on a background thread
+                            await MainActor.run {
+                                self.filtereScrollPositionStart = last.day.addingTimeInterval(-1 * 3600 * 24 * 30)
+                            }
+                        }
                         self.isPresentFiltered = true
                     } else {
                         self.showAlertOfFilter = true
@@ -735,10 +759,16 @@ final class AuthStateEnvObject: ObservableObject {
                 do {
                     let dataArray = try FragmentModel.decodeFrom(data: data)
                     debugPrint("OK")
-                    self.allStatsFragments = dataArray.map { (day: $0.date.makeDateFrom(),
+                    self.allStatsFragments = dataArray.map { (day: makeDateFrom($0.date),
                                                               events: $0.events) }.sorted { $0.day > $1.day }
                     if let last = self.allStatsFragments.last {
-                        self.scrollPositionStart = last.day.addingTimeInterval(-1 * 3600 * 24 * 30)
+                        self.scrollPositionStart = last.day.addingTimeInterval(-1 * 3600 * 24 * 31)
+                        Task {
+                            try await Task.sleep(nanoseconds: 100_000_000) // Sleep on a background thread
+                            await MainActor.run {
+                                self.scrollPositionStart = last.day.addingTimeInterval(-1 * 3600 * 24 * 30)
+                            }
+                        }
                     } else {
                         debugPrint("No Last")
                     }

@@ -62,8 +62,9 @@ private extension CreateIssueScreen {
                     }
                     .onTapGesture {
                         Task {
+                            authStateEnvObject.notificationCount = 0
                             generator.prepare()
-                            try await Task.sleep(nanoseconds: 100_000_000)
+                            try await Task.sleep(nanoseconds: 50_000_000)
                             generator.impactOccurred()
                             authStateEnvObject.tabBarSelection = .monitorIssue
                         }

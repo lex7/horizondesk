@@ -565,7 +565,7 @@ private extension ManagerView {
             Spacer()
             // Wrapping Text inside Menu to show options on tap
             Menu {
-                Button("По рэйтингу") {
+                Button("По рейтингу") {
                     generator.impactOccurred()
                     authStateEnvObject.makeSortingRating(sortUpRate)
                     sortUpSpec = false
