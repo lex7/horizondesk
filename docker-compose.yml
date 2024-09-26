@@ -3,8 +3,6 @@ services:
   web:
     build: .  
     command: ["uvicorn", "backend.app:app", "--host", "0.0.0.0"]
-    deploy:
-      replicas: 3  # 3 replicas of the FastAPI app
     networks:
       - internal_network
     restart: on-failure
