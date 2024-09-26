@@ -7,13 +7,16 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # File path to the JSON file
-json_file = 'data/issues72.json'
+json_file = 'data/issues.json'
+
+# available users
+users = [30, 44, 33, 32, 42, 31, 49, 52, 51, 48, 50, 53]
 
 # Authorization token
-auth_token = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJUTUstSGVhbHRoQ2hlY2siLCJleHAiOjE3Mjc0NzI3ODd9.Y4VfR83ngbWweq4d09WwaZHJNDCmQZjmTb4KV2HNGTs'
+auth_token = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGV4IiwiZXhwIjoxNzI3NTMwODg5fQ.shrn75blu86xK2EhHaIGhVkUQ40s9wri3Bqid5vowpM'
 
 # API endpoint
-url = 'https://corp3.cybertrain4security.ru:4443/create-request'
+url = 'https://timofmax1.fvds.ru/create-request'
 
 def random_datetime():
     start_date = datetime(2024, 7, 25)
@@ -26,9 +29,10 @@ def random_datetime():
 # Function to send a POST request using requests
 def send_request(issue):
     created_at = random_datetime()
+    random_user_id = random.choice(users)  # Select a random user from the users list
     payload = {
         "request_type": issue['request_type'],
-        "user_id": issue['user_id'],
+        "user_id": random_user_id,  # Use the random user ID
         "area_id": issue['area_id'],
         "description": issue['description'],
         "created_at": created_at
@@ -43,9 +47,9 @@ def send_request(issue):
     response = requests.post(url, headers=headers, json=payload, verify=False)
 
     if response.status_code == 200:
-        print(f"Request sent for user_id: {issue['user_id']} with response: {response.json()}")
+        print(f"Request sent for user_id: {random_user_id} with response: {response.json()}")
     else:
-        print(f"Failed to send request for user_id: {issue['user_id']} with status code: {response.status_code} and response: {response.text}")
+        print(f"Failed to send request for user_id: {random_user_id} with status code: {response.status_code} and response: {response.text}")
 
 # Read JSON file
 with open(json_file, 'r', encoding='utf-8') as file:
