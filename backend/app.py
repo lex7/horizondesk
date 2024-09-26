@@ -799,14 +799,12 @@ def confirm_request(request: UpdateRequest, db: Session = Depends(get_db), curre
     creator = db.query(User).filter(User.user_id == existing_request.created_by).first()
     executor = db.query(User).filter(User.user_id == existing_request.assigned_to).first()
     
-    if not creator.user_id == executor.user_id: # если создал и исполнил тот же чел, то не даем
-        if executor:
-            executor.num_completed += 1
-            executor.tokens += EXEC_BONUS
-            executor.last_completed = datetime.now().date()
-
-        if creator:
-            creator.tokens += CREATOR_BONUS
+    if creator and executor and not creator.user_id == executor.user_id: # если создал и исполнил тот же чел, то не даем
+        executor.num_completed += 1
+        executor.tokens += EXEC_BONUS
+        executor.last_completed = datetime.now().date()
+    if creator:
+        creator.tokens += CREATOR_BONUS
 
     send_push(
         tokens=executor.fcm_token if executor else None,
@@ -817,7 +815,6 @@ def confirm_request(request: UpdateRequest, db: Session = Depends(get_db), curre
     
     db.commit()
     return {"message": "Request confirmed successfully", "request_id": request.request_id}
-
 
 @app.post("/requestor-deny", response_model=dict)
 def deny_request(request: UpdateRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
