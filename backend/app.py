@@ -16,11 +16,16 @@ from backend.schemas import TokenData
 from fastapi.security import OAuth2PasswordRequestForm
 import os
 
+
+# constants
 JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY")
 if not JWT_SECRET_KEY:
     raise ValueError("No JWT_SECRET_KEY set for JWT")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 3000
+
+EXEC_BONUS = 200 # бонус за выполнение заявки
+CREATOR_BONUS = 100 # бонус за создание заявки
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
@@ -552,9 +557,9 @@ def create_request(request: RequestCreate, db: Session = Depends(get_db), curren
 
     # Update creator's request count
     creator = db.query(User).filter(User.user_id == request.user_id).first()
-    if creator:
-        creator.num_created += 1
-        db.commit()
+    # if creator:
+    #     creator.num_created += 1
+    #     db.commit()
 
     # Log the creation of the request
     log_entry = RequestStatusLog(
@@ -640,9 +645,14 @@ def approve_request(request: UpdateRequest, db: Session = Depends(get_db), curre
     )
     
     # Send push notification to the request creator
-    creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
+    creator = db.query(User).filter(User.user_id == existing_request.created_by).first()
+
+    if creator:
+        creator.num_created += 1
+        db.commit()
+
     send_push(
-        tokens=creator_user.fcm_token,
+        tokens=creator.fcm_token,
         title="Запрос согласован",
         body=f"Ваш запрос (№ {existing_request.request_id}) был согласован мастером",
         type_of_request="1"
@@ -676,9 +686,9 @@ def deny_request(request: UpdateRequest, db: Session = Depends(get_db), current_
         reason=request.reason,
         action_name='Отклонено мастером'
     )
-    creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
+    creator = db.query(User).filter(User.user_id == existing_request.created_by).first()
     send_push(
-        tokens=creator_user.fcm_token,
+        tokens=creator.fcm_token,
         title="Запрос отклонен",
         body=f"Ваш запрос (№ {existing_request.request_id}) был отклонен мастером",
         type_of_request="3"
@@ -692,8 +702,8 @@ def take_request(request: UpdateRequest, db: Session = Depends(get_db), current_
     existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
     if existing_request is None:
         raise HTTPException(status_code=404, detail="Request not found")
-    if existing_request.created_by == request.user_id:
-        raise HTTPException(status_code=400, detail="Заявитель не может быть исполнителем")
+    # if existing_request.created_by == request.user_id:
+    #     raise HTTPException(status_code=400, detail="Заявитель не может быть исполнителем")
     existing_request = update_request(
         request.request_id,
         new_status=4,
@@ -702,9 +712,9 @@ def take_request(request: UpdateRequest, db: Session = Depends(get_db), current_
         assigned_to=request.user_id,
         action_name='Взято в работу'
     )
-    creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
+    creator = db.query(User).filter(User.user_id == existing_request.created_by).first()
     send_push(
-        tokens=creator_user.fcm_token,
+        tokens=creator.fcm_token,
         title="Запрос в работе",
         body=f"Ваш запрос (№ {existing_request.request_id}) был взят в работу"
     )
@@ -724,9 +734,9 @@ def cancel_request(request: UpdateRequest, db: Session = Depends(get_db), curren
         reason=request.reason,
         action_name='Исполнитель отказался'
     )
-    creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
+    creator = db.query(User).filter(User.user_id == existing_request.created_by).first()
     send_push(
-        tokens=creator_user.fcm_token,
+        tokens=creator.fcm_token,
         title="Запрос был отменен",
         body=f"Ваш запрос (№ {existing_request.request_id}) был возвращен исполнителем"
     )
@@ -738,10 +748,10 @@ def cancel_request(request: UpdateRequest, db: Session = Depends(get_db), curren
 @app.post("/executor-complete", response_model=dict)
 def complete_request(request: UpdateRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     existing_request = update_request(request.request_id, 5, request.user_id, db, reason=request.reason, action_name='Исполнено')
-    creator_user = db.query(User).filter(User.user_id == existing_request.created_by).first()
+    creator = db.query(User).filter(User.user_id == existing_request.created_by).first()
     badge = db.query(Request).filter(Request.request_type == existing_request.request_type, Request.status_id == 5).count()
     send_push(
-        tokens=creator_user.fcm_token,
+        tokens=creator.fcm_token,
         title="Запрос исполнен",
         body=f"Ваш запрос (№ {existing_request.request_id}) был исполнен и ожидает проверки",
         type_of_request="1",
@@ -757,13 +767,14 @@ def confirm_request(request: UpdateRequest, db: Session = Depends(get_db), curre
     creator = db.query(User).filter(User.user_id == request.user_id).first()
     executor = db.query(User).filter(User.user_id == existing_request.assigned_to).first()
     
-    if executor:
-        executor.num_completed += 1
-        executor.tokens += 200
-        executor.last_completed = datetime.now().date()
+    if not creator.user_id == executor.user_id: # если создал и исполнил тот же чел, то не даем
+        if executor:
+            executor.num_completed += 1
+            executor.tokens += EXEC_BONUS
+            executor.last_completed = datetime.now().date()
 
-    if creator:
-        creator.tokens += 100
+        if creator:
+            creator.tokens += CREATOR_BONUS
 
     send_push(
         tokens=executor.fcm_token if executor else None,
