@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  web:
+    build: .
+    command: ["uvicorn", "backend.app:app", "--host", "0.0.0.0"]
+    networks:
+      - app-network
+    profiles:
+      - web
+    deploy:
+      replicas: 2
+
+networks:
+  app-network:
+    driver: bridge

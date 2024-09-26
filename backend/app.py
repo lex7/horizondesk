@@ -687,7 +687,6 @@ def deny_request(request: UpdateRequest, db: Session = Depends(get_db), current_
     return {"message": "Request denied successfully", "request_id": existing_request.request_id}
     
 
-
 @app.post("/take-on-work", response_model=dict)
 def take_request(request: UpdateRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     existing_request = db.query(Request).filter(Request.request_id == request.request_id).first()
