@@ -304,7 +304,6 @@ def get_boss_requests(
         query = query.filter(Request.created_at >= from_date_obj)
     if until_date:
         until_date_obj = datetime.strptime(until_date, "%d-%m-%Y").date() + timedelta(days=1)
-        until_date_obj += timedelta(days=1)
         query = query.filter(Request.created_at < until_date_obj)
     if request_type:
         query = query.filter(Request.request_type == request_type)
@@ -318,6 +317,7 @@ def get_boss_requests(
 
     # Execute the query and return the results
     return query.all()
+
 
 
 @app.get("/get-stats", response_model=List[StatsModel])
