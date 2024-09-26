@@ -796,7 +796,7 @@ def complete_request(request: UpdateRequest, db: Session = Depends(get_db), curr
 @app.post("/requestor-confirm", response_model=dict)
 def confirm_request(request: UpdateRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     existing_request = update_request(request.request_id, 6, request.user_id, db, reason=request.reason, action_name='Принято')
-    creator = db.query(User).filter(User.user_id == request.user_id).first()
+    creator = db.query(User).filter(User.user_id == existing_request.created_by).first()
     executor = db.query(User).filter(User.user_id == existing_request.assigned_to).first()
     
     if not creator.user_id == executor.user_id: # если создал и исполнил тот же чел, то не даем
@@ -817,7 +817,6 @@ def confirm_request(request: UpdateRequest, db: Session = Depends(get_db), curre
     
     db.commit()
     return {"message": "Request confirmed successfully", "request_id": request.request_id}
-
 
 
 @app.post("/requestor-deny", response_model=dict)
