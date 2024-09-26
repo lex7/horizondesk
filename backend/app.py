@@ -357,7 +357,14 @@ def get_all_stats(
         else:
             query = query.filter(Request.status_id == status_mapping[status])
 
-    # Fetch request counts grouped by date
+    # Get the earliest and latest dates in the filtered result
+    min_date = query.with_entities(func.min(cast(Request.created_at, Date))).scalar()
+    max_date = query.with_entities(func.max(cast(Request.created_at, Date))).scalar()
+
+    if not min_date or not max_date:
+        return []  # No requests in the database
+
+    # Fetch request counts grouped by date from the filtered query
     results = query.with_entities(
         cast(Request.created_at, Date).label('date'),
         func.count(Request.request_id).label('events')
@@ -366,14 +373,7 @@ def get_all_stats(
     # Create a dict with dates as keys and event counts as values
     event_dict = {str(result.date): result.events for result in results}
 
-    # Get the earliest and latest dates in the filtered result
-    min_date = db.query(func.min(cast(Request.created_at, Date))).scalar()
-    max_date = db.query(func.max(cast(Request.created_at, Date))).scalar()
-
-    if not min_date or not max_date:
-        return []  # No requests in the database
-
-    # Generate all dates between min_date and max_date
+    # Generate all dates between min_date and max_date based on filtered results
     all_dates = []
     current_date = min_date
     while current_date <= max_date:
