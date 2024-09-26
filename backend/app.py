@@ -806,15 +806,18 @@ def confirm_request(request: UpdateRequest, db: Session = Depends(get_db), curre
     if creator:
         creator.tokens += CREATOR_BONUS
 
-    send_push(
-        tokens=executor.fcm_token if executor else None,
-        title="Работа принята",
-        body=f"Ваша работа (№ {existing_request.request_id}) была принята заявителем",
-        type_of_request="2"
-    )
-    
+    # Only send a push notification if executor exists and has an FCM token
+    if executor and executor.fcm_token:
+        send_push(
+            tokens=executor.fcm_token,
+            title="Работа принята",
+            body=f"Ваша работа (№ {existing_request.request_id}) была принята заявителем",
+            type_of_request="2"
+        )
+
     db.commit()
     return {"message": "Request confirmed successfully", "request_id": request.request_id}
+
 
 @app.post("/requestor-deny", response_model=dict)
 def deny_request(request: UpdateRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
