@@ -1,6 +1,17 @@
+#docker-compose.yml
 services:
+  web:
+    build: .  
+    command: ["uvicorn", "backend.app:app", "--host", "0.0.0.0"]
+    deploy:
+      replicas: 3  # 3 replicas of the FastAPI app
+    networks:
+      - internal_network
+    restart: on-failure
+
   db:
     image: postgres:13
+    container_name: postgres_db
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -10,20 +21,12 @@ services:
       - ./init-scripts:/docker-entrypoint-initdb.d/
     networks:
       - internal_network
-    profiles:
-      - db
+    restart: on-failure
 
-  web:
-    build: .
-    command: ["uvicorn", "backend.app:app", "--host", "0.0.0.0"]
-    networks:
-      - internal_network
-    profiles:
-      - web
+volumes:
+  postgres_data:
 
 networks:
   internal_network:
     driver: bridge
 
-volumes:
-  postgres_data:
