@@ -296,7 +296,7 @@ def get_boss_requests(
     }
 
     # Default query
-    query = db.query(Request)
+    query = db.query(Request).filter(Request.status_id != 7)
 
     # Apply filters
     if from_date:
