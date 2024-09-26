@@ -320,26 +320,58 @@ def get_boss_requests(
     return query.all()
 
 
-@app.get("/get-all-stats", response_model=List[StatsModel])
+@app.get("/get-stats", response_model=List[StatsModel])
 def get_all_stats(
+    from_date: Optional[str] = None,
+    until_date: Optional[str] = None,
+    status: Optional[str] = None,
+    request_type: Optional[int] = None,
+    area_id: Optional[int] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    # Get the earliest and latest dates
-    min_date = db.query(func.min(cast(Request.created_at, Date))).scalar()
-    max_date = db.query(func.max(cast(Request.created_at, Date))).scalar()
+    # Map status to status_id
+    status_mapping = {
+        "done": 6,
+        "denied": 3,
+        "in-progress": [1, 2, 4, 5]
+    }
 
-    if not min_date or not max_date:
-        return []  # No requests in the database
+    # Default query
+    query = db.query(Request)
+
+    # Apply filters
+    if from_date:
+        from_date_obj = datetime.strptime(from_date, "%d-%m-%Y").date()
+        query = query.filter(Request.created_at >= from_date_obj)
+    if until_date:
+        until_date_obj = datetime.strptime(until_date, "%d-%m-%Y").date() + timedelta(days=1)
+        query = query.filter(Request.created_at < until_date_obj)
+    if request_type:
+        query = query.filter(Request.request_type == request_type)
+    if area_id:
+        query = query.filter(Request.area_id == area_id)
+    if status and status in status_mapping:
+        if isinstance(status_mapping[status], list):
+            query = query.filter(Request.status_id.in_(status_mapping[status]))
+        else:
+            query = query.filter(Request.status_id == status_mapping[status])
 
     # Fetch request counts grouped by date
-    results = db.query(
+    results = query.with_entities(
         cast(Request.created_at, Date).label('date'),
         func.count(Request.request_id).label('events')
     ).group_by(cast(Request.created_at, Date)).all()
 
     # Create a dict with dates as keys and event counts as values
     event_dict = {str(result.date): result.events for result in results}
+
+    # Get the earliest and latest dates in the filtered result
+    min_date = db.query(func.min(cast(Request.created_at, Date))).scalar()
+    max_date = db.query(func.max(cast(Request.created_at, Date))).scalar()
+
+    if not min_date or not max_date:
+        return []  # No requests in the database
 
     # Generate all dates between min_date and max_date
     all_dates = []
@@ -353,6 +385,7 @@ def get_all_stats(
         current_date += timedelta(days=1)
 
     return all_dates
+
 
 @app.get("/get-rating", response_model=List[RatingResponse])
 def get_rating(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
@@ -382,7 +415,6 @@ def get_rating(db: Session = Depends(get_db), current_user: User = Depends(get_c
         }
         for user in users
     ]
-
 
 
 # Post endpoints
