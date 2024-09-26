@@ -12,7 +12,7 @@ services:
       - app-network
     profiles:
       - db
-    restart: always
+    restart: on-failure
     ports:
       - "5432:5432"
 

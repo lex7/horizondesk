@@ -6,8 +6,7 @@ services:
       - app-network
     profiles:
       - web
-    deploy:
-      replicas: 2
+    restart: on-failure
 
 networks:
   app-network:
