@@ -107,6 +107,8 @@ private extension IssueAcceptanceCheck {
                             }
                         }
                     }
+                    .contentShape(Rectangle())
+                    .allowsHitTesting(!authStateEnvObject.masterAproveInWork)
                 Spacer()
                 makeMediumContrastView(text: "Подтвердить", image: "checkmark", imageFirst: false, color: .positivePrimary)
                     .padding(.horizontal, 30)
@@ -116,6 +118,8 @@ private extension IssueAcceptanceCheck {
                             presentationMode.wrappedValue.dismiss()
                         }
                     }
+                    .contentShape(Rectangle())
+                    .allowsHitTesting(!authStateEnvObject.masterAproveInWork)
             }
             .padding(.bottom, screenHeight/20)
         }

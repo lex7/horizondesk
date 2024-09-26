@@ -28,5 +28,4 @@ extension String {
         inputFormatter.dateFormat = "dd-MM-yyyy" // "24-09-2023"
         return inputFormatter.date(from: self) ?? Date()
     }
-    
 }

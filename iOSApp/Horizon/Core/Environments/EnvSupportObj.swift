@@ -9,6 +9,7 @@ final class EnvSupportObj: ObservableObject {
     @Published var areaOfIssueNumber: Int = 999
     // MARK: - Published properties
     @Published var isIssueCreated: Bool = false
+    @Published var buttonIssueInProgress: Bool = false
     @Published var isErrorOccured: Bool = false
     
     // MARK: - Private constants
@@ -27,6 +28,7 @@ final class EnvSupportObj: ObservableObject {
     
     func createRequestIssue() {
         isIssueCreated = false
+        buttonIssueInProgress = true
         guard !issueMessage.isEmpty else { return }
         guard areaOfIssueNumber != 999 else { return }
         guard requestType != 0 else { return }
@@ -36,7 +38,7 @@ final class EnvSupportObj: ObservableObject {
                                       description: issueMessage)
         networkManager.requestMoyaData(apis: .createRequest(message: model))
             .receive(on: DispatchQueue.main)
-            .sink { completion in
+            .sink { [unowned self] completion in
                 switch completion {
                 case .finished:
                     debugPrint(String(describing: "[vm: ✅ sendIssues successfully]"))
@@ -44,6 +46,7 @@ final class EnvSupportObj: ObservableObject {
                 case .failure(let error):
                     debugPrint(String(describing: "[vm: \(error) - ❌ sendIssues]"))
                 }
+                self.buttonIssueInProgress = false
             } receiveValue: { [weak self] _ in
                 debugPrint(model)
                 self?.isIssueCreated = true

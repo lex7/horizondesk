@@ -45,8 +45,9 @@ struct DailySalesChart: View {
                 majorAlignment: .matching(.init(day: 1))))
         .chartScrollPosition(x: $scrollPosition)
         .onChange(of: scrollPosition) { _ in
-                    generator.impactOccurred()
-                }
+            generator.prepare()
+            generator.impactOccurred()
+        }
         .chartXAxis {
             AxisMarks(values: .stride(by: .day, count: 7)) {
                 AxisTick()

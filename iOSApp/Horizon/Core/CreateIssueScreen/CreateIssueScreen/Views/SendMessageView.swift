@@ -78,6 +78,7 @@ private extension SendMessageView {
                     generator.impactOccurred()
                     vm.createRequestIssue()
                 }
+                .allowsHitTesting(!vm.buttonIssueInProgress)
         }
     }
     var customTextEditor: some View {

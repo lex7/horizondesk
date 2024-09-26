@@ -214,7 +214,7 @@ extension EndPointsDolly: Moya.TargetType {
         case .bossRequests:
             return "boss-requests"
         case .getAllStats:
-            return "get-all-stats"
+            return "get-stats"
         case .getRating:
             return "get-rating"
         }

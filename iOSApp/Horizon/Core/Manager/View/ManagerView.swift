@@ -65,10 +65,6 @@ struct ManagerView: View {
         authStateEnvObject.scrollPositionStart.addingTimeInterval(3600 * 24 * 30)
     }
     
-//    var scrollPositionString: String {
-//        authStateEnvObject.scrollPositionStart.formatted(.dateTime.month().day())
-//    }
-    
     var scrollPositionString: String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ru_RU")
@@ -79,7 +75,7 @@ struct ManagerView: View {
     var scrollPositionEndString: String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ru_RU")
-        formatter.dateFormat = "d MMM" // Example: "31 декабря", adjust format as needed
+        formatter.dateFormat = "d MMM yyyy" // Example: "31 декабря", adjust format as needed
         return formatter.string(from: scrollPositionEnd)
     }
     
@@ -113,9 +109,9 @@ struct ManagerView: View {
                 ScrollView(showsIndicators: false) {
                     VStack {
                         Text("\(scrollPositionString) – \(scrollPositionEndString)")
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                            .padding(.top, 20)
+                            .withDefaultTextModifier(font: "NexaRegular", size: 15,
+                                                     relativeTextStyle: .callout, color: .secondary)
+                            .padding(.top, 15)
                         if authStateEnvObject.statsIsLoading {
                             ProgressView()
                                 .frame(height: 190)
@@ -128,7 +124,7 @@ struct ManagerView: View {
                         HStack {
                             if let selectedDateFrom = selectedDateFrom {
                                 createListPickedTypes(text: selectedDateFrom.isEmpty ? "дата от" : selectedDateFrom,
-                                                      butPressed: selectedDateFrom.isEmpty,
+                                                      butPressed: !selectedDateFrom.isEmpty,
                                                       size: 17,
                                                       fontSize: .body) {
                                     showingDatePickerFrom = true
@@ -165,9 +161,25 @@ struct ManagerView: View {
                         statusIssue
                             .padding(.top, 10)
                         HStack {
+                            makeMediumContrastView(text: "Очистить", image: "trash.slash")
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    generator.prepare()
+                                    generator.impactOccurred()
+                                    selectedDateFromDate = Date()
+                                    selectedDateToDate = Date()
+                                    selectedDateFrom = nil
+                                    selectedDateTo = nil
+                                    specializationTypeFilter = nil
+                                    titleOfIssue = ""
+                                    areaIdFilter = nil
+                                    areaOfIssueNumber = ""
+                                    statusFilter = nil
+                                    statusOfIssue = ""
+                                }
                             Spacer()
-                            makeMediumContrastView(text: "Отфильтровать", image: "paperplane", imageFirst: false)
-                                .padding(.top, 20)
+                            makeMediumContrastView(text: "Фильтровать", image: "paperplane", imageFirst: false)
+                                .contentShape(Rectangle())
                                 .onTapGesture {
                                     generator.impactOccurred()
                                     let model = BossFilterModel(from_date: selectedDateFrom,
@@ -178,6 +190,8 @@ struct ManagerView: View {
                                     authStateEnvObject.filterRequests(model)
                                 }
                         }
+                        .padding(.horizontal, 10)
+                        .padding(.top, 30)
                     } /// End of VStack Scroll
                     .padding(.horizontal, 20)
                 } /// End of ScrollView
@@ -211,7 +225,7 @@ struct ManagerView: View {
             authStateEnvObject.getAllStats()
         }, content: {
             FilteredDetailsView(currentChart: $authStateEnvObject.filteredChartFragments,
-                                scrollPosition: $authStateEnvObject.filtereScrollPositionStart,
+                                scrollPositionStart: $authStateEnvObject.filtereScrollPositionStart,
                                 visibleDomain: $authStateEnvObject.visibleDomain,
                                 issues: $authStateEnvObject.issuesFilteredBoss)
         })
@@ -285,7 +299,8 @@ private extension ManagerView {
                     DatePicker(
                         "Select Date",
                         selection: $selectedDateFromDate,
-                        in: Date().addingTimeInterval(-3650*24*60*60)...Date(),
+//                        in: Date().addingTimeInterval(-3650*24*60*60)...Date(),
+                        in: Date().addingTimeInterval(-3650*24*60*60)...selectedDateToDate,
                         displayedComponents: [.date]
                     )
                     .environment(\.locale, Locale.init(identifier: "Ru_ru"))
@@ -294,14 +309,82 @@ private extension ManagerView {
                     }
                     .datePickerStyle(WheelDatePickerStyle())
                     .padding()
-                    Button(action: {
-                        selectedDateFrom = dateFormatter.string(from: selectedDateFromDate)
-                        showingDatePickerFrom = false
-                    },
-                           label: {
-                        makeMediumContrastView(text: "Выбрать", image: "calendar.badge.checkmark", imageFirst: false)
-                    })
-                    .padding()
+                    HStack {
+                        Button(action: {
+                            selectedDateFrom = nil
+                            selectedDateFromDate = Date()
+                            showingDatePickerFrom = false
+                        },
+                               label: {
+                            makeMediumContrastView(text: "Очистить", image: "trash.slash", imageFirst: false)
+                                .contentShape(Rectangle())
+                        })
+                        Spacer()
+                        Button(action: {
+                            selectedDateFrom = dateFormatter.string(from: selectedDateFromDate)
+                            showingDatePickerFrom = false
+                        },
+                               label: {
+                            makeMediumContrastView(text: "Выбрать", image: "calendar.badge.checkmark", imageFirst: false)
+                                .contentShape(Rectangle())
+                        })
+                    }
+                    .padding(.bottom, 20)
+                    .foregroundColor(Color.theme.surface)
+                }
+                .frame(maxWidth: screenWidth/1.5, alignment: .center)
+                .padding(12)
+                .background(Color.theme.surface)
+                .cornerRadius(12)
+                .shadow(color: Color.theme.muted.opacity(0.5), radius: 9, x: 3, y: 3)
+                .padding()
+            }
+        }
+    }
+    
+    @ViewBuilder
+    var datePickerTo: some View {
+        Group {
+            if showingDatePickerTo {
+                Color.black.opacity(0.01)
+                    .edgesIgnoringSafeArea(.all)
+                    .onTapGesture {
+                        showingDatePickerTo = false
+                    }
+                // The modal view
+                VStack {
+                    DatePicker(
+                        "",
+                        selection: $selectedDateToDate,
+//                        in: Date().addingTimeInterval(-365*24*60*60)...Date(),
+                        in: selectedDateFromDate...Date(),
+                        displayedComponents: [.date]
+                    )
+                    .environment(\.locale, Locale.init(identifier: "Ru_ru"))
+                    .onChange(of: selectedDateToDate) { _ in
+                        updateSelectedTimeTo()
+                    }
+                    .datePickerStyle(WheelDatePickerStyle())
+                    HStack {
+                        Button(action: {
+                            selectedDateTo = nil
+                            selectedDateToDate = Date()
+                            showingDatePickerTo = false
+                        },
+                               label: {
+                            makeMediumContrastView(text: "Очистить", image: "trash.slash", imageFirst: false)
+                                .contentShape(Rectangle())
+                        })
+                        Spacer()
+                        Button(action: {
+                            selectedDateTo = dateFormatter.string(from: selectedDateToDate)
+                            debugPrint(dateFormatter.string(from: selectedDateToDate))
+                            showingDatePickerTo = false
+                        },
+                               label: {
+                            makeMediumContrastView(text: "Выбрать", image: "calendar.badge.checkmark", imageFirst: false)
+                        })
+                    }
                     .foregroundColor(Color.theme.surface)
                 }
                 .frame(maxWidth: screenWidth/1.5, alignment: .center)
@@ -323,55 +406,10 @@ private extension ManagerView {
         }
     }
     
-    @ViewBuilder
-    var datePickerTo: some View {
-        Group {
-            if showingDatePickerTo {
-                Color.black.opacity(0.01)
-                    .edgesIgnoringSafeArea(.all)
-                    .onTapGesture {
-                        showingDatePickerTo = false
-                    }
-                // The modal view
-                VStack {
-                    DatePicker(
-                        "",
-                        selection: $selectedDateToDate,
-                        in: Date().addingTimeInterval(-365*24*60*60)...Date(),
-                        displayedComponents: [.date]
-                    )
-                    .environment(\.locale, Locale.init(identifier: "Ru_ru"))
-                    .onChange(of: selectedDateToDate) { _ in
-                        updateSelectedTimeTo()
-                    }
-                    .datePickerStyle(WheelDatePickerStyle())
-                    //                    .padding()
-                    Button(action: {
-                        selectedDateTo = dateFormatter.string(from: selectedDateToDate)
-                        showingDatePickerTo = false
-                    },
-                           label: {
-                        makeMediumContrastView(text: "Выбрать", image: "calendar.badge.checkmark", imageFirst: false)
-                    })
-                    .padding()
-                    .foregroundColor(Color.theme.surface)
-                }
-                .frame(maxWidth: screenWidth/1.5, alignment: .center)
-                .padding(12)
-                .background(Color.theme.surface)
-                .cornerRadius(12)
-                .shadow(color: Color.theme.muted.opacity(0.5), radius: 9, x: 3, y: 3)
-                .padding()
-            }
-        }
-    }
-    
     private func updateSelectedTimeTo() {
         let today = Calendar.current.startOfDay(for: Date())
         if Calendar.current.isDate(selectedDateFromDate, inSameDayAs: today) {
             selectedDateTo = dateFormatter.string(from: selectedDateToDate)
-            //            selectedTime = Date().addingTimeInterval(2 * 60 * 60)
-            //            selectedMeetingTime = dateTimeFormatter.string(from: selectedTime)
         } else {
             selectedDateTo = dateFormatter.string(from: selectedDateToDate)
         }
@@ -512,7 +550,7 @@ private extension ManagerView {
                 }
                 Button("") {
                     statusFilter = nil
-                    statusOfIssue = "Выберите Статус"
+                    statusOfIssue = ""
                 }
             } label: {
                 textViewOnBoard($statusOfIssue, placeHolder: "Выберите Статус", focusField: .statusType)
@@ -588,40 +626,76 @@ private extension ManagerView {
     
     func makeRatingCell(_ user: UserRatingModel) -> some View {
         VStack {
-            HStack {
-                descriptionOfField("ФИО:", color: sortUpName ? Color.theme.primary : Color.theme.secondary)
-                Spacer()
-                descriptionOfField("\(user.surname) \(user.name) \(user.middle_name)")
+            if sortUpName {
+                specialization(user.surname, user.name, user.middle_name)
             }
-            HStack {
-                if let spec = user.specialization {
-                    descriptionOfField("Должность:", color: sortUpSpec ? Color.theme.primary : Color.theme.secondary)
-                    Spacer()
-                    descriptionOfField(spec)
-                }
+            if sortUpRate {
+                tokens(user.tokens)
             }
-            HStack {
-                descriptionOfField("Заявок создано:", color: Color.theme.secondary)
-                Spacer()
-                descriptionOfField("\(user.num_created)")
+            if sortUpSpec {
+                specialization(user.specialization)
             }
-            HStack {
-                descriptionOfField("Заявок выполнено:", color: Color.theme.secondary)
-                Spacer()
-                descriptionOfField("\(user.num_completed)")
+            if !sortUpName {
+                specialization(user.surname, user.name, user.middle_name)
             }
-            HStack {
-                descriptionOfField("Токены:", color: sortUpRate ? Color.theme.primary : Color.theme.secondary)
-                Spacer()
-                descriptionOfField("\(user.tokens)")
+            if !sortUpRate {
+                tokens(user.tokens)
             }
+            if !sortUpSpec {
+                specialization(user.specialization)
+            }
+            createdReq(user.num_created)
+            completedReq(user.num_completed)
+            
             
         } /// End of VStack cell
         .padding(.horizontal, 20)
         .padding(.top, 10)
     }
     
-    var filterBottom: some View {
+    private func specialization(_ surname: String, _ name: String, _ middle_name: String) -> some View {
+        HStack {
+            descriptionOfField("ФИО:", color: sortUpName ? Color.theme.primary : Color.theme.secondary)
+            Spacer()
+            descriptionOfField("\(surname) \(name) \(middle_name)")
+        }
+    }
+    
+    private func specialization(_ spec: String?) -> some View {
+        HStack {
+            if let spec = spec {
+                descriptionOfField("Должность:", color: sortUpSpec ? Color.theme.primary : Color.theme.secondary)
+                Spacer()
+                descriptionOfField(spec)
+            }
+        }
+    }
+    
+    private func createdReq(_ num_created: Int) -> some View {
+        HStack {
+            descriptionOfField("Заявок создано:", color: Color.theme.secondary)
+            Spacer()
+            descriptionOfField("\(num_created)")
+        }
+    }
+    
+    private func completedReq(_ num_completed: Int) -> some View {
+        HStack {
+            descriptionOfField("Заявок выполнено:", color: Color.theme.secondary)
+            Spacer()
+            descriptionOfField("\(num_completed)")
+        }
+    }
+    
+    private func tokens(_ tokens: Int) -> some View {
+        HStack {
+            descriptionOfField("Токены:", color: sortUpRate ? Color.theme.primary : Color.theme.secondary)
+            Spacer()
+            descriptionOfField("\(tokens)")
+        }
+    }
+    
+    private var filterBottom: some View {
         createSysImageTitle(title: "Сортировка", systemName: "line.3.horizontal.decrease.circle", imageFirst: false)
             .padding(.horizontal, 24)
             .padding(.top, 10)

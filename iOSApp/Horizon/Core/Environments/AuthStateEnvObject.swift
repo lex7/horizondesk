@@ -41,6 +41,7 @@ final class AuthStateEnvObject: ObservableObject {
     @Published var isStatistic: Bool = false
     @Published var goingFromLogin: Bool = false
     @Published var permissionIsDownloaded: Bool = false
+    @Published var isMasterErrorTakeRequest: Bool = false
     
     // MARK: - Private Published variables
     @Published private(set) var loadingInProgress: Bool = false
@@ -71,6 +72,8 @@ final class AuthStateEnvObject: ObservableObject {
     @Published var documentSegment: MasterSwitcher = .underMasterApproval
     // Application Version
     @Published var updateNeeded: Bool = false
+    // masterAproveInWork
+    @Published var masterAproveInWork: Bool = false
     
     // MARK: - Private constants
     private var credentialService = CredentialService.standard
@@ -177,11 +180,13 @@ final class AuthStateEnvObject: ObservableObject {
     
     
     private func sendUserLogout(_ action: @escaping () -> Void) {
+        clearDateLogOut()
         guard let userId = credentialService.getUserId(),
               let fcm = credentialService.getFcm() else {
             action()
             return
         }
+        action()
         let model = FcmOldModel(user_id: userId, old_fcm: fcm)
         networkManager.requestMoyaData(apis: .logout(model: model))
             .receive(on: DispatchQueue.main)
@@ -193,7 +198,6 @@ final class AuthStateEnvObject: ObservableObject {
                 case .failure(let error):
                     debugPrint(String(describing: "[vm: \(error) - ❌ sendUserLogout]"))
                 }
-                action()
             } receiveValue: { _ in
                 
             }
@@ -252,7 +256,7 @@ final class AuthStateEnvObject: ObservableObject {
             } receiveValue: { [unowned self] data in
                 do {
                     self.requestsForMasterMonitor = try RequestIssueModel.decode(from: data).sorted { ($0.created_at ?? Date()) > ($1.created_at ?? Date()) }
-                    debugPrint(self.requestsForMasterMonitor)
+                    //debugPrint(self.requestsForMasterMonitor)
                 } catch {
                     print(error)
                 }
@@ -261,12 +265,13 @@ final class AuthStateEnvObject: ObservableObject {
     }
     
     func masterAcceptRequest(_ request_id: Int, _ reason: String, action: @escaping (()->Void)) {
+        masterAproveInWork = true
         let model = MasterApproveModel(user_id: credentialService.getUserId() ?? 777,
                                        request_id: request_id,
                                        reason: reason)
         networkManager.requestMoyaData(apis: .masterApprove(model: model))
             .receive(on: DispatchQueue.main)
-            .sink { completion in
+            .sink { [unowned self] completion in
                 switch completion {
                 case .finished:
                     debugPrint(String(describing: "[vm: ✅ MasterApproveModel successfully]"))
@@ -274,6 +279,7 @@ final class AuthStateEnvObject: ObservableObject {
                 case .failure(let error):
                     debugPrint(String(describing: "[vm: \(error) - ❌ MasterApproveModel]"))
                 }
+                self.masterAproveInWork = false
             } receiveValue: { _ in
                 action()
             }
@@ -281,12 +287,13 @@ final class AuthStateEnvObject: ObservableObject {
     }
     
     func masterDenyRequest(_ request_id: Int, _ reason: String, action: @escaping (()->Void)) {
+        masterAproveInWork = true
         let model = MasterDenyModel(user_id: credentialService.getUserId() ?? 777,
                                     request_id: request_id,
                                     reason: reason)
         networkManager.requestMoyaData(apis: .masterDeny(model: model))
             .receive(on: DispatchQueue.main)
-            .sink { completion in
+            .sink { [unowned self] completion in
                 switch completion {
                 case .finished:
                     debugPrint(String(describing: "[vm: ✅ masterDenyRequest successfully]"))
@@ -294,6 +301,7 @@ final class AuthStateEnvObject: ObservableObject {
                 case .failure(let error):
                     debugPrint(String(describing: "[vm: \(error) - ❌ masterDenyRequest]"))
                 }
+                self.masterAproveInWork = false
             } receiveValue: { _ in
                 action()
             }
@@ -302,6 +310,9 @@ final class AuthStateEnvObject: ObservableObject {
     
     // MARK: - Executor Requests
     func executorUnassignRequest() {
+        if isManager() {
+            return
+        }
         let model = UserIdModel(user_id: credentialService.getUserId() ?? 777)
         networkManager.requestMoyaData(apis: .executorUnassigned(model: model))
             .receive(on: DispatchQueue.main)
@@ -349,16 +360,20 @@ final class AuthStateEnvObject: ObservableObject {
     }
 
     func executerTakeOnWork(_ request_id: Int, action: @escaping ()->Void) {
+//        masterError
         let model = ExecutorActionModel(user_id: credentialService.getUserId() ?? 777, request_id: request_id, reason: "")
         networkManager.requestMoyaData(apis: .takeOnWork(model: model))
             .receive(on: DispatchQueue.main)
-            .sink { completion in
+            .sink { [unowned self] completion in
                 switch completion {
                 case .finished:
                     debugPrint(String(describing: "[vm: ✅ executerTakeOnWork successfully]"))
                     break
                 case .failure(let error):
                     debugPrint(String(describing: "[vm: \(error) - ❌ executerTakeOnWork]"))
+                    if error.localizedDescription.contains("400") {
+                        self.isMasterErrorTakeRequest = true
+                    }
                 }
             } receiveValue: { _ in
                 action()
@@ -562,7 +577,6 @@ final class AuthStateEnvObject: ObservableObject {
                 case .failure(let error):
                     debugPrint(String(describing: "[vm: \(error) - ❌ getUserInfoData]"))
                 }
-                self.getUserRewardsData()
             } receiveValue: { [unowned self] data in
                 do {
                     self.userDataModel = try UserInfoDataModel(data: data)
@@ -573,7 +587,7 @@ final class AuthStateEnvObject: ObservableObject {
             .store(in: &cancellables)
     }
     
-    private func getUserRewardsData() {
+    func getUserRewardsData() {
         let model = UserInfoModel(user_id: (credentialService.getUserId() ?? 777))
         networkManager.requestMoyaData(apis: .rewards(model: model))
             .receive(on: DispatchQueue.main)
@@ -639,8 +653,8 @@ final class AuthStateEnvObject: ObservableObject {
             } receiveValue: { [unowned self] data in
                 do {
                     self.issuesFilteredBoss = try RequestIssueModel.decode(from: data).sorted { ($0.created_at ?? Date()) > ($1.created_at ?? Date()) }
-                    let fragmentModels = createFragmentModels(from: issuesFilteredBoss).sorted { $0.date.makeDateFrom() < $1.date.makeDateFrom() }
-                    self.filteredChartFragments = fragmentModels.map { (day: $0.date.makeDateFrom(), events: $0.events) }
+                    let fragmentModels = createFragmentModels(from: issuesFilteredBoss).sorted { makeDateFrom($0.date) < makeDateFrom($1.date) }
+                    self.filteredChartFragments = fragmentModels.map { (day: makeDateFrom($0.date), events: $0.events) }
                     if let last = self.filteredChartFragments.last {
                         self.filtereScrollPositionStart = last.day.addingTimeInterval(-1 * 3600 * 24 * 30)
                         self.isPresentFiltered = true
@@ -652,16 +666,18 @@ final class AuthStateEnvObject: ObservableObject {
                     let lastDate = fragmentModels.last?.date.makeDateFrom()
                     let daysDifferentBetweenRequests = getDaysDifferent(firstDate, lastDate)
                     
-                    if daysDifferentBetweenRequests > 30 {
+                    if daysDifferentBetweenRequests >= 30 {
                         self.visibleDomain = 30
                     } else if daysDifferentBetweenRequests > 14 {
                         self.visibleDomain = 14
-                    } else if daysDifferentBetweenRequests > 7 {
+                    } else if daysDifferentBetweenRequests >= 7 {
                         self.visibleDomain = 7
-                    } else if daysDifferentBetweenRequests > 3 {
+                    } else if daysDifferentBetweenRequests >= 3 {
                         self.visibleDomain = 3
-                    } else {
+                    } else if daysDifferentBetweenRequests == 2 {
                         self.visibleDomain = 2
+                    } else {
+                        self.visibleDomain = 1
                     }
                     // po String(decoding: data, as: UTF8.self)
                 } catch {
@@ -719,10 +735,12 @@ final class AuthStateEnvObject: ObservableObject {
                 do {
                     let dataArray = try FragmentModel.decodeFrom(data: data)
                     debugPrint("OK")
-//                    self.scrollPositionStart = self.allStatsFragments.last!.day.addingTimeInterval(-1 * 3600 * 24 * 30)
-                    self.allStatsFragments = dataArray.map { (day: $0.date.makeDateFrom(), events: $0.events) }.sorted { $0.day > $1.day }
-                    if let last = self.filteredChartFragments.last {
+                    self.allStatsFragments = dataArray.map { (day: $0.date.makeDateFrom(),
+                                                              events: $0.events) }.sorted { $0.day > $1.day }
+                    if let last = self.allStatsFragments.last {
                         self.scrollPositionStart = last.day.addingTimeInterval(-1 * 3600 * 24 * 30)
+                    } else {
+                        debugPrint("No Last")
                     }
                 } catch (let error) {
                     debugPrint(error)
@@ -841,6 +859,13 @@ extension AuthStateEnvObject: UIDataUpdatable {
 
 
 private extension AuthStateEnvObject {
+    
+    func makeDateFrom(_ dateStr: String) -> Date {
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "dd-MM-yyyy" // "24-09-2023"
+        return inputFormatter.date(from: dateStr) ?? Date()
+    }
+    
     private func resetFirebaseFCMToken(completion: @escaping () -> Void) {
         completion()
         if let senderId = fcmTokenManager.getSenderId() {
@@ -853,6 +878,24 @@ private extension AuthStateEnvObject {
                 )
             })
         }
+    }
+    
+    private func clearDateLogOut() {
+        userDataModel = nil
+        userRewardsDataModel = nil
+        requestsForMaster = []
+        requestsForMasterMonitor = []
+        issuesInWork = []
+        issuesDone = []
+        issuesDeclined = []
+        issuesApproved = []
+        issuesInProgress = []
+        issuesFilteredBoss = []
+        logsModel = []
+        allStatsFragments = []
+        filteredChartFragments = []
+        usersRating = []
+        notificationCount = 0
     }
 }
 

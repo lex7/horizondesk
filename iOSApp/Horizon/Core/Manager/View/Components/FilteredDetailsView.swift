@@ -15,7 +15,7 @@ struct FilteredDetailsView: View {
     
     // MARK: - Binding
     @Binding var currentChart: [(day: Date, events: Int)]
-    @Binding var scrollPosition: Date
+    @Binding var scrollPositionStart: Date
     @Binding var visibleDomain: Int
     @Binding var issues: [RequestIssueModel]
     
@@ -30,6 +30,24 @@ struct FilteredDetailsView: View {
                                                                           updated_at: nil, reason: nil)
     @State private var logId: Int  = 10000000
     
+    private var scrollPositionEnd: Date {
+        scrollPositionStart.addingTimeInterval(3600 * 24 * Double(visibleDomain))
+    }
+    
+    private var scrollPositionString: String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ru_RU")
+        formatter.dateFormat = "d MMM" // Example: "31 декабря", adjust format as needed
+        return formatter.string(from: scrollPositionStart)
+    }
+    
+    private var scrollPositionEndString: String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ru_RU")
+        formatter.dateFormat = "d MMM yyyy" // Example: "31 декабря", adjust format as needed
+        return formatter.string(from: scrollPositionEnd)
+    }
+    
     // MARK: - Private Constants
     private let generator = UIImpactFeedbackGenerator(style: .light)
     
@@ -39,14 +57,24 @@ struct FilteredDetailsView: View {
                 HStack {
                     topLeftHeader(title: "Фильтр")
                     Spacer()
-                    topRightHeaderAccount(title: "Закрыть")
+                    topRightHeaderAccount(title: "Свернуть", image: "chevron.down")
                         .onTapGesture {
                             generator.impactOccurred()
                             presentationMode.wrappedValue.dismiss()
                         }
                 }
                 VStack {
-                    DailySalesChart(scrollPosition: $scrollPosition,
+                    HStack {
+                        Text("Найдено: \(authStateEnvObject.issuesFilteredBoss.count)")
+                            .withDefaultTextModifier(font: "NexaRegular", size: 15,
+                                                     relativeTextStyle: .callout, color: .secondary)
+                        Spacer()
+                        Text("\(scrollPositionString) – \(scrollPositionEndString)")
+                            .withDefaultTextModifier(font: "NexaRegular", size: 15,
+                                                     relativeTextStyle: .callout, color: .secondary)
+                    }
+                        .padding(.top, 15)
+                    DailySalesChart(scrollPosition: $scrollPositionStart,
                                     dataForChart: $currentChart,
                                     visibleDomain: $visibleDomain)
                     .frame(height: 190)
@@ -63,9 +91,6 @@ struct FilteredDetailsView: View {
                 .padding(.horizontal, 20)
             } /// End Of ScrollView
         } /// End of VStack
-        .onAppear {
-            authStateEnvObject.allStatsFragments = []
-        }
         .sheet(item: $isShowDetails, onDismiss: {
             authStateEnvObject.logsModel = []
         }, content: { _ in

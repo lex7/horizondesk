@@ -40,6 +40,9 @@ struct AppTabBarView: View {
                             .tabBarItem(tab: .account, selection: $authStateEnvObject.tabBarSelection)
                     }
                 }
+                .onTapGesture {
+                    hideKeyboard()
+                }
             }
         }
         .onAppear {

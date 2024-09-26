@@ -33,7 +33,8 @@ struct ManagerRequestDetailLogView: View {
                     defaultSpacer
                     HStack {
                         Spacer()
-                        topRightHeaderAccount(title: "Закрыть")
+                        topRightHeaderAccount(title: "Свернуть", image: "chevron.down")
+                            .contentShape(Rectangle())
                             .onTapGesture {
                                 generator.impactOccurred()
                                 presentationMode.wrappedValue.dismiss()

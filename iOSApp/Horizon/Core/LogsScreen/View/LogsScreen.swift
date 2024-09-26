@@ -69,24 +69,27 @@ private extension LogsScreen {
                 VStack(alignment: .leading) {
                     HStack(spacing: 0) {
                         descriptionOfField("cтатус:", color: Color.theme.lowContrast)
+                            .padding(.trailing, 5)
                     }
                     HStack(spacing: 0) {
                         descriptionOfField("время:", color: Color.theme.lowContrast)
+                            .padding(.trailing, 5)
                     }
                     HStack(spacing: 0) {
                         descriptionOfField("имя:", color: Color.theme.lowContrast)
+                            .padding(.trailing, 5)
                     }
                     if let reason = log.reason {
                         if !reason.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             if log.old_status_id != nil {
-                                HStack {
+                                HStack(spacing: 0) {
                                     descriptionOfField("пометка:", color: Color.theme.lowContrast)
+                                        .padding(.trailing, 5)
                                 }
                             }
                         }
                     }
                 }
-                .frame(width: screenWidth/7)
                 VStack(alignment: .leading) {
                     HStack(spacing: 0) {
                         descriptionOfField(log.action_name,
@@ -152,7 +155,9 @@ private extension LogsScreen {
                     relativeTextStyle: .callout,
                     color: Color.theme.mediumContrast
                 )
+                .contentShape(Rectangle())
                 .padding(.horizontal, 10)
+                .padding(.top, 15)
             Spacer()
             createSysImageTitle(title: "", systemName: "xmark", imageFirst: false)
                 .padding(.horizontal, 10)

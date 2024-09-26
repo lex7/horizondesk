@@ -85,9 +85,12 @@ extension View {
             .cornerRadius(40)
     }
     
-    func topRightHeaderAccount(title: String = "Выход") -> some View {
+    func topRightHeaderAccount(title: String = "Выход",
+                               image: String = "rectangle.portrait.and.arrow.forward") -> some View {
         if #available(iOS 16, *) {
-            createSysImageTitle(title: title, systemName: "rectangle.portrait.and.arrow.forward", imageFirst: false)
+            createSysImageTitle(title: title,
+                                systemName: image,
+                                imageFirst: false)
                 .padding(.horizontal, 24)
                 .padding(.vertical, 6)
                 .cornerRadius(40)

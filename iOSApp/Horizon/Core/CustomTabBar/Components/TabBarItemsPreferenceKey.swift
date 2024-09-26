@@ -19,12 +19,11 @@ struct TabBarItemViewModifier: ViewModifier {
         content
             .opacity(selection == tab ? 1.0 : 0.0)
             .preference(key: TabBarItemsPreferenceKey.self, value: [tab])
-        
     }
 }
 
 extension View {
     func tabBarItem(tab: TabBarItem, selection: Binding<TabBarItem>) -> some View {
-        modifier(TabBarItemViewModifier(tab: tab, selection: selection))      
+        modifier(TabBarItemViewModifier(tab: tab, selection: selection))
     }
 }

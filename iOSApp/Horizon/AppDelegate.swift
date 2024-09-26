@@ -90,6 +90,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
            let badge = aps["badge"] as? Int {
             DispatchQueue.main.async {
                 UIApplication.shared.applicationIconBadgeNumber = badge
+                debugPrint("badge 💳 \(badge)")
             }
         }
                 

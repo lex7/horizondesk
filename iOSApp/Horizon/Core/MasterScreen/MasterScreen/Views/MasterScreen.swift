@@ -82,6 +82,14 @@ struct MasterScreen: View {
                 authStateEnvObject.getRequestsForMasterMonitor()
             }
         }
+        .alert("Ошибка", isPresented: $authStateEnvObject.isMasterErrorTakeRequest) {
+            // Buttons as actions for the alert
+            Button("Ok", role: .cancel) {
+                generator.impactOccurred()
+            }
+        } message: {
+            Text("Заявитель не может быть исполнителем.")
+        }
     }
 }
 

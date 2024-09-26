@@ -96,6 +96,7 @@ extension CustomTabBarView {
                             authStateEnvObject.executorMyTasksRequest()
                         case .account:
                             authStateEnvObject.getUserInfoData()
+                            authStateEnvObject.getUserRewardsData()
                         default:
                             debugPrint()
                         }
