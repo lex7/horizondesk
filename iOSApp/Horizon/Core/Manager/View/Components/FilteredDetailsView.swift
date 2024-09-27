@@ -26,6 +26,9 @@ struct FilteredDetailsView: View {
     /// PieChart Status
     @Binding var statusTypeChart: [(name: String, count: Int)]
     @Binding var mostStatusFragments: (name: String, count: Int)?
+    /// PieChart Status
+    @Binding var areaTypeChart: [(name: String, count: Int)]
+    @Binding var mostAreaFragments: (name: String, count: Int)?
     
     var generator: UIImpactFeedbackGenerator
     
@@ -119,10 +122,23 @@ struct FilteredDetailsView: View {
                         } label: {
                             HStack {
                                 makeMediumContrastView(text: "Статус заявок", image: "chart.pie", imageFirst: true)
-//                                Text("Статус заявок")
-//                                    .withDefaultTextModifier(font: "NexaRegular", size: 16,
-//                                                             relativeTextStyle: .footnote,
-//                                                             color: Color.theme.mediumContrast)
+                            }
+                            .padding(.top, 10)
+                            .padding(.horizontal, 10)
+                        }
+                        .foregroundColor(Color.theme.mediumContrast)
+                        .padding(.top, 5)
+                        
+                    }
+                    if let mostAreaFragments = mostAreaFragments {
+                        DisclosureGroup {
+                            TypeSpecPieChart(data: areaTypeChart, topSpec: mostAreaFragments,
+                                             totalAmount: authStateEnvObject.issuesFilteredBoss.count,
+                                             generator: generator)
+                                .padding(.horizontal, 20)
+                        } label: {
+                            HStack {
+                                makeMediumContrastView(text: "Заявки по участкам", image: "chart.pie", imageFirst: true)
                             }
                             .padding(.top, 10)
                             .padding(.horizontal, 10)

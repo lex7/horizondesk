@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		0503CB792CA1B5AB00C81580 /* ManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0503CB782CA1B5AB00C81580 /* ManagerView.swift */; };
-		0503CB7B2CA1C46F00C81580 /* ManagerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0503CB7A2CA1C46F00C81580 /* ManagerViewModel.swift */; };
 		05096EBF2B84E96B003FDB52 /* RootContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05096EBE2B84E96B003FDB52 /* RootContentView.swift */; };
 		05096EC12B84E98C003FDB52 /* AuthStateEnvObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05096EC02B84E98C003FDB52 /* AuthStateEnvObject.swift */; };
 		05096EC32B84E9BF003FDB52 /* AuthState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05096EC22B84E9BF003FDB52 /* AuthState.swift */; };
@@ -110,7 +109,6 @@
 
 /* Begin PBXFileReference section */
 		0503CB782CA1B5AB00C81580 /* ManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagerView.swift; sourceTree = "<group>"; };
-		0503CB7A2CA1C46F00C81580 /* ManagerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagerViewModel.swift; sourceTree = "<group>"; };
 		05096EBE2B84E96B003FDB52 /* RootContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootContentView.swift; sourceTree = "<group>"; };
 		05096EC02B84E98C003FDB52 /* AuthStateEnvObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthStateEnvObject.swift; sourceTree = "<group>"; };
 		05096EC22B84E9BF003FDB52 /* AuthState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthState.swift; sourceTree = "<group>"; };
@@ -229,7 +227,6 @@
 			isa = PBXGroup;
 			children = (
 				0503CB742CA1B55A00C81580 /* View */,
-				0503CB752CA1B56300C81580 /* ViewModel */,
 			);
 			path = Manager;
 			sourceTree = "<group>";
@@ -241,14 +238,6 @@
 				0550F81C2CA38506009C170B /* Components */,
 			);
 			path = View;
-			sourceTree = "<group>";
-		};
-		0503CB752CA1B56300C81580 /* ViewModel */ = {
-			isa = PBXGroup;
-			children = (
-				0503CB7A2CA1C46F00C81580 /* ManagerViewModel.swift */,
-			);
-			path = ViewModel;
 			sourceTree = "<group>";
 		};
 		05096EBB2B84E912003FDB52 /* MainContent */ = {
@@ -724,6 +713,7 @@
 				05597B622C657919007B96A0 /* LogsScreen */,
 				05096EBB2B84E912003FDB52 /* MainContent */,
 				05D65AEE2B6A1F06009CF788 /* CustomTabBar */,
+				0503CB732CA1B54800C81580 /* Manager */,
 				05D759262B6309AD00578623 /* Environments */,
 				058F46722B54930400151850 /* ViewModifiers */,
 				05D7A6572C5EE47400275E9D /* StatisticScreen */,
@@ -732,7 +722,6 @@
 				052A98E12B73A78C002249C5 /* ExecutorScreen */,
 				052A98E22B73A79B002249C5 /* MasterScreen */,
 				0517DCBA2B8369FE009F6979 /* MyAccount */,
-				0503CB732CA1B54800C81580 /* Manager */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -1050,7 +1039,6 @@
 				05D65AF02B6A1F90009CF788 /* AppTabBarView.swift in Sources */,
 				055045E52B8CA3210046543F /* ChangePasswordScreen.swift in Sources */,
 				05096EC52B84FA28003FDB52 /* LoginScreen.swift in Sources */,
-				0503CB7B2CA1C46F00C81580 /* ManagerViewModel.swift in Sources */,
 				05EC0C7D2B504C6500A5E5D8 /* PickerSegmentsView.swift in Sources */,
 				05BAFE442B5D95B20092FDF9 /* View+Extension.swift in Sources */,
 				0550F8192CA2EC60009C170B /* AllStatsModel.swift in Sources */,

@@ -118,7 +118,7 @@ struct ManagerView: View {
                         } else {
                             DailySalesChart(scrollPosition: $authStateEnvObject.scrollPositionStart,
                                             dataForChart: $authStateEnvObject.allStatsFragments,
-                                            visibleDomain: .constant(30))
+                                            visibleDomain: $authStateEnvObject.visibleDomainAllState)
                                 .frame(height: 190)
                         }
                         HStack {
@@ -232,6 +232,8 @@ struct ManagerView: View {
                                 mostSpecialFragments: $authStateEnvObject.mostSpecialFragments,
                                 statusTypeChart: $authStateEnvObject.filteredStatusFragments,
                                 mostStatusFragments: $authStateEnvObject.mostStatusFragments,
+                                areaTypeChart: $authStateEnvObject.filteredAreaFragments,
+                                mostAreaFragments: $authStateEnvObject.mostAreaFragments,
                                 generator: generator)
         })
         .overlay {
@@ -603,6 +605,7 @@ private extension ManagerView {
         HStack(alignment: .center, spacing: 4) {
             ManagerLeftSegmentView(sectionSelected: $managerSegment, label: "Все заявки")
                 .onTapGesture {
+                    authStateEnvObject.getAllStats()
                     generator.prepare()
                     generator.impactOccurred()
                     managerSegment.toggle()
@@ -610,6 +613,7 @@ private extension ManagerView {
                 .allowsHitTesting(managerSegment != .allStats)
             ManagerRightSegmentView(sectionSelected: $managerSegment, label: "Рейтинг")
                 .onTapGesture {
+                    authStateEnvObject.getRating()
                     generator.prepare()
                     generator.impactOccurred()
                     managerSegment.toggle()

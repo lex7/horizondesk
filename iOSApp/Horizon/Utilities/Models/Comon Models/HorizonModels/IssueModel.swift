@@ -45,6 +45,11 @@ struct RequestIssueModel: Hashable, Codable {
         IssueStatus(rawValue: request_type)?.descriptionShort ?? ""
     }
     
+    /// For ChartPie
+    var chartAreaName: String {
+        RegionIssue(rawValue: area_id)?.name ?? ""
+    }
+    
     var updatedAtString: String {
         guard let created = updated_at else { return "N/A" }
         let dateFormatter = DateFormatter()

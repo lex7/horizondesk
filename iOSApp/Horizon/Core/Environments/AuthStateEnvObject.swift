@@ -12,6 +12,7 @@ protocol DataClearable {
     func clearToken()
 }
 
+@MainActor
 final class AuthStateEnvObject: ObservableObject {
     
     @Published var userDataModel: UserInfoDataModel?
@@ -59,7 +60,7 @@ final class AuthStateEnvObject: ObservableObject {
     // Average Stats
     @Published var scrollPositionStart: Date = Date()
     @Published var allStatsFragments: [(day: Date, events: Int)] = []
-    
+    @Published var visibleDomainAllState: Int = 30
     // Filtered Stats
     @Published var filteredChartFragments: [(day: Date, events: Int)] = []
     // Pie chart specialization
@@ -68,6 +69,11 @@ final class AuthStateEnvObject: ObservableObject {
     // Pie chart status
     @Published var filteredStatusFragments: [(name: String, count: Int)] = []
     @Published var mostStatusFragments: (name: String, count: Int)? = nil
+    // Pie chart area
+    @Published var filteredAreaFragments: [(name: String, count: Int)] = []
+    @Published var mostAreaFragments: (name: String, count: Int)? = nil
+    
+    
     
     // Bars Chart
     @Published var filtereScrollPositionStart: Date = Date()
@@ -694,22 +700,17 @@ final class AuthStateEnvObject: ObservableObject {
                         }
                     }
                     
-                    /// Progress Chart
-                    let fragmentModels = createFragmentModels(from: issuesFilteredBoss).sorted { makeDateFrom($0.date) < makeDateFrom($1.date) }
-                    self.filteredChartFragments = fragmentModels.map { (day: makeDateFrom($0.date), events: $0.events) }
-                    if let last = self.filteredChartFragments.last {
-                        self.filtereScrollPositionStart = last.day.addingTimeInterval(-1 * 3600 * 24 * 31)
-                        Task {
-                            try await Task.sleep(nanoseconds: 50_000_000) // Sleep on a background thread
-                            await MainActor.run {
-                                self.filtereScrollPositionStart = last.day.addingTimeInterval(-1 * 3600 * 24 * 30)
-                            }
+                    /// Pie Chart Area
+                    self.filteredAreaFragments = Dictionary(grouping: self.issuesFilteredBoss) { $0.chartAreaName }.map { (name: $0.key, count: $0.value.count) }.sorted { $0.count > $1.count }
+                    if !self.filteredAreaFragments.isEmpty {
+                        if let fragments = self.filteredAreaFragments.max (by: { $0.count < $1.count } ) {
+                            self.mostAreaFragments = fragments
                         }
-                        self.isPresentFiltered = true
-                    } else {
-                        self.showAlertOfFilter = true
                     }
                     
+                    
+                    /// Progress Chart
+                    let fragmentModels = createFragmentModels(from: issuesFilteredBoss).sorted { makeDateFrom($0.date) < makeDateFrom($1.date) }
                     let firstDate = fragmentModels.first?.date.makeDateFrom()
                     let lastDate = fragmentModels.last?.date.makeDateFrom()
                     let daysDifferentBetweenRequests = getDaysDifferent(firstDate, lastDate)
@@ -727,6 +728,23 @@ final class AuthStateEnvObject: ObservableObject {
                     } else {
                         self.visibleDomain = 1
                     }
+                    
+                    
+                    self.filteredChartFragments = fragmentModels.map { (day: makeDateFrom($0.date), events: $0.events) }
+                    if let last = self.filteredChartFragments.last {
+                        self.filtereScrollPositionStart = last.day.addingTimeInterval(-1 * 3600 * 24 * 31)
+                        Task {
+                            try await Task.sleep(nanoseconds: 50_000_000) // Sleep on a background thread
+                            await MainActor.run {
+                                self.filtereScrollPositionStart = last.day.addingTimeInterval(-1 * 3600 * 24 * 30)
+                            }
+                        }
+                        self.isPresentFiltered = true
+                    } else {
+                        self.showAlertOfFilter = true
+                    }
+                    
+                    
                     // po String(decoding: data, as: UTF8.self)
                 } catch {
                     print(error)
@@ -785,14 +803,13 @@ final class AuthStateEnvObject: ObservableObject {
                     debugPrint("OK")
                     self.allStatsFragments = dataArray.map { (day: makeDateFrom($0.date),
                                                               events: $0.events) }.sorted { $0.day > $1.day }
+                    
+                    
+                    let firstDate = allStatsFragments.first?.day
+                    let lastDate = allStatsFragments.last?.day
+                    
                     if let last = self.allStatsFragments.last {
-                        self.scrollPositionStart = last.day.addingTimeInterval(-1 * 3600 * 24 * 31)
-                        Task {
-                            try await Task.sleep(nanoseconds: 100_000_000) // Sleep on a background thread
-                            await MainActor.run {
-                                self.scrollPositionStart = last.day.addingTimeInterval(-1 * 3600 * 24 * 30)
-                            }
-                        }
+                        self.scrollPositionStart = last.day.addingTimeInterval(1 * 3600 * 24 * 30)                        
                     } else {
                         debugPrint("No Last")
                     }
@@ -917,6 +934,12 @@ private extension AuthStateEnvObject {
     func makeDateFrom(_ dateStr: String) -> Date {
         let inputFormatter = DateFormatter()
         inputFormatter.dateFormat = "dd-MM-yyyy" // "24-09-2023"
+        return inputFormatter.date(from: dateStr) ?? Date()
+    }
+    
+    func makeDateFromDetailed(_ dateStr: String) -> Date {
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         return inputFormatter.date(from: dateStr) ?? Date()
     }
     
