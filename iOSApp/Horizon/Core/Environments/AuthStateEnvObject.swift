@@ -950,6 +950,10 @@ private extension AuthStateEnvObject {
         filteredChartFragments = []
         usersRating = []
         notificationCount = 0
+        filteredSpecialFragments = []
+        mostSpecialFragments = nil
+        filteredStatusFragments = []
+        mostStatusFragments = nil
     }
 }
 

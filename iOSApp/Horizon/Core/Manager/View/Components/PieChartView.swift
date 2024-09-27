@@ -93,8 +93,4 @@ struct TypeSpecPieChart: View {
             }
         }
     }
-    
-    private func calculate() {
-        
-    }
 }

@@ -62,7 +62,6 @@ struct SendMessageView: View {
                     titleOfIssue = ""
                     inputTextIssue = ""
                     areaOfIssueNumber = ""
-                    
                 }
             } message: {
                 Text("Ваша заявка отправлена на рассмотрение. Благодарим!")
@@ -85,10 +84,13 @@ private extension SendMessageView {
                 .padding(.horizontal, 10)
                 .contentShape(Rectangle())
                 .onTapGesture {
-                    validateFields()
-                    vm.issueMessage = inputTextIssue
-                    generator.impactOccurred()
-                    vm.createRequestIssue()
+                    if validateFieldsPassed() {
+                        vm.issueMessage = inputTextIssue
+                        generator.impactOccurred()
+                        vm.createRequestIssue()
+                    }
+                    generator.prepare()
+                    generator.impactOccurred(intensity: .infinity)
                 }
                 .allowsHitTesting(!vm.buttonIssueInProgress)
         }
@@ -98,28 +100,21 @@ private extension SendMessageView {
         GeometryReader { geometry in
             ZStack {
                 VStack {
-                    if #available(iOS 16, *) {
-                        TextEditor(text: $inputTextIssue)
-                            .foregroundColor(Color.theme.selected)
-                            .tint(Color.theme.selected)
-                            .scrollContentBackground(.hidden)
-                            .background(.surface)
-                            .cornerRadius(8)
-                            .lineSpacing(10)
-                            .autocapitalization(.none)
-                            .autocorrectionDisabled()
-                            .padding(.horizontal, 10)
-                    } else {
-                        TextEditor(text: $inputTextIssue)
-                            .foregroundColor(Color.theme.selected)
-                            .accentColor(Color.theme.selected)
-                            .background(.surface)
-                            .cornerRadius(8)
-                            .lineSpacing(10)
-                            .autocapitalization(.none)
-                            .autocorrectionDisabled()
-                            .padding(.horizontal, 10)
-                    }
+                    TextEditor(text: $inputTextIssue)
+                        .foregroundColor(Color.theme.selected)
+                        .onChange(of: $inputTextIssue.wrappedValue) { newValue in
+                            if !newValue.isEmpty {
+                                textCheckFailed = false
+                            }
+                        }
+                        .tint(Color.theme.selected)
+                        .scrollContentBackground(.hidden)
+                        .background(.surface)
+                        .cornerRadius(8)
+                        .lineSpacing(10)
+                        .autocapitalization(.none)
+                        .autocorrectionDisabled()
+                        .padding(.horizontal, 10)
                 }
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
@@ -179,7 +174,7 @@ private extension SendMessageView {
                     titleOfIssue = RequestTypeEnum.empty.name
                 }
             } label: {
-                textViewOnBoard($titleOfIssue, focusField: .title, $textCheckFailed)
+                textViewOnBoard($titleOfIssue, focusField: .title, $specCheckFailed)
             }
             Spacer()
         }
@@ -236,16 +231,20 @@ private extension SendMessageView {
         }
     }
     
-    func validateFields() {
+    func validateFieldsPassed() -> Bool {
         if titleOfIssue.isEmpty {
             specCheckFailed = true
+            return false
         }
         if areaOfIssueNumber.isEmpty {
             areaCheckFailed = true
+            return false
         }
         if inputTextIssue.isEmpty {
             textCheckFailed = true
+            return false
         }
+        return true
     }
     
     @ViewBuilder

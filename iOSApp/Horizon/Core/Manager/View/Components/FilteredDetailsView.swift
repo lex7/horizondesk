@@ -96,10 +96,11 @@ struct FilteredDetailsView: View {
                                 .padding(.horizontal, 20)
                         } label: {
                             HStack {
-                                Text("Категория заявок")
-                                    .withDefaultTextModifier(font: "NexaRegular", size: 16,
-                                                             relativeTextStyle: .footnote,
-                                                             color: Color.theme.mediumContrast)
+                                makeMediumContrastView(text: "Категория заявок", image: "chart.pie", imageFirst: false)
+//                                Text("Категория заявок")
+//                                    .withDefaultTextModifier(font: "NexaRegular", size: 16,
+//                                                             relativeTextStyle: .footnote,
+//                                                             color: Color.theme.mediumContrast)
                             }
                             .padding(.top, 10)
                             .padding(.horizontal, 10)
@@ -117,10 +118,11 @@ struct FilteredDetailsView: View {
                                 .padding(.horizontal, 20)
                         } label: {
                             HStack {
-                                Text("Статус заявок")
-                                    .withDefaultTextModifier(font: "NexaRegular", size: 16,
-                                                             relativeTextStyle: .footnote,
-                                                             color: Color.theme.mediumContrast)
+                                makeMediumContrastView(text: "Статус заявок", image: "chart.pie", imageFirst: false)
+//                                Text("Статус заявок")
+//                                    .withDefaultTextModifier(font: "NexaRegular", size: 16,
+//                                                             relativeTextStyle: .footnote,
+//                                                             color: Color.theme.mediumContrast)
                             }
                             .padding(.top, 10)
                             .padding(.horizontal, 10)
