@@ -96,7 +96,7 @@ struct FilteredDetailsView: View {
                                 .padding(.horizontal, 20)
                         } label: {
                             HStack {
-                                makeMediumContrastView(text: "Категория заявок", image: "chart.pie", imageFirst: false)
+                                makeMediumContrastView(text: "Категория заявок", image: "chart.pie", imageFirst: true)
 //                                Text("Категория заявок")
 //                                    .withDefaultTextModifier(font: "NexaRegular", size: 16,
 //                                                             relativeTextStyle: .footnote,
@@ -118,7 +118,7 @@ struct FilteredDetailsView: View {
                                 .padding(.horizontal, 20)
                         } label: {
                             HStack {
-                                makeMediumContrastView(text: "Статус заявок", image: "chart.pie", imageFirst: false)
+                                makeMediumContrastView(text: "Статус заявок", image: "chart.pie", imageFirst: true)
 //                                Text("Статус заявок")
 //                                    .withDefaultTextModifier(font: "NexaRegular", size: 16,
 //                                                             relativeTextStyle: .footnote,

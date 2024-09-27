@@ -41,6 +41,7 @@ struct ManagerRequestDetailLogView: View {
                             }
                     }
                     Divider()
+                        .padding(.top, 7)
                     defaultSpacer
                     // 2. Date Block
                     dateTitleAndValue(title: "Дата создания", value: currentNode.createdAtString)
