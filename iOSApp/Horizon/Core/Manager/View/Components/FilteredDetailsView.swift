@@ -14,10 +14,20 @@ struct FilteredDetailsView: View {
     @Environment(\.presentationMode) private var presentationMode
     
     // MARK: - Binding
+    /// BarChart
     @Binding var currentChart: [(day: Date, events: Int)]
     @Binding var scrollPositionStart: Date
     @Binding var visibleDomain: Int
     @Binding var issues: [RequestIssueModel]
+    
+    /// PieChart Specialization
+    @Binding var specialTypeChart: [(name: String, count: Int)]
+    @Binding var mostSpecialFragments: (name: String, count: Int)?
+    /// PieChart Status
+    @Binding var statusTypeChart: [(name: String, count: Int)]
+    @Binding var mostStatusFragments: (name: String, count: Int)?
+    
+    var generator: UIImpactFeedbackGenerator
     
     // MARK: - Private State
     @State private var isShowDetails: Bool?
@@ -49,8 +59,7 @@ struct FilteredDetailsView: View {
     }
     
     // MARK: - Private Constants
-    private let generator = UIImpactFeedbackGenerator(style: .light)
-    
+
     var body: some View {
         VStack {
             ScrollView(showsIndicators: false) {
@@ -67,17 +76,59 @@ struct FilteredDetailsView: View {
                     HStack {
                         Text("Найдено: \(authStateEnvObject.issuesFilteredBoss.count)")
                             .withDefaultTextModifier(font: "NexaRegular", size: 15,
-                                                     relativeTextStyle: .callout, color: .secondary)
+                                                     relativeTextStyle: .callout, color: Color.theme.mediumContrast)
                         Spacer()
                         Text("\(scrollPositionString) – \(scrollPositionEndString)")
                             .withDefaultTextModifier(font: "NexaRegular", size: 15,
-                                                     relativeTextStyle: .callout, color: .secondary)
+                                                     relativeTextStyle: .callout, color: Color.theme.mediumContrast)
                     }
                         .padding(.top, 15)
                     DailySalesChart(scrollPosition: $scrollPositionStart,
                                     dataForChart: $currentChart,
                                     visibleDomain: $visibleDomain)
                     .frame(height: 190)
+                    .padding(.top, 15)
+                    if let mostSpecialFragments = mostSpecialFragments {
+                        DisclosureGroup {
+                            TypeSpecPieChart(data: specialTypeChart, topSpec: mostSpecialFragments,
+                                             totalAmount: authStateEnvObject.issuesFilteredBoss.count,
+                                             generator: generator)
+                                .padding(.horizontal, 20)
+                        } label: {
+                            HStack {
+                                Text("Категория заявок")
+                                    .withDefaultTextModifier(font: "NexaRegular", size: 16,
+                                                             relativeTextStyle: .footnote,
+                                                             color: Color.theme.mediumContrast)
+                            }
+                            .padding(.top, 10)
+                            .padding(.horizontal, 10)
+                        }
+                        //.foregroundColor(Color.theme.mediumContrast)
+                        .tint(Color.theme.mediumContrast)
+                        .padding(.top, 5)
+                    }
+                    
+                    if let mostStatusFragments = mostStatusFragments {
+                        DisclosureGroup {
+                            TypeSpecPieChart(data: statusTypeChart, topSpec: mostStatusFragments,
+                                             totalAmount: authStateEnvObject.issuesFilteredBoss.count,
+                                             generator: generator)
+                                .padding(.horizontal, 20)
+                        } label: {
+                            HStack {
+                                Text("Статус заявок")
+                                    .withDefaultTextModifier(font: "NexaRegular", size: 16,
+                                                             relativeTextStyle: .footnote,
+                                                             color: Color.theme.mediumContrast)
+                            }
+                            .padding(.top, 10)
+                            .padding(.horizontal, 10)
+                        }
+                        .foregroundColor(Color.theme.mediumContrast)
+                        .padding(.top, 5)
+                        
+                    }
                     ForEach(authStateEnvObject.issuesFilteredBoss, id: \.self) { issue in
                         issueCellFor(issue)
                             .onTapGesture {

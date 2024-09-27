@@ -8,14 +8,6 @@
 import SwiftUI
 import Foundation
 import Charts
-import GameplayKit
-
-
-private let gaussianRandoms = GKGaussianDistribution(lowestValue: 0, highestValue: 20)
-func date(year: Int, month: Int, day: Int = 1) -> Date {
-    Calendar.current.date(from: DateComponents(year: year, month: month, day: day)) ?? Date()
-}
-
 
 struct DailySalesChart: View {
     // MARK: - Private properties

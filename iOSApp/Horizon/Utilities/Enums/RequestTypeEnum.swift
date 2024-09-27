@@ -32,6 +32,23 @@ enum RequestTypeEnum: Int, CaseIterable {
         }
     }
     
+    var shortName: String {
+        switch self {
+        case .electricity:
+            return "Электрика"
+        case .tools:
+            return "Инструменты"
+        case .sanpin:
+            return "СанПиН"
+        case .safety:
+            return "Охрана Tруда"
+        case .docs:
+            return "Документация"
+        case .empty:
+            return ""
+        }
+    }
+    
     var requestType: Int {
         switch self {
         case .electricity: return 1

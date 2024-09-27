@@ -62,9 +62,14 @@ final class AuthStateEnvObject: ObservableObject {
     
     // Filtered Stats
     @Published var filteredChartFragments: [(day: Date, events: Int)] = []
-    @Published var filteredSpecialFragments: [(name: String, sales: Int)] = []
-    @Published var filteredStatusFragments: [(name: String, sales: Int)] = []
+    // Pie chart specialization
+    @Published var filteredSpecialFragments: [(name: String, count: Int)] = []
+    @Published var mostSpecialFragments: (name: String, count: Int)? = nil
+    // Pie chart status
+    @Published var filteredStatusFragments: [(name: String, count: Int)] = []
+    @Published var mostStatusFragments: (name: String, count: Int)? = nil
     
+    // Bars Chart
     @Published var filtereScrollPositionStart: Date = Date()
     @Published var visibleDomain: Int = 30
     @Published var filteredIsLoading: Bool = false
@@ -670,7 +675,26 @@ final class AuthStateEnvObject: ObservableObject {
                 self.filteredIsLoading = false
             } receiveValue: { [unowned self] data in
                 do {
+                    
+                    /// Data to manipulate
                     self.issuesFilteredBoss = try RequestIssueModel.decode(from: data).sorted { ($0.created_at ?? Date()) > ($1.created_at ?? Date()) }
+                    
+                    /// Pie Chart Specialization
+                    self.filteredSpecialFragments = Dictionary(grouping: self.issuesFilteredBoss) { $0.specializationName }.map { (name: $0.key, count: $0.value.count) }.sorted { $0.count > $1.count }
+                    if !self.filteredSpecialFragments.isEmpty {
+                        if let fragments = self.filteredSpecialFragments.max (by: { $0.count < $1.count } ) {
+                            self.mostSpecialFragments = fragments
+                        }
+                    }
+                    /// Pie Chart Types
+                    self.filteredStatusFragments = Dictionary(grouping: self.issuesFilteredBoss) { $0.chartStatusName }.map { (name: $0.key, count: $0.value.count) }.sorted { $0.count > $1.count }
+                    if !self.filteredStatusFragments.isEmpty {
+                        if let fragments = self.filteredStatusFragments.max (by: { $0.count < $1.count } ) {
+                            self.mostStatusFragments = fragments
+                        }
+                    }
+                    
+                    /// Progress Chart
                     let fragmentModels = createFragmentModels(from: issuesFilteredBoss).sorted { makeDateFrom($0.date) < makeDateFrom($1.date) }
                     self.filteredChartFragments = fragmentModels.map { (day: makeDateFrom($0.date), events: $0.events) }
                     if let last = self.filteredChartFragments.last {

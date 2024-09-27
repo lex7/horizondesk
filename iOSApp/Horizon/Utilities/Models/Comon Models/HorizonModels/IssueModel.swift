@@ -35,6 +35,16 @@ struct RequestIssueModel: Hashable, Codable {
         return dateFormatter.string(from: created)
     }
     
+    /// For ChartPie
+    var specializationName: String {
+        RequestTypeEnum(rawValue: request_type)?.shortName ?? ""
+    }
+    
+    /// For ChartPie
+    var chartStatusName: String {
+        IssueStatus(rawValue: request_type)?.descriptionShort ?? ""
+    }
+    
     var updatedAtString: String {
         guard let created = updated_at else { return "N/A" }
         let dateFormatter = DateFormatter()

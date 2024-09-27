@@ -227,7 +227,12 @@ struct ManagerView: View {
             FilteredDetailsView(currentChart: $authStateEnvObject.filteredChartFragments,
                                 scrollPositionStart: $authStateEnvObject.filtereScrollPositionStart,
                                 visibleDomain: $authStateEnvObject.visibleDomain,
-                                issues: $authStateEnvObject.issuesFilteredBoss)
+                                issues: $authStateEnvObject.issuesFilteredBoss,
+                                specialTypeChart: $authStateEnvObject.filteredSpecialFragments,
+                                mostSpecialFragments: $authStateEnvObject.mostSpecialFragments,
+                                statusTypeChart: $authStateEnvObject.filteredStatusFragments,
+                                mostStatusFragments: $authStateEnvObject.mostStatusFragments,
+                                generator: generator)
         })
         .overlay {
             datePickerFrom
