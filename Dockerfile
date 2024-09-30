@@ -10,12 +10,8 @@ WORKDIR /app
 # Copy project files
 COPY . .
 
-# Copy SSL certificates to the container
-COPY selfsigned.crt /app/selfsigned.crt
-COPY selfsigned.key /app/selfsigned.key
-
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Command to run the application with HTTPS enabled
-CMD ["uvicorn", "backend.app:app", "--host", "0.0.0.0", "--port", "443", "--ssl-keyfile", "/app/selfsigned.key", "--ssl-certfile", "/app/selfsigned.crt"]
+CMD ["uvicorn", "backend.app:app", "--host", "0.0.0.0", "--port", "443"]

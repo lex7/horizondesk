@@ -10,17 +10,17 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 json_file = 'data/issues.json'
 
 # available users
-users = [30, 44, 33, 32, 42, 31, 49, 52, 51, 48, 50, 53]
+users = [2,3,4,6]
 
 # Authorization token
-auth_token = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGV4IiwiZXhwIjoxNzI3NTMwODg5fQ.shrn75blu86xK2EhHaIGhVkUQ40s9wri3Bqid5vowpM'
+auth_token = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJUTUstSGVhbHRoQ2hlY2siLCJleHAiOjE3Mjc2MDI4MDV9.YzNwdfWGhTRHkPQW6uujHKpA37_lcBNBpgCkV4ovXsw'
 
 # API endpoint
-url = 'https://timofmax1.fvds.ru/create-request'
+url = 'https://corp3.cybertrain4security.ru:4443/create-request'
 
 def random_datetime():
-    start_date = datetime(2024, 7, 25)
-    end_date = datetime(2024, 9, 25)
+    start_date = datetime(2024, 6, 27)
+    end_date = datetime(2024, 9, 27)
     delta = end_date - start_date
     random_days = random.randrange(delta.days + 1)
     random_time = timedelta(seconds=random.randrange(86400))  # random time within a day
