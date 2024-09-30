@@ -1,11 +1,15 @@
+import os
 from firebase_admin import credentials, initialize_app
 from google.oauth2 import service_account
 import google.auth.transport.requests
 import requests
 import json
 
-cred = credentials.Certificate("accKey.json")
-initialize_app(cred)
+if not os.path.exists("accKey.json"):
+    print("accKey.json file is not found, skipping FCM setup")
+else:
+    cred = credentials.Certificate("accKey.json")
+    initialize_app(cred)
 
 PROJECT_ID = 'horizons-champ'
 BASE_URL = 'https://fcm.googleapis.com'
@@ -67,8 +71,4 @@ def send_push(tokens: list, title="title", body="body", type_of_request="0", sou
         
         except Exception as e:
             print({'message': message, 'status': 'failure', 'error': str(e)})
-    
-
-if __name__ == '__main__':
-    print(send_push(['ezF5uHyj1UV2uZhF1_ppo4:APA91bHPH8qnaHjwzE38aDP8XJuAnc06rXBawLGTIzl1__kTjOTX0npD_-Hpg9QYkwWTpkHnE8lWMKspHeA_bAoW3h70UTWpw0Bt8yLzO5JQIsPE_Li53jESv8wmbtBlGPIO4NFmOHXi'], 'проверка', 'руками дернул'))
     
