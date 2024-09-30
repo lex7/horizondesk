@@ -34,8 +34,7 @@ enum IssueStatus: Int, CaseIterable {
     /// For ChartPie
     var descriptionShort: String {
         switch self {
-        case .new, .approved, .inprogress,
-                .review:
+        case .new, .approved, .inprogress, .review:
             return "в работе"
         case .done:
             return "выполнено"

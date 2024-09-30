@@ -18,36 +18,6 @@
             endingLineNumber = "110"
             landmarkName = "application(_:didReceiveRemoteNotification:fetchCompletionHandler:)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "C11EA70F-0F0E-4E3C-A289-94CCDD920F55 - c69aaaba13a8bdc5"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "DeskHorizon.AppDelegate.application(_: __C.UIApplication, didReceiveRemoteNotification: Swift.Dictionary&lt;Swift.AnyHashable, Any&gt;, fetchCompletionHandler: (__C.UIBackgroundFetchResult) -&gt; ()) -&gt; ()"
-                  moduleName = "DeskHorizon"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/lucky/Documents/Apps/AppsHomeWork/horizondesk/iOSApp/Horizon/AppDelegate.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "110"
-                  endingLineNumber = "110">
-               </Location>
-               <Location
-                  uuid = "C11EA70F-0F0E-4E3C-A289-94CCDD920F55 - c69aaaba13a8bdc5"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "DeskHorizon.AppDelegate.application(_: __C.UIApplication, didReceiveRemoteNotification: Swift.Dictionary&lt;Swift.AnyHashable, Any&gt;, fetchCompletionHandler: (__C.UIBackgroundFetchResult) -&gt; ()) -&gt; ()"
-                  moduleName = "DeskHorizon"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/lucky/Documents/Apps/AppsHomeWork/horizondesk/iOSApp/Horizon/AppDelegate.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "110"
-                  endingLineNumber = "110">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -64,36 +34,6 @@
             endingLineNumber = "45"
             landmarkName = "createRequestIssue()"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "C513F386-24E2-4BDF-92AE-15F04A1165C0 - b66ce6eabe493ef7"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 (Combine.Subscribers.Completion&lt;DeskHorizon.APIError&gt;) -&gt; () in DeskHorizon.EnvSupportObj.createRequestIssue() -&gt; ()"
-                  moduleName = "DeskHorizon"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/lucky/Documents/Apps/AppsHomeWork/horizondesk/iOSApp/Horizon/Core/Environments/EnvSupportObj.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "45"
-                  endingLineNumber = "45">
-               </Location>
-               <Location
-                  uuid = "C513F386-24E2-4BDF-92AE-15F04A1165C0 - b66ce6eabe493ef7"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 (Combine.Subscribers.Completion&lt;DeskHorizon.APIError&gt;) -&gt; () in DeskHorizon.EnvSupportObj.createRequestIssue() -&gt; ()"
-                  moduleName = "DeskHorizon"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/lucky/Documents/Apps/AppsHomeWork/horizondesk/iOSApp/Horizon/Core/Environments/EnvSupportObj.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "45"
-                  endingLineNumber = "45">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -126,36 +66,6 @@
             endingLineNumber = "52"
             landmarkName = "createRequestIssue()"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "37EB7E5B-7B86-4E36-99C4-FBF20F5868C6 - 19ac1d62b96ffd95"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #2 (Foundation.Data) -&gt; () in DeskHorizon.EnvSupportObj.createRequestIssue() -&gt; ()"
-                  moduleName = "DeskHorizon"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/lucky/Documents/Apps/AppsHomeWork/horizondesk/iOSApp/Horizon/Core/Environments/EnvSupportObj.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "52"
-                  endingLineNumber = "52">
-               </Location>
-               <Location
-                  uuid = "37EB7E5B-7B86-4E36-99C4-FBF20F5868C6 - 19ac1d62b96ffd95"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #2 (Foundation.Data) -&gt; () in DeskHorizon.EnvSupportObj.createRequestIssue() -&gt; ()"
-                  moduleName = "DeskHorizon"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/lucky/Documents/Apps/AppsHomeWork/horizondesk/iOSApp/Horizon/Core/Environments/EnvSupportObj.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "52"
-                  endingLineNumber = "52">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy

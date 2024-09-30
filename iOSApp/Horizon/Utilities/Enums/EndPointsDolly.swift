@@ -43,7 +43,7 @@ enum EndPointsDolly {
         switch self {
         default:
             return "https://timofmax1.fvds.ru/"
-//            return "https://corp3.cybertrain4security.ru:4443/"
+//            return "https://corp3.cybertrain4security.ru:65534/"
         }
     }
     
@@ -122,11 +122,6 @@ extension EndPointsDolly: Moya.TargetType {
         case .requestLogsOfTask(let model):
             return .requestParameters(parameters: ["request_id": model.request_id], encoding: URLEncoding.queryString)
         case .bossRequests(model: let model):
-//            return .requestParameters(parameters: ["from_date": model.from_date ?? "",
-//                                                   "until_date": model.until_date ?? "",
-//                                                   "status": model.status ?? "",
-//                                                   "request_type": model.request_type ?? "",
-//                                                   "area_id": (model.area_id ?? "")], encoding: URLEncoding.queryString)
             var parameters = [String: Any]()
 
             if let fromDate = model.from_date {

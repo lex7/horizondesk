@@ -42,7 +42,7 @@ struct RequestIssueModel: Hashable, Codable {
     
     /// For ChartPie
     var chartStatusName: String {
-        IssueStatus(rawValue: request_type)?.descriptionShort ?? ""
+        IssueStatus(rawValue: status_id)?.descriptionShort ?? ""
     }
     
     /// For ChartPie
