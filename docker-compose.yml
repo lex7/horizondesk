@@ -3,7 +3,7 @@ services:
   web:
     container_name: fastapi_app
     build: .  
-    command: ["uvicorn", "backend.app:app", "--host", "0.0.0.0", "--port", "8000"]
+    command: ["/bin/sh", "-c", "/app/run_init_scripts.sh && uvicorn backend.app:app --host 0.0.0.0 --port 8000"]
     networks:
       - internal_network
     restart: on-failure
