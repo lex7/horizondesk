@@ -2,13 +2,22 @@
 services:
   web:
     container_name: fastapi_app
-    build: .  
-    command: ["/bin/sh", "-c", "/app/run_init_scripts.sh && uvicorn backend.app:app --host 0.0.0.0 --port 8000"]
+    build: .
+    command: >
+      /bin/sh -c "
+      python /app/create_users.py &&
+      python /app/create_requests.py &&
+      python /app/update_requests.py &&
+      python /app/deny_requests.py &&
+      uvicorn backend.app:app --host 0.0.0.0 --port 8000
+      "
     networks:
       - internal_network
     restart: on-failure
     ports:
       - "8000:8000"  # Expose port 8000 for FastAPI
+    depends_on:
+      - db
 
   db:
     image: postgres:13
