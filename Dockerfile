@@ -10,9 +10,6 @@ WORKDIR /app
 # Copy project files
 COPY . .
 
-# Ensure all scripts are present
-COPY create_users.py create_requests.py update_requests.py deny_requests.py ./
-
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 

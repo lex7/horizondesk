@@ -15,7 +15,6 @@ from fastapi.security import OAuth2PasswordBearer
 from backend.schemas import TokenData
 from fastapi.security import OAuth2PasswordRequestForm
 import os
-import subprocess   
 
 
 # constants
@@ -417,17 +416,6 @@ def get_rating(db: Session = Depends(get_db), current_user: User = Depends(get_c
         for user in users
     ]
 
-
-@app.get("/initialize")
-async def initialize():
-    try:
-        subprocess.run(["python", "/app/create_users.py"], check=True)
-        subprocess.run(["python", "/app/create_requests.py"], check=True)
-        subprocess.run(["python", "/app/update_requests.py"], check=True)
-        subprocess.run(["python", "/app/deny_requests.py"], check=True)
-        return JSONResponse(content={"message": "Initialization completed successfully"}, status_code=200)
-    except subprocess.CalledProcessError as e:
-        return JSONResponse(content={"message": f"Initialization failed: {str(e)}"}, status_code=500)
 
 
 # Post endpoints
