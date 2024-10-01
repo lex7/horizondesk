@@ -5,9 +5,8 @@ import requests
 api_url = 'http://localhost:8000/register'  # Replace with your API URL if different
 
 # Path to the user.json file
-user_file = 'user.json'
+user_file = 'data/users.json'
 
-# Read users from the user.json file
 with open(user_file, 'r') as file:
     users = json.load(file)
 
