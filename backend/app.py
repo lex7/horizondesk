@@ -589,10 +589,7 @@ def create_request(request: RequestCreate, db: Session = Depends(get_db), curren
 
     # Update creator's request count
     creator = db.query(User).filter(User.user_id == request.user_id).first()
-    # if creator:
-    #     creator.num_created += 1
-    #     db.commit()
-
+    
     # Log the creation of the request
     log_entry = RequestStatusLog(
         request_id=new_request.request_id,
