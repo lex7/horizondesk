@@ -7,20 +7,14 @@ RUN apt-get update && apt-get install -y libpq-dev gcc
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy project files
+# Copy project files (this includes the Python scripts and shell script)
 COPY . .
 
-# Copy the initialization scripts
-COPY create_users.py /app/
-COPY create_requests.py /app/
-COPY update_requests.py /app/
-COPY deny_requests.py /app/
-COPY run_init_scripts.sh /app/
-
+# Ensure the init script has execution permissions
 RUN chmod +x /app/run_init_scripts.sh
 
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Command to run the application with HTTPS enabled
+# Command to run the application
 CMD ["uvicorn", "backend.app:app", "--host", "0.0.0.0", "--port", "8000"]
