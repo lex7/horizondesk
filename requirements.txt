@@ -5,3 +5,4 @@ passlib
 firebase-admin
 python-dotenv
 psycopg2
+python-jose
