@@ -10,6 +10,8 @@ WORKDIR /app
 # Copy project files
 COPY . .
 
+RUN chmod +x /app/run_init_scripts.sh
+
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 

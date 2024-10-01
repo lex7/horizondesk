@@ -1,30 +1,49 @@
-import json
 import random
 import requests
-from datetime import datetime, timedelta
-import urllib3
+from datetime import datetime
 
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# Authorization token
-auth_token = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJUTUstSGVhbHRoQ2hlY2siLCJleHAiOjE3Mjc2MDcyMzh9.0IEJicCuligKuLfhtvCp0r0LTUuwADmEVskZ790MbYg'
+# Authorization endpoint
+login_url = 'http://localhost:8000/login'
+
+
+# Credentials for authentication
+username = 'admin'
+password = '1234'
+
+# Get auth token from /login
+response = requests.post(login_url, json={'username': username, 'password': password})
+if response.status_code == 200:
+    auth_token = response.json()['access_token']
+else:
+    print(f"Failed to get auth token with status code: {response.status_code} and response: {response.text}")
+    exit(1)
+
+# Get list of users from /users endpoint, exclude user_id = 1
+users_url = 'http://localhost:8000/users'
+response = requests.get(users_url, headers={'Authorization': f'Bearer {auth_token}'})
+if response.status_code == 200:
+    masters = [user['user_id'] for user in response.json() if user['user_id'] != 1 and user['role_id'] == 2]
+    executors = [user['user_id'] for user in response.json() if user['user_id'] != 1 and user['role_id'] == 1]
+else:
+    print(f"Failed to get users with status code: {response.status_code} and response: {response.text}")
+    exit(1)
+
 
 # API endpoints
-base_url = 'https://corp3.cybertrain4security.ru:65534'
+base_url = 'http://localhost:8000'
 requests_url = f'{base_url}/requests'
 approve_url = f'{base_url}/master-approve'
 take_on_work_url = f'{base_url}/take-on-work'
 executor_complete_url = f'{base_url}/executor-complete'
 requestor_confirm_url = f'{base_url}/requestor-confirm'
 
-creators = [30, 31, 33, 44, 49, 48, 50]
-masters = [43, 42, 32, 52]
 
 # Get all requests with status_id=1
 def get_requests():
     headers = {
         'accept': 'application/json',
-        'Authorization': auth_token
+        'Authorization': f'Bearer {auth_token}'
     }
     response = requests.get(requests_url, headers=headers, verify=False)
     if response.status_code == 200:
@@ -37,7 +56,7 @@ def get_requests():
 def approve_request(request_id, user_id):
     headers = {
         'accept': 'application/json',
-        'Authorization': auth_token,
+        'Authorization': f'Bearer {auth_token}',
         'Content-Type': 'application/json'
     }
     payload = {
@@ -55,7 +74,7 @@ def approve_request(request_id, user_id):
 def take_on_work(request_id, user_id):
     headers = {
         'accept': 'application/json',
-        'Authorization': auth_token,
+        'Authorization': f'Bearer {auth_token}',
         'Content-Type': 'application/json'
     }
     payload = {
@@ -72,7 +91,7 @@ def take_on_work(request_id, user_id):
 def executor_complete(request_id, user_id):
     headers = {
         'accept': 'application/json',
-        'Authorization': auth_token,
+        'Authorization': f'Bearer {auth_token}',
         'Content-Type': 'application/json'
     }
     payload = {
@@ -89,7 +108,7 @@ def executor_complete(request_id, user_id):
 def requestor_confirm(request_id, user_id):
     headers = {
         'accept': 'application/json',
-        'Authorization': auth_token,
+        'Authorization': f'Bearer {auth_token}',
         'Content-Type': 'application/json'
     }
     payload = {
@@ -125,7 +144,7 @@ for request in selected_requests:
     approve_request(request_id, approver_user_id)
     
     # Step 2: Take on work with random user_id
-    worker_user_id = random.choice(creators)
+    worker_user_id = random.choice(executors)
     take_on_work(request_id, worker_user_id)
     
     # Step 3: Executor completes the work
@@ -133,3 +152,4 @@ for request in selected_requests:
     
     # Step 4: Requestor confirms the request
     requestor_confirm(request_id, creator_id)
+

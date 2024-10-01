@@ -7,7 +7,7 @@ api_url = 'http://localhost:8000/register'  # Replace with your API URL if diffe
 # Path to the user.json file
 user_file = 'data/users.json'
 
-with open(user_file, 'r') as file:
+with open(user_file, 'r', encoding='utf-8') as file:
     users = json.load(file)
 
 # Iterate through each user and send a POST request to register

@@ -2,25 +2,44 @@ import json
 import random
 import requests
 from datetime import datetime, timedelta
-import urllib3
 
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+# Authorization endpoint
+login_url = 'http://localhost:8000/login'
 
-# Authorization token
-auth_token = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJUTUstSGVhbHRoQ2hlY2siLCJleHAiOjE3Mjc2MDcyMzh9.0IEJicCuligKuLfhtvCp0r0LTUuwADmEVskZ790MbYg'
+# API endpoint
+url = 'http://localhost:8000'
+
+# Credentials for authentication
+username = 'admin'
+password = '1234'
+
+# Get auth token from /login
+response = requests.post(login_url, json={'username': username, 'password': password})
+if response.status_code == 200:
+    auth_token = response.json()['access_token']
+else:
+    print(f"Failed to get auth token with status code: {response.status_code} and response: {response.text}")
+    exit(1)
+
+# Get list of users from /users endpoint, exclude user_id = 1
+users_url = f'{url}/users'
+response = requests.get(users_url, headers={'Authorization': f'Bearer {auth_token}'})
+if response.status_code == 200:
+    users = [user['user_id'] for user in response.json() if user['user_id'] != 1]
+    masters = [user['user_id'] for user in response.json() if user['user_id'] != 1 and user['role_id'] == 2]
+else:
+    print(f"Failed to get users with status code: {response.status_code} and response: {response.text}")
+    exit(1)
 
 # API endpoints
-base_url = 'https://timofmax1.fvds.ru'
-requests_url = f'{base_url}/requests'
-deny_url = f'{base_url}/master-deny'
-
-masters = [43, 42, 32, 52]
+requests_url = f'{url}/requests'
+deny_url = f'{url}/master-deny'
 
 # Get all requests with status_id=1
 def get_requests():
     headers = {
         'accept': 'application/json',
-        'Authorization': auth_token
+        'Authorization': f'Bearer {auth_token}'
     }
     response = requests.get(requests_url, headers=headers, verify=False)
     if response.status_code == 200:
@@ -33,7 +52,7 @@ def get_requests():
 def deny_request(request_id, user_id, reason):
     headers = {
         'accept': 'application/json',
-        'Authorization': auth_token,
+        'Authorization': f'Bearer {auth_token}',
         'Content-Type': 'application/json'
     }
     payload = {
