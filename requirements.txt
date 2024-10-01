@@ -4,3 +4,4 @@ SQLAlchemy
 passlib
 firebase-admin
 python-dotenv
+psycopg2
