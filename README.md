@@ -24,6 +24,8 @@ python create_requests.py
 python update_requests.py
 python deny_requests.py
 
+все, бэкенд на http://localhost:8000/
+
 список юзеров в data/users.json
 
 Для работы пушей нужно добавить файл accKey.json в корень проекта
