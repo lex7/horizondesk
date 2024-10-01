@@ -1,9 +1,29 @@
 # MobileDesk
 
+Мобильное приложение для создания и управления заявками на рабочем месте.
+
 Проект команды 3 
-Горизонты-2024. Отборочный этап IT-трека. Dev++
+Горизонты-2024. Отборочный этап IT-трека, IT-трек форума Горизонты. Dev++
 
-При изменении адреса сервера необходимо изменить BASE_URL в firebase_utils и ключ firebase - accKey.json
 
-Запуск бэкенда на сервере командой:
-  docker compose up --build -d   
+Инструкция запуска бэка для винды:
+
+git clone https://github.com/lex7/horizondesk.git
+cd horizondesk
+
+запускаем docker desktop
+
+запускаем контейнер:
+docker compose up --build -d
+
+pip install -r requirements.txt
+
+наполнение базы:
+python create_users.py
+python create_requests.py
+python update_requests.py
+python deny_requests.py
+
+список юзеров в data/users.json
+
+Для работы пушей нужно добавить файл accKey.json в корень проекта
