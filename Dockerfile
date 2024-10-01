@@ -10,6 +10,13 @@ WORKDIR /app
 # Copy project files
 COPY . .
 
+# Copy the initialization scripts
+COPY create_users.py /app/
+COPY create_requests.py /app/
+COPY update_requests.py /app/
+COPY deny_requests.py /app/
+COPY run_init_scripts.sh /app/
+
 RUN chmod +x /app/run_init_scripts.sh
 
 # Install dependencies
