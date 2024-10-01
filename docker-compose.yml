@@ -3,14 +3,7 @@ services:
   web:
     container_name: fastapi_app
     build: .
-    command: >
-      /bin/sh -c "
-      python /app/create_users.py &&
-      python /app/create_requests.py &&
-      python /app/update_requests.py &&
-      python /app/deny_requests.py &&
-      uvicorn backend.app:app --host 0.0.0.0 --port 8000
-      "
+    command: uvicorn backend.app:app --host 0.0.0.0 --port 8000
     networks:
       - internal_network
     restart: on-failure

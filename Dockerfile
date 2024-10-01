@@ -7,11 +7,11 @@ RUN apt-get update && apt-get install -y libpq-dev gcc
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy project files (this includes the Python scripts and shell script)
+# Copy project files
 COPY . .
 
-# Ensure the init script has execution permissions
-RUN chmod +x /app/run_init_scripts.sh
+# Ensure all scripts are present
+COPY create_users.py create_requests.py update_requests.py deny_requests.py ./
 
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
